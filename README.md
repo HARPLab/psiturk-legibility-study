@@ -5,12 +5,13 @@ Generated from the HARPLab psiturk-harp-template
 ### Notes from the template
 To use, please:
 
-Clone this directory to a repository on eve.pr
-cd to within this directory
-Type the command psiturk
-Once within the psiturk terminal, type server on. You should see the server status successfully update
-The public view of your website can be seen here
-To check if another PsiTurk project is already running there, use ps aux | grep psiturk. pkill gunicorn kills all servers of this kind on the machine, which can be verified with the previous command.
+*Clone this directory to a repository on eve.pr
+*cd to within this directory
+*Type the command psiturk
+*Once within the psiturk terminal, type server on. You should see the server status successfully update
+*The public view of your website can be seen here
+*To check if another PsiTurk project is already running there, use ps aux | grep psiturk. pkill gunicorn kills all servers of this kind on the machine, which can be 
+verified with the previous command.
 
 Please remember to use relative paths only when accessing resources, otherwise when mirroring your local site, the server will get confused and be unable to find your content.
 
@@ -20,6 +21,6 @@ To use this template, please create your own repository based on this one, do no
 
 Quickstart Notes:
 
-Logged data can be found at the host url + '/view_data', behind lab password protected login.
-The folder "templates" contains the html pages of a study where the bulk of your work will take place
-If you would like to manually query user data, that can be found in participants.db
+*Logged data can be found at the host url + '/view_data', behind lab password protected login.
+*The folder "templates" contains the html pages of a study where the bulk of your work will take place
+*If you would like to manually query user data, that can be found in participants.db
