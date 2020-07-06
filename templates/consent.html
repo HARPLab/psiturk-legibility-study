@@ -45,27 +45,88 @@
                     You have been invited to take part in a research study named XXXXXXX
                     </p>
                     <p>
-                    Put your consent form here.  If you are a worker and are viewing this
-                    please decline the HIT.  This requester doesn't know what they are doing.
-                    </p>
-
+                     Summary Here!
+                        <br>
+                    Purpose Here!
+                        <br>
+                    Procedure Here! (Include duration!)
+                        <br>
+                Participation in this study is limited to individuals age 18 and older. Any other participant requirements here!
+<br>
+                Risks here!
+<br>
+                Benefits here!
+<br>
+                Compensations and Costs here!
+<br>
+                Future Use of Information here!
+<br>
+                Confidentiality here!
+<br>
+                Right to ask questions here!
+<br>
+                Voluntary Participation here!
+                          </p>
+                
+                    
+                    
+                    <br>
                     <button type="button" class="btn btn-default btn-sm" onClick="window.print();">
                     <span class="glyphicon glyphicon-print"></span> Print a copy of this
                     </button>
                 </div>
+                
+        
+                  
+                    <label for="age">I am 18 years old or older:</label> 
+                    <input type="checkbox" id="age" onclick="myFunction()">
+                    <br>
+                    <label for="read">I have read and understand the information above:</label> 
+                    <input type="checkbox" id="read" onclick="myFunction()">
+                    <br>
+                    <label for="want">I want to participate in this research:</label> 
+                    <input type="checkbox" id="want" onclick="myFunction()">
+                    
+                    <p id="eligible" style="display">Unless you meet the above requirements, you are not eligible to complete this study. </p>
+
+                    <script>
+                        function myFunction() {
+                            var ageBox = document.getElementById("age");
+                            var readBox = document.getElementById("read");
+                            var wantBox =document.getElementById("want");
+                            var text = document.getElementById("eligible");
+                            var header = document.getElementById("header");
+                            var yesButton = document.getElementById("yesButton");
+                        
+                            if (ageBox.checked && readBox.checked && wantBox.checked){
+                                header.style.display = "block";
+                                yesButton.style.display = "block";
+                                text.style.display = "none";
+
+                            } else {
+                                text.style.display = "block";
+                                header.style.display = "none";
+                                yesButton.style.display = "none";
+                            
+                            }
+                        }
+                    </script>
 
                 <hr />
-                <h4>Do you understand and consent to these terms?</h4>
+                <h4 id = "header" style="display:none">You are eligible to participate in our study. Do you understand and consent to these terms?</h4>
                 <br />
 
                 <center>
-                    <button type="button" class="btn btn-primary btn-lg" onClick="window.location='exp?hitId={{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }}'">
+                    <button id = "yesButton" style="display:none" type="button" class="btn btn-primary btn-lg" onClick="window.location='exp?hitId={{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }}'">
                     <span class="glyphicon glyphicon-ok"></span> I agree 
                     </button>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <button type="button" class="btn btn-danger btn-lg" onClick="onexit()">
+                </center>
+                
+                <center>
+                    <button id = "noButton" type="button" class="btn btn-danger btn-lg" onClick="onexit()">
                     <span class="glyphicon glyphicon-ban-circle"></span> No thanks, I do not want to do this HIT
                     </button>
                 </center>

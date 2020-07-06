@@ -1,7 +1,7 @@
 [HIT Configuration]
-title = Stroop task
-description = Judge the color of a series of words.
-amt_keywords = Perception, Psychology
+title = Legibility of Path Trajectories 
+description = Infer the goal of a robot from video clips
+amt_keywords = Human Robot Interaction
 lifetime = 24
 us_only = true
 approve_requirement = 95
@@ -9,14 +9,14 @@ number_hits_approved = 0
 require_master_workers = false
 contact_email_on_error = youremail@gmail.com
 ad_group = Default psiTurk Stroop Example
-psiturk_keywords = stroop
-organization_name = New Great University
+psiturk_keywords = path legibility
+organization_name = Carnegie Mellon University
 browser_exclude_rule = MSIE, mobile, tablet
 allow_repeats = false
 
 [Database Parameters]
 database_url = sqlite:///participants.db
-table_name = turkdemo
+table_name = development
 
 [Server Parameters]
 host = 0.0.0.0
