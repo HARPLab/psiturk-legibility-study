@@ -49,18 +49,12 @@ var StroopExperiment = function() {
 	var wordon, // time word is presented
 	    listening = false;
 
-	// Stimuli for a basic Stroop experiment
+	// Altering the Stimuli
 	var stims = [
-			["SHIP", "red", "unrelated"],
-			["MONKEY", "green", "unrelated"],
-			["ZAMBONI", "blue", "unrelated"],
-			["RED", "red", "congruent"],
-			["GREEN", "green", "congruent"],
-			["BLUE", "blue", "congruent"],
-			["GREEN", "red", "incongruent"],
-			["BLUE", "green", "incongruent"],
-			["RED", "blue", "incongruent"]
+			["Condition: Incorrect Table", "red", "show_video"],
+			["Condition: Correct Table", "green", "show_video2"],
 		];
+
 
 	stims = _.shuffle(stims);
 
@@ -73,7 +67,16 @@ var StroopExperiment = function() {
 			show_word( stim[0], stim[1] );
 			wordon = new Date().getTime();
 			listening = true;
-			d3.select("#query").html('<p id="prompt">Type "R" for Red, "B" for blue, "G" for green.</p>');
+			d3.select("#query").html('<p id="prompt">Press left arrow for table 1, right arrow for table 2, and space to skip. </p>');
+            
+            if (stim[2] == "show_video") {
+				d3.select("#query").html('<p id="prompt"><video width="320" height="240" controls><source src="../static/videos/IncorrectTable.mp4" type="video/mp4"></video></p>');
+			}
+            if (stim[2] == "show_video2") {
+				d3.select("#query").html('<p id="prompt"><video width="320" height="240" controls><source src="../static/videos/CorrectTable.mp4" type="video/mp4"></video></p>');
+				
+			}
+
 		}
 	};
 	
@@ -84,17 +87,17 @@ var StroopExperiment = function() {
 			response;
 
 		switch (keyCode) {
-			case 82:
-				// "R"
-				response="red";
+			case 37:
+				// "left arrow"
+				response="left";
 				break;
-			case 71:
-				// "G"
-				response="green";
+			case 39:
+				// "right arrow"
+				response="right";
 				break;
 			case 66:
 				// "B"
-				response="blue";
+				response="skip";
 				break;
 			default:
 				response = "";
@@ -129,7 +132,7 @@ var StroopExperiment = function() {
 			.attr("id","word")
 			.style("color",color)
 			.style("text-align","center")
-			.style("font-size","150px")
+			.style("font-size","50px")
 			.style("font-weight","400")
 			.style("margin","20px")
 			.text(text);
