@@ -58,14 +58,9 @@ var StroopExperiment = function() {
 		}
 		else {
 			stim = stims.shift();
-			show_word( stim[0], stim[1] );
+			show_stimulus(stim[3]);
 			wordon = new Date().getTime();
 			listening = true;
-			d3.select("#query").html('<p id="prompt">Press Space to Continue. </p>');
-            
-            if (stim[2] == "show_video") {
-				d3.select("#query").html('<p id="prompt"><video width="320" height="240" controls><source src="../static/videos/' + stim[3] + '" type="video/mp4"></video></p>');
-			}
 		}
 	};
 	
@@ -77,15 +72,15 @@ var StroopExperiment = function() {
 
 		switch (keyCode) {
 			case 37:
-				// "left arrow"
-				response="left";
+				// "left arrow" means my table
+				response="mine";
 				break;
 			case 39:
-				// "right arrow"
-				response="right";
+				// "right arrow" means other table
+				response="other";
 				break;
-			case 66:
-				// "B"
+			case 32:
+				// "Space"
 				response="skip";
 				break;
 			default:
@@ -115,20 +110,12 @@ var StroopExperiment = function() {
 	    currentview = new Questionnaire();
 	};
 	
-	var show_word = function(text, color) {
-		d3.select("#stim")
-			.append("div")
-			.attr("id","word")
-			.style("color",color)
-			.style("text-align","center")
-			.style("font-size","50px")
-			.style("font-weight","400")
-			.style("margin","20px")
-			.text(text);
+	var show_stimulus = function(videoPath) {
+		d3.select("#stim").html('<p id="video"><video width="620" height="540" controls><source src="../static/videos/' + videoPath + '" type="video/mp4"></video></p>');
 	};
 
 	var remove_word = function() {
-		d3.select("#word").remove();
+		d3.select("#video").remove();
 	};
 
 	

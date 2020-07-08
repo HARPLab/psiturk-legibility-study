@@ -1,0 +1,25 @@
+<script src = "../static/js/task.js"></script>
+
+<div id="buttons-exp">
+	<div id="buttons">
+        <p>Press play to play the video. Stop the video when you think you know whether the server is approaching your table or a different table. You will be instantly taken to a questionnare.</p>
+        <br>
+		<button onclick="play()">Play Video</button> 
+        <button onclick="stop()">Stop Video</button> 
+	</div>
+    
+    <script>
+    var myVideo = document.getElementById("vid"); 
+
+    function play() { 
+        myVideo.play(); 
+    } 
+        
+    function stop() { 
+        myVideo.pause(); 
+    }
+    </script>
+
+
+</div>
+
