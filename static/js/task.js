@@ -13,9 +13,6 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
 
 // All pages to be loaded
 var pages = [
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
 	"instructions/instruct-ready.html",
 	"stage.html",
 	"postquestionnaire.html"
@@ -24,9 +21,6 @@ var pages = [
 psiTurk.preloadPages(pages);
 
 var instructionPages = [ // add as a list as many pages as you like
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
 	"instructions/instruct-ready.html"
 ];
 
@@ -51,8 +45,8 @@ var StroopExperiment = function() {
 
 	// Altering the Stimuli
 	var stims = [
-			["Condition: Incorrect Table", "red", "show_video"],
-			["Condition: Correct Table", "green", "show_video2"],
+			["Condition: Incorrect Table", "other", "show_video", "IncorrectTable.mp4"],
+			["Condition: Correct Table", "mine", "show_video", "CorrectTable.mp4"],
 		];
 
 
@@ -67,16 +61,11 @@ var StroopExperiment = function() {
 			show_word( stim[0], stim[1] );
 			wordon = new Date().getTime();
 			listening = true;
-			d3.select("#query").html('<p id="prompt">Press left arrow for table 1, right arrow for table 2, and space to skip. </p>');
+			d3.select("#query").html('<p id="prompt">Press Space to Continue. </p>');
             
             if (stim[2] == "show_video") {
-				d3.select("#query").html('<p id="prompt"><video width="320" height="240" controls><source src="../static/videos/IncorrectTable.mp4" type="video/mp4"></video></p>');
+				d3.select("#query").html('<p id="prompt"><video width="320" height="240" controls><source src="../static/videos/' + stim[3] + '" type="video/mp4"></video></p>');
 			}
-            if (stim[2] == "show_video2") {
-				d3.select("#query").html('<p id="prompt"><video width="320" height="240" controls><source src="../static/videos/CorrectTable.mp4" type="video/mp4"></video></p>');
-				
-			}
-
 		}
 	};
 	
