@@ -36,9 +36,9 @@ var instructionPages = [ // add as a list as many pages as you like
 ********************/
 
 /********************
-* STROOP TEST       *
+* Legibility Task       *
 ********************/
-var StroopExperiment = function() {
+var LegibilityExperiment = function() {
 
 	var wordon, // time word is presented
 	    listening = false;
@@ -111,11 +111,12 @@ var StroopExperiment = function() {
 	};
 	
 	var show_stimulus = function(videoPath) {
-		d3.select("#stim").html('<p id="video"><video width="620" height="540" controls><source src="../static/videos/' + videoPath + '" type="video/mp4"></video></p>');
+		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/videos/" + videoPath + "")
+//        d3.select("#stim").html('<p id="video"><video width="620" height="540" controls><source src="../static/videos/' + videoPath + '" type="video/mp4"></video></p>');
 	};
 
 	var remove_word = function() {
-		d3.select("#video").remove();
+		d3.select("#sourceComp").remove();
 	};
 
 	
@@ -201,6 +202,6 @@ var currentview;
 $(window).load( function(){
     psiTurk.doInstructions(
     	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new StroopExperiment(); } // what you want to do when you are done with instructions
+    	function() { currentview = new LegibilityExperiment(); } // what you want to do when you are done with instructions
     );
 });
