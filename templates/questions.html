@@ -1,36 +1,23 @@
-<div id="container-exp">
-	<div id="trial">
-		<h1>Watch the video closely</h1>
-		<p>Left Arrow = Your Table <br>
-           Right Arrow = Different Table
-        </p>
-		<div id="video">
-            <video id = "vid" width="620" height="540" autoplay></video>
-        </div>
-	</div>
-</div>
-
-<div id="container-question">
-	<p>Please answer the following questions before continuing</p>
+<div id="container-questionnaire">
+    <h1>Trial complete</h1>
 
     <div class="instructions well">
 
-        <form id="confExpQuestions" action="debrief" method="post">
+        <form id="confidence quiz" action="debrief" method="post">
 
             <!-- beginning of a question -->
             <div class="row question">
                 <div class="col-md-8">
-                    On a scale of 1-10, please rate how confident you are about your prediction (10 is the most confident):
+                    On a scale of 1-10 (where 10 is the most engaged), please rate how confident you are about your prediction:
                 </div>
                 <div class="col-md-4">
                     <select id="confidence" name="confidence">
-                        <option value="11" SELECTED></option>
                         <option value="10">10 - Extremely Confident</option>
                         <option value="9">9</option>
                         <option value="8">8</option>
                         <option value="7">7</option>
                         <option value="6">6</option>
-                        <option value="5">5 - Moderately</option>
+                        <option value="5" SELECTED>5 - Moderately</option>
                         <option value="4">4</option>
                         <option value="3">3</option>
                         <option value="2">2</option>
@@ -45,22 +32,21 @@
             <!-- beginning of a question -->
             <div class="row question">
                 <div class="col-md-8">
-                    On a scale of 1-10, please rate how well the server's motion matched your expectations (where 10 is the most similar):
+                    On a scale of 1-10 (where 10 is the most difficult), please rate how well the server's motion matched your expectations:
                 </div>
                 <div class="col-md-4">
                     <select id="expectation" name="expectation">
-                        <option value="11" SELECTED></option>
-                        <option value="10">10 - Matched Perfectly</option>
+                        <option value="10">10 - Very difficult</option>
                         <option value="9">9</option>
                         <option value="8">8</option>
                         <option value="7">7</option>
                         <option value="6">6</option>
-                        <option value="5">5 - Moderately </option>
+                        <option value="5" SELECTED>5 - Moderately difficult</option>
                         <option value="4">4</option>
                         <option value="3">3</option>
                         <option value="2">2</option>
                         <option value="1">1</option>
-                        <option value="0">0 - Did not match at all</option>
+                        <option value="0">0 - Not difficult at all</option>
                     </select>
                 </div>
             </div>
@@ -71,9 +57,19 @@
 
     <hr />
 
-    <div id="temp">
+    <div class="nav">
+        <div class="row">
+            <div class="col-xs-2">
+            </div>
+            <div class="col-xs-7">
+            </div>
+            <div class="col-xs-3">
+                <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
+                    Continue <span class="glyphicon glyphicon-arrow-right"></span>
+                </button>
+            </div>
+        </div>
     </div>
-    <div>
-        <button id="cont">Continue</button>
-    </div>
+
+
 </div>

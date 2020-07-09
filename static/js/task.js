@@ -15,7 +15,8 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
 var pages = [
 	"instructions/instruct-ready.html",
 	"stage.html",
-	"postquestionnaire.html"
+	"postquestionnaire.html",
+    "questions.html"
 ];
 
 psiTurk.preloadPages(pages);
@@ -58,6 +59,8 @@ var LegibilityExperiment = function() {
 		}
 		else {
 			stim = stims.shift();
+            document.getElementById("container-exp").style.display = "block";
+            document.getElementById("container-question").style.display = "none";
 			show_stimulus(stim[3]);
 			wordon = new Date().getTime();
 			listening = true;
@@ -100,8 +103,15 @@ var LegibilityExperiment = function() {
                                      'hit':hit,
                                      'rt':rt}
                                    );
-			remove_word();
-			next();
+			//remove_word();
+            
+            go_to_questionnare();
+            
+            //Maybe try removing everything and adding a questionarre here??
+            //Perhaps the .hide() function?
+            
+            //next();
+			
 		}
 	};
 
@@ -115,9 +125,47 @@ var LegibilityExperiment = function() {
 //        d3.select("#stim").html('<p id="video"><video width="620" height="540" controls><source src="../static/videos/' + videoPath + '" type="video/mp4"></video></p>');
 	};
 
-	var remove_word = function() {
-		d3.select("#sourceComp").remove();
-	};
+//	var remove_word = function() {
+//		d3.select("#sourceComp").remove();
+//	};
+    
+    var go_to_questionnare = function(){
+        
+        record_responses = function() {
+            
+            //Get confidence score
+            var selectConfidence = document.getElementById("confidence");
+            var confidenceScore = selectConfidence.options[selectConfidence.selectedIndex];
+            
+            //Get Expectation score
+            var selectExpectation = document.getElementById("expectation");
+            var expectationScore = selectExpectation.options[selectExpectation.selectedIndex];
+            
+            //Record the scores for this trial
+             psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submit'});
+            psiTurk.recordTrialData({'ConfidenceScore':confidenceScore.text, 'ExpectationScore':expectationScore.text});
+            
+             psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submit'});
+            //I dont think we need this
+//            psiTurk.recordUnstructuredData('ConfidenceScore', confidenceScore.text);
+//            psiTurk.recordUnstructuredData('ExpectationScore', expectationScore.text);
+
+	   };
+        
+        document.getElementById("container-question").style.display = "block";
+        document.getElementById("container-exp").style.display = "none";
+        
+        psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'begin'});
+        
+        d3.select("#sourceComp").remove();
+        document.getElementById("cont").addEventListener('click', function(){
+            record_responses();
+            document.getElementById("confExpQuestions").reset();
+            psiTurk.saveData();
+            //go to next stimulus
+            next();
+        });
+    }
 
 	
 	// Load the stage.html snippet into the body of the page
@@ -132,8 +180,9 @@ var LegibilityExperiment = function() {
 };
 
 
+
 /****************
-* Questionnaire *
+* POST Questionnaire *
 ****************/
 
 var Questionnaire = function() {
@@ -202,6 +251,7 @@ var currentview;
 $(window).load( function(){
     psiTurk.doInstructions(
     	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new LegibilityExperiment(); } // what you want to do when you are done with instructions
+    	function() { 
+            currentview = new LegibilityExperiment(); } // what you want to do when you are done with instructions
     );
 });
