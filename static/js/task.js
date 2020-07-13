@@ -46,15 +46,19 @@ var LegibilityExperiment = function() {
 
 	// Altering the Stimuli
 	var stims = [
-			["Condition: Incorrect Table", "other", "show_video", "IncorrectTable.mp4"],
-			["Condition: Correct Table", "mine", "show_video", "CorrectTable.mp4"],
+			["Other Viewpoint 1", "other", "show_video", "otherRobotV1.mp4"],
+            ["Other Viewpoint 2", "other", "show_video", "otherRobotV2.mp4"],
+			["Mine Viewpoint 1", "mine", "show_video", "mineRobotV1.mp4"],
+            ["Mine Viewpoint 2", "mine", "show_video", "mineRobotV2.mp4"],
 		];
 
 
 	stims = _.shuffle(stims);
 
 	var next = function() {
+        console.log("next called");
 		if (stims.length===0) {
+            console.log("finishing because no more stims");
 			finish();
 		}
 		else {
@@ -107,8 +111,6 @@ var LegibilityExperiment = function() {
             
             go_to_questionnare();
             
-            //Maybe try removing everything and adding a questionarre here??
-            //Perhaps the .hide() function?
             
             //next();
 			
@@ -121,6 +123,7 @@ var LegibilityExperiment = function() {
 	};
 	
 	var show_stimulus = function(videoPath) {
+        console.log("showing stim: " + videoPath);
 		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/videos/" + videoPath + "")
 //        d3.select("#stim").html('<p id="video"><video width="620" height="540" controls><source src="../static/videos/' + videoPath + '" type="video/mp4"></video></p>');
 	};
@@ -131,24 +134,19 @@ var LegibilityExperiment = function() {
     
     var go_to_questionnare = function(){
         
+        console.log("ive gone to the questionnare!");
+        
         record_responses = function() {
-            
+            console.log("recording responses");
             //Get confidence score
             var selectConfidence = document.getElementById("confidence");
             var confidenceScore = selectConfidence.options[selectConfidence.selectedIndex];
             
-            //Get Expectation score
-            var selectExpectation = document.getElementById("expectation");
-            var expectationScore = selectExpectation.options[selectExpectation.selectedIndex];
-            
+          
             //Record the scores for this trial
-             psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submit'});
-            psiTurk.recordTrialData({'ConfidenceScore':confidenceScore.text, 'ExpectationScore':expectationScore.text});
+            psiTurk.recordTrialData({'ConfidenceScore':confidenceScore.text});
             
-             psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submit'});
-            //I dont think we need this
-//            psiTurk.recordUnstructuredData('ConfidenceScore', confidenceScore.text);
-//            psiTurk.recordUnstructuredData('ExpectationScore', expectationScore.text);
+            psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submited'});
 
 	   };
         
@@ -158,11 +156,15 @@ var LegibilityExperiment = function() {
         psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'begin'});
         
         d3.select("#sourceComp").remove();
+        
+        //controls continue button on questionare page
         document.getElementById("cont").addEventListener('click', function(){
+            console.log("button pressed");
             record_responses();
             document.getElementById("confExpQuestions").reset();
             psiTurk.saveData();
             //go to next stimulus
+            console.log("Going to next stimulus!");
             next();
         });
     }
