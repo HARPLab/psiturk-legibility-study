@@ -50,15 +50,17 @@ var LegibilityExperiment = function() {
             ["Other Viewpoint 2", "other", "show_video", "otherRobotV2.mp4"],
 			["Mine Viewpoint 1", "mine", "show_video", "mineRobotV1.mp4"],
             ["Mine Viewpoint 2", "mine", "show_video", "mineRobotV2.mp4"],
+            ["Mine Viewpoint 1 Human", "mine", "show_video", "CorrectTable.mp4"],
+            ["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"]
 		];
 
 
-	stims = _.shuffle(stims);
+	stims = _.shuffle(stims); //returns a randomized array
 
 	var next = function() {
         console.log("next called");
 		if (stims.length===0) {
-            console.log("finishing because no more stims");
+            //console.log("finishing because no more stims");
 			finish();
 		}
 		else {
@@ -123,7 +125,7 @@ var LegibilityExperiment = function() {
 	};
 	
 	var show_stimulus = function(videoPath) {
-        console.log("showing stim: " + videoPath);
+      //  console.log("showing stim: " + videoPath);
 		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/videos/" + videoPath + "")
 //        d3.select("#stim").html('<p id="video"><video width="620" height="540" controls><source src="../static/videos/' + videoPath + '" type="video/mp4"></video></p>');
 	};
@@ -134,10 +136,10 @@ var LegibilityExperiment = function() {
     
     var go_to_questionnare = function(){
         
-        console.log("ive gone to the questionnare!");
+        console.log("Questionnare called");
         
         record_responses = function() {
-            console.log("recording responses");
+            //console.log("recording responses");
             //Get confidence score
             var selectConfidence = document.getElementById("confidence");
             var confidenceScore = selectConfidence.options[selectConfidence.selectedIndex];
@@ -157,16 +159,19 @@ var LegibilityExperiment = function() {
         
         d3.select("#sourceComp").remove();
         
-        //controls continue button on questionare page
-        document.getElementById("cont").addEventListener('click', function(){
+        //Make the button respond to a click
+        document.getElementById("cont").addEventListener('click', continueClick);
+        
+        function continueClick(){
             console.log("button pressed");
             record_responses();
             document.getElementById("confExpQuestions").reset();
             psiTurk.saveData();
+            //Do not respond to more clicks
+            document.getElementById("cont").removeEventListener('click', continueClick);
             //go to next stimulus
-            console.log("Going to next stimulus!");
             next();
-        });
+        }
     }
 
 	
