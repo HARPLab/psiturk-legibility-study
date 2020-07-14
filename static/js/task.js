@@ -102,8 +102,8 @@ var LegibilityExperiment = function() {
 			var rt = new Date().getTime() - wordon;
 
 			psiTurk.recordTrialData({'phase':"TEST",
-                                     'word':stim[0],
-                                     'color':stim[1],
+                                     'stimulus':stim[0],
+                                     'destination':stim[1],
                                      'relation':stim[2],
                                      'response':response,
                                      'hit':hit,
@@ -146,7 +146,7 @@ var LegibilityExperiment = function() {
             
           
             //Record the scores for this trial
-            psiTurk.recordTrialData({'ConfidenceScore':confidenceScore.text});
+            psiTurk.recordTrialData({'phase':'ConfQuestionsResponse', 'ConfidenceScore':confidenceScore.text});
             
             psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submited'});
 
