@@ -46,13 +46,14 @@ var LegibilityExperiment = function() {
 
 	// Altering the Stimuli
 	var stims = [
-			["Other Viewpoint 1", "other", "show_video", "otherRobotV1.mp4"],
-            ["Other Viewpoint 2", "other", "show_video", "otherRobotV2.mp4"],
-			["Mine Viewpoint 1", "mine", "show_video", "mineRobotV1.mp4"],
-            ["Mine Viewpoint 2", "mine", "show_video", "mineRobotV2.mp4"],
-            ["Mine Viewpoint 1 Human", "mine", "show_video", "CorrectTable.mp4"],
-            ["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"],
-            ["Bot Check Trial", "neither", "bot_check"]
+            //[Stimulus name, correct answer, trial type, video location, condition]
+			["Other Viewpoint 1", "other", "show_video", "otherRobotV1.mp4", "baseline"],
+            ["Other Viewpoint 2", "other", "show_video", "otherRobotV2.mp4", "baseline"],
+			["Mine Viewpoint 1", "mine", "show_video", "mineRobotV1.mp4", "baseline"],
+            ["Mine Viewpoint 2", "mine", "show_video", "mineRobotV2.mp4", "baseline"],
+            //["Mine Viewpoint 1 Human", "mine", "show_video", "CorrectTable.mp4"],
+            //["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"],
+            ["Bot Check Trial", "neither", "bot_check", "n/a", "n/a"]
 		];
 
 
@@ -134,7 +135,9 @@ var LegibilityExperiment = function() {
                                      'relation':stim[2],
                                      'response':response,
                                      'hit':hit,
-                                     'rt':rt}
+                                     'rt':rt,
+                                     'condition':stim[4]
+                                    }
                                    );
 			//remove_word();
             

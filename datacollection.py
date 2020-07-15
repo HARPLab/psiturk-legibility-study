@@ -1,7 +1,10 @@
-#Check comments with TODO for things that still need to to be implemented
+#Version Using sqlite3
 
 import sqlite3
 import json
+import sqlalchemy
+import pandas as pd
+import scipy.stats as stats
 
 db_url = "participants.db"
 table_name = 'newdev'
@@ -29,9 +32,11 @@ data = participantDict.get("data")
 
 #three lists to collect a single participant's confidence scores, trial accuracy, and reaction times
 partConfScores =[]
+allConfResponses = True
 trialAccuracy = []
 reactionTimes = []
 botCheckResponse = ""
+botCheckPass = True
 
 #each entry is a dictionary. with four keys: uniqueid, current_trial, dateTime, trialdata
 for entry in data:
@@ -41,20 +46,23 @@ for entry in data:
     phase = trialData.get("phase")
     if phase == "ConfQuestionsResponse": #if its a trial with a confidence score value
         confScore = trialData.get("ConfidenceScore")
-        
-        #TODO: if confScore is 11 or whatever 11 looks like in data, do something here
-        
+                
         if len(confScore) > 1:
             #Trim the confScore if it is 1,5,or 10
             confScore = confScore[0:2] 
-            
-        confScore = int(confScore) #make it an integer
-        partConfScores.append(confScore)
+                    
+        if confScore == "": #if the participant did not make a selection, there will be a blank 
+            partConfScores.append("")
+            allConfResponses = False
+        else:
+            confScore = int(confScore) #make it an integer
+            partConfScores.append(confScore)
         
     if phase == "TEST": #if its a trial with a stimulus
         #not needed at this time
-        #condition = trialData.get("stimulus") 
+        #stimulusname = trialData.get("stimulus") 
         #tableDest = trialData.get("destination") 
+        #condition = trialData.get("condition)
         
         correct = trialData.get("hit")
         reactionTime = trialData.get("rt")
@@ -65,14 +73,27 @@ for entry in data:
         
     if phase == "BotCheck":
         botCheckResponse = trialData.get("BotCheckResponse")
+        if len(botCheckResponse) != 2: #response too short or too long
+            botCheckPass = False
+        else:
+            letter = botCheckResponse[0:1]
+            digit = botCheckResponse[1:2]
+            if digit not in "0123456789": #second value not a digit
+                botCheckPass = False
+            if letter not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz": #first value not a letter
+                botCheckPass = False
         
         
         
         
-print(partConfScores)
-print(trialAccuracy)
-print(reactionTimes)
-print(botCheckResponse)
+        
+        
+print("Confidence Scores:", partConfScores)
+print("Answered all confidence questions?", allConfResponses)
+print("Trial Accuracies:", trialAccuracy)
+print("RTs:", reactionTimes)
+print("Bot check response:", botCheckResponse)
+print("Passed bot check?", botCheckPass)
 
         
     
@@ -80,45 +101,8 @@ print(botCheckResponse)
 con.close()
 
 
-# Example using sqlalchemy
-# TODO: move to useing sqlalchemy rather than sqlite3
+# TODO: Data Analysis. 
+    #Look here: https://www.geeksforgeeks.org/create-a-pandas-dataframe-from-lists/
+    #and here: https://reneshbedre.github.io/blog/anova.html
 
-# boilerplace sqlalchemy setup
-#engine = create_engine(db_url)
-#metadata = MetaData()
-#metadata.bind = engine
-#table = Table(table_name, metadata, autoload=True)
-# make a query and loop through
-#s = table.select()
-#rows = s.execute()
-#
-#data = []
-##status codes of subjects who completed experiment
-#statuses = [3,4,5,7]
-## if you have workers you wish to exclude, add them here
-#exclude = []
-#for row in rows:
-#    # only use subjects who completed experiment and aren't excluded
-#    if row['status'] in statuses and row['uniqueid'] not in exclude:
-#        data.append(row[data_column_name])
-#
-## Now we have all participant datastrings in a list.
-## Let's make it a bit easier to work with:
-#
-## parse each participant's datastring as json object
-## and take the 'data' sub-object
-#data = [json.loads(part)['data'] for part in data]
-#
-## insert uniqueid field into trialdata in case it wasn't added
-## in experiment:
-#for part in data:
-#    for record in part:
-#        record['trialdata']['uniqueid'] = record['uniqueid']
-#
-## flatten nested list so we just have a list of the trialdata recorded
-## each time psiturk.recordTrialData(trialdata) was called.
-#data = [record['trialdata'] for part in data for record in part]
-#
-## Put all subjects' trial data into a dataframe object from the
-## 'pandas' python library: one option among many for analysis
-#data_frame = pd.DataFrame(data)
+
