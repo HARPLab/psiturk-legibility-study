@@ -51,25 +51,52 @@ var LegibilityExperiment = function() {
 			["Mine Viewpoint 1", "mine", "show_video", "mineRobotV1.mp4"],
             ["Mine Viewpoint 2", "mine", "show_video", "mineRobotV2.mp4"],
             ["Mine Viewpoint 1 Human", "mine", "show_video", "CorrectTable.mp4"],
-            ["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"]
+            ["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"],
+            ["Bot Check Trial", "neither", "bot_check"]
 		];
 
 
 	stims = _.shuffle(stims); //returns a randomized array
 
 	var next = function() {
-        console.log("next called");
+        //console.log("next called");
 		if (stims.length===0) {
             //console.log("finishing because no more stims");
 			finish();
 		}
 		else {
 			stim = stims.shift();
-            document.getElementById("container-exp").style.display = "block";
-            document.getElementById("container-question").style.display = "none";
-			show_stimulus(stim[3]);
-			wordon = new Date().getTime();
-			listening = true;
+            if(stim[2] == "show_video"){
+                    document.getElementById("container-exp").style.display = "block";
+                    document.getElementById("container-question").style.display = "none";
+                    document.getElementById("container-bot-check").style.display = "none";
+
+                    show_stimulus(stim[3]);
+                    wordon = new Date().getTime();
+                    listening = true;
+               }
+            else{ //check for bot
+                document.getElementById("container-exp").style.display = "none";
+                document.getElementById("container-question").style.display = "none";
+                document.getElementById("container-bot-check").style.display = "block";
+                
+                document.getElementById("botcontinue").addEventListener('click', continueClick);
+        
+                function continueClick(){
+                    var botCheckQuestion = document.getElementById("botcheck");
+                    var botCheckResponse = botCheckQuestion.value;
+                    console.log(botCheckResponse);
+          
+                    //Record the scores for this trial
+                    psiTurk.recordTrialData({'phase':'BotCheck', 'BotCheckResponse':botCheckQuestion.value});
+                    psiTurk.saveData();
+                            //Do not respond to more clicks
+                    document.getElementById("botcontinue").removeEventListener('click', continueClick);
+                    //go to next stimulus
+                    next();
+                }
+            }
+           
 		}
 	};
 	
@@ -136,7 +163,7 @@ var LegibilityExperiment = function() {
     
     var go_to_questionnare = function(){
         
-        console.log("Questionnare called");
+        //console.log("Questionnare called");
         
         record_responses = function() {
             //console.log("recording responses");
@@ -148,14 +175,15 @@ var LegibilityExperiment = function() {
             //Record the scores for this trial
             psiTurk.recordTrialData({'phase':'ConfQuestionsResponse', 'ConfidenceScore':confidenceScore.text});
             
-            psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submited'});
+        //    psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submited'});
 
 	   };
         
         document.getElementById("container-question").style.display = "block";
         document.getElementById("container-exp").style.display = "none";
+        document.getElementById("container-bot-check").style.display = "none";
         
-        psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'begin'});
+       // psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'begin'});
         
         d3.select("#sourceComp").remove();
         

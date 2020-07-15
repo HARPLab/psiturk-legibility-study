@@ -32,7 +32,6 @@
                 </div>
                 <div class="col-md-4">
                     <select id="confidence" name="confidence">
-                        <option value="11" SELECTED></option>
                         <option value="10">10 - Extremely Confident</option>
                         <option value="9">9</option>
                         <option value="8">8</option>
@@ -42,8 +41,8 @@
                         <option value="4">4</option>
                         <option value="3">3</option>
                         <option value="2">2</option>
-                        <option value="1">1</option>
-                        <option value="0">0 - Not confident</option>
+                        <option value="1">1 - Not Confident</option>
+                        <option value="0" SELECTED></option>
                     </select>
                 </div>
             </div>
@@ -85,3 +84,24 @@
         <button id="cont">Continue</button>
     </div>
 </div>
+
+<div id="container-bot-check" class = "class1">
+	<div id="bot-question">
+		<h1>Please type in a color and a number</h1>
+		<p>Example: Blue 5
+        </p>
+        <p><input type="text" id="botcheck"> </p>
+        <br>
+        <div>
+        <button id="botcontinue">Continue</button>
+        </div>
+	</div>
+</div>
+
+<style>
+.class1 {
+  padding-top: 50px;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+</style>
