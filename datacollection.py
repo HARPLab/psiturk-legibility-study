@@ -31,6 +31,7 @@ data = participantDict.get("data")
 partConfScores =[]
 trialAccuracy = []
 reactionTimes = []
+botCheckResponse = ""
 
 #each entry is a dictionary. with four keys: uniqueid, current_trial, dateTime, trialdata
 for entry in data:
@@ -45,7 +46,6 @@ for entry in data:
         
         if len(confScore) > 1:
             #Trim the confScore if it is 1,5,or 10
-            #TODO: confirm this works with 1 and 5
             confScore = confScore[0:2] 
             
         confScore = int(confScore) #make it an integer
@@ -63,11 +63,16 @@ for entry in data:
         reactionTimes.append(int(reactionTime))
         
         
+    if phase == "BotCheck":
+        botCheckResponse = trialData.get("BotCheckResponse")
+        
+        
         
         
 print(partConfScores)
 print(trialAccuracy)
 print(reactionTimes)
+print(botCheckResponse)
 
         
     

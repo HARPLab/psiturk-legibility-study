@@ -85,7 +85,7 @@ var LegibilityExperiment = function() {
                 function continueClick(){
                     var botCheckQuestion = document.getElementById("botcheck");
                     var botCheckResponse = botCheckQuestion.value;
-                    console.log(botCheckResponse);
+                    //console.log(botCheckResponse);
           
                     //Record the scores for this trial
                     psiTurk.recordTrialData({'phase':'BotCheck', 'BotCheckResponse':botCheckQuestion.value});
