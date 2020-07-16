@@ -3,41 +3,16 @@
 
     <hr />
 
-    <p>You are finished!  Thank you for your contributions to science. (thanks for debugging my study)</p>
+    <p>You are finished!  Thank you for your contributions to science. </p>
 
-  <!-- I don't need this right now  
+  
     <div class="instructions well">
 
         <form id="postquiz" action="debrief" method="post">
-
-    
-            <div class="row question">
-                <div class="col-md-8">
-                    On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the learning task:
-                </div>
-                <div class="col-md-4">
-                    <select id="engagement" name="engagement">
-                        <option value="10">10 - Very engaging</option>
-                        <option value="9">9</option>
-                        <option value="8">8</option>
-                        <option value="7">7</option>
-                        <option value="6">6</option>
-                        <option value="5" SELECTED>5 - Moderately</option>
-                        <option value="4">4</option>
-                        <option value="3">3</option>
-                        <option value="2">2</option>
-                        <option value="1">1</option>
-                        <option value="0">0 - Not engaged</option>
-                    </select>
-                </div>
-            </div>
-            
-
-
   
             <div class="row question">
                 <div class="col-md-8">
-                    On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the learning task:
+                    On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the task:
                 </div>
                 <div class="col-md-4">
                     <select id="difficulty" name="difficulty">
@@ -46,49 +21,36 @@
                         <option value="8">8</option>
                         <option value="7">7</option>
                         <option value="6">6</option>
-                        <option value="5" SELECTED>5 - Moderately difficult</option>
+                        <option value="5" >5 - Moderately difficult</option>
                         <option value="4">4</option>
                         <option value="3">3</option>
                         <option value="2">2</option>
-                        <option value="1">1</option>
-                        <option value="0">0 - Not difficult at all</option>
+                        <option value="1">1 - Not Difficult</option>
+                        <option value="0" SELECTED></option>
                     </select>
                 </div>
             </div>
-         
-
-            <div class="row question">
-                <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-              <label class="form-check-label" for="defaultCheck1">
-                Default checkbox
-              </label>
-            </div>
-            <div class="row question">
-              <input class="form-check-input" type="checkbox" value="" id="defaultCheck2" disabled>
-              <label class="form-check-label" for="defaultCheck2">
-                Disabled checkbox
-              </label>
-            </div>
-
+            
             <div class="row question">
                  <div class="col-md-8">
-                    Which animals did you see during the task?
+                   Do you have a significant amount of experience with robotics?
                 </div>
 
                 <div class="col-md-4">
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                      <label class="form-check-label" for="inlineCheckbox1">Hippo</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                      <label class="form-check-label" for="inlineCheckbox2">Tiger</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled>
-                      <label class="form-check-label" for="inlineCheckbox3">Ocelot (not possible)</label>
+                    <div class="col-md-4">
+                    <select id="experience" name="experience">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="0" SELECTED></option>
+                    </select>
                     </div>
                 </div>
+            </div>
+            
+            <div class="row question">
+                <div class="col-md-8">Do you have any other comments about the task?</div> 
+               
+                <div class="col-md-4"><input type="text" id="postcomments"></div>
             </div>
 
 
@@ -106,11 +68,11 @@
             </div>
             <div class="col-xs-3">
                 <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
-                    Continue <span class="glyphicon glyphicon-arrow-right"></span>
+                    Submit HIT <span class="glyphicon glyphicon-arrow-right"></span>
                 </button>
             </div>
         </div>
     </div>
 
- --> 
+
 </div>

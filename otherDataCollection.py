@@ -53,7 +53,7 @@ for part in data:
 # each time psiturk.recordTrialData(trialdata) was called.
 data = [record['trialdata'] for part in data for record in part]
 
-#HERE: A list of the trialdata calls
+#HERE: A list of the trialdata calls (not by participant)
 
 
 # Put all subjects' trial data into a dataframe object from the

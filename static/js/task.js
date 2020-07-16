@@ -229,14 +229,29 @@ var Questionnaire = function() {
 
 	record_responses = function() {
 
+        //Difficulty Score
+        var selectDifficulty = document.getElementById("difficulty");
+        var difficultyScore = selectDifficulty.options[selectDifficulty.selectedIndex];
+        
+        //Robotics Experience
+        var selectExperience = document.getElementById("experience");
+        var roboticsExperience = selectExperience.options[selectExperience.selectedIndex]; 
+        
+        //Free Response
+        var freeResponseQuestion = document.getElementById("postcomments");
+        var freeResponse = freeResponseQuestion.value;
+        
+        psiTurk.recordTrialData({'phase':'postquestionnaire', 'difficultyScore':difficultyScore.text, 'hasRoboticsExperience':roboticsExperience.text,
+        'additionalComments':freeResponse});
+        
 		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
 
-		$('textarea').each( function(i, val) {
-			psiTurk.recordUnstructuredData(this.id, this.value);
-		});
-		$('select').each( function(i, val) {
-			psiTurk.recordUnstructuredData(this.id, this.value);		
-		});
+//		$('textarea').each( function(i, val) {
+//			psiTurk.recordUnstructuredData(this.id, this.value);
+//		});
+//		$('select').each( function(i, val) {
+//			psiTurk.recordUnstructuredData(this.id, this.value);		
+//		});
 
 	};
 
