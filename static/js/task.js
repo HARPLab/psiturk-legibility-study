@@ -14,6 +14,8 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
 // All pages to be loaded
 var pages = [
 	"instructions/instruct-ready.html",
+    "instructions/instruct-1.html",
+//    "instructions/practice.html",
 	"stage.html",
 	"postquestionnaire.html",
     "questions.html"
@@ -22,7 +24,9 @@ var pages = [
 psiTurk.preloadPages(pages);
 
 var instructionPages = [ // add as a list as many pages as you like
-	"instructions/instruct-ready.html"
+	"instructions/instruct-1.html",
+//    "instructions/practice.html",
+    "instructions/instruct-ready.html"
 ];
 
 
@@ -41,7 +45,8 @@ var instructionPages = [ // add as a list as many pages as you like
 ********************/
 var LegibilityExperiment = function() {
 
-	var wordon, // time word is presented
+    //reaction time is tracked by setting start time once the stimulus has been loaded into the page with show_stimulus() and setting end time once a key response has been registered. rt is calculated by subtracting the start and end time. 
+	var stimStartTime, // time word is presented
 	    listening = false;
 
 	// Altering the Stimuli
@@ -73,7 +78,7 @@ var LegibilityExperiment = function() {
                     document.getElementById("container-bot-check").style.display = "none";
 
                     show_stimulus(stim[3]);
-                    wordon = new Date().getTime();
+                    stimStartTime = new Date().getTime();
                     listening = true;
                }
             else{ //check for bot
@@ -125,9 +130,9 @@ var LegibilityExperiment = function() {
 				break;
 		}
 		if (response.length>0) {
+            var rt = new Date().getTime() - stimStartTime;
 			listening = false;
 			var hit = response == stim[1];
-			var rt = new Date().getTime() - wordon;
 
 			psiTurk.recordTrialData({'phase':"TEST",
                                      'stimulus':stim[0],
@@ -138,14 +143,9 @@ var LegibilityExperiment = function() {
                                      'rt':rt,
                                      'condition':stim[4]
                                     }
-                                   );
-			//remove_word();
-            
+                                   );            
             go_to_questionnare();
-            
-            
-            //next();
-			
+            			
 		}
 	};
 

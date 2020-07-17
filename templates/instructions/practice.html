@@ -1,0 +1,207 @@
+<div id="practice-trials">
+
+    <div id="container-exp">
+	<div id="trial">
+        <h1> PRACTICE TRIAL </h1>
+		<h1>What is the server's goal?</h1>
+		<p>Left Arrow = Server is approaching your table <br>
+           Right Arrow = Server is approaching a different table
+        </p>
+		<div id="video">
+            <video id = "vid" width="620" height="540" autoplay>
+            </video>
+        </div>
+	</div>
+</div>
+
+<style>
+.class1 {
+  padding-top: 50px;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+</style>
+
+<div id="container-question" class="class1">
+	<p>Please answer the following question before continuing</p>
+
+    <div class="instructions well">
+
+        <form id="confExpQuestions" action="debrief" method="post">
+
+            <!-- beginning of a question -->
+            <div class="row question">
+                <div class="col-md-8">
+                    On a scale of 1-10, please rate how confident you are about your prediction (10 is the most confident):
+                </div>
+                <div class="col-md-4">
+                    <select id="confidence" name="confidence">
+                        <option value="10">10 - Extremely Confident</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5">5 - Moderately</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1 - Not Confident</option>
+                        <option value="0" SELECTED></option>
+                    </select>
+                </div>
+            </div>
+            <!-- end of a question -->
+
+        </form>
+    </div>
+
+    <hr />
+
+    <div id="temp">
+    </div>
+    <div>
+        <button id="cont">Continue</button>
+    </div>
+</div>
+
+
+</div>
+
+
+<!-- 
+<script>
+//Script taken from task.js. Check there for more details
+    console.log("script starting");
+    var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);
+    
+    var stimStartTime, 
+	    listening = false;
+
+	// Practice Stimuli
+	var stims = [
+            //[Stimulus name, correct answer, trial type, video location, condition]
+			["Practice 1", "other", "show_video", "IncorrectTable.mp4", "n/a"],
+			["Practice 2", "mine", "show_video", "CorrectTable.mp4", "n/a"]
+		];
+
+
+	stims = _.shuffle(stims); //randomize
+
+	var next = function() {
+        console.log("next called");
+		if (stims.length===0) {
+            //console.log("finishing because no more stims");
+			finish();
+		}
+		else {
+			stim = stims.shift();
+            
+            document.getElementById("container-exp").style.display = "block";
+            document.getElementById("container-question").style.display = "none";
+            show_stimulus(stim[3]);
+            stimStartTime = new Date().getTime();
+            listening = true;
+		}
+	};
+	
+	var response_handler = function(e) {
+		if (!listening) return;
+
+		var keyCode = e.keyCode,
+			response;
+
+		switch (keyCode) {
+			case 37:
+				// "left arrow" means my table
+				response="mine";
+				break;
+			case 39:
+				// "right arrow" means other table
+				response="other";
+				break;
+			case 32:
+				// "Space"
+				response="skip";
+				break;
+			default:
+				response = "";
+				break;
+		}
+		if (response.length>0) {
+            var rt = new Date().getTime() - stimStartTime;
+			listening = false;
+			var hit = response == stim[1];
+
+			psiTurk.recordTrialData({'phase':"PRACTICE",
+                                     'stimulus':stim[0],
+                                     'destination':stim[1],
+                                     'relation':stim[2],
+                                     'response':response,
+                                     'hit':hit,
+                                     'rt':rt,
+                                     'condition':stim[4]
+                                    }
+                                   );            
+            go_to_questionnare();
+            			
+		}
+	};
+
+	var finish = function() {
+	    $("body").unbind("keydown", response_handler); // Unbind keys
+	    currentview = new Questionnaire();
+	};
+	
+	var show_stimulus = function(videoPath) {
+        console.log("showing stim: " + videoPath);
+		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../../static/videos/" + videoPath + "")
+	};
+
+    var go_to_questionnare = function(){
+        
+        //console.log("Questionnare called");
+        
+        record_responses = function() {
+            //console.log("recording responses");
+            //Get confidence score
+            var selectConfidence = document.getElementById("confidence");
+            var confidenceScore = selectConfidence.options[selectConfidence.selectedIndex];
+            
+            //Record the scores for this trial
+            psiTurk.recordTrialData({'phase':'PRACTICE', 'ConfidenceScore':confidenceScore.text});
+        
+	   };
+        
+        document.getElementById("container-question").style.display = "block";
+        document.getElementById("container-exp").style.display = "none";
+                
+        d3.select("#sourceComp").remove();
+        
+        document.getElementById("cont").addEventListener('click', continueClick);
+        
+        function continueClick(){
+            console.log("button pressed");
+            record_responses();
+            document.getElementById("confExpQuestions").reset();
+            psiTurk.saveData();
+            //Do not respond to more clicks
+            document.getElementById("cont").removeEventListener('click', continueClick);
+            //go to next stimulus
+            next();
+        }
+    }
+
+	
+	// Load the stage.html snippet into the body of the page
+	psiTurk.showPage('stage.html');
+
+	// Register the response handler that is defined above to handle any
+	// key down events.
+	$("body").focus().keydown(response_handler); 
+
+	// Start the test
+	next();
+};
+
+</script>
+-->
