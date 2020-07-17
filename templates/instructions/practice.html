@@ -2,15 +2,20 @@
 
     <div id="container-exp">
 	<div id="trial">
-        <h1> PRACTICE TRIAL </h1>
-		<h1>What is the server's goal?</h1>
-        <h1>Press Space to Continue</h1>
+        <h1> Practice Trial</h1>
+		<h2>What is the server's goal?</h2>
+        <br>
+        <p id="VideoInfo">The video will play when you are holding the slider. It will pause if you let go.</p>
+    
+        
 		
         
         <div id="video">
             <video id = "vid" width="620" height="540"></video>
         </div>
+        <div>
         
+        </div>
         <div>
             
             <div class="row">
@@ -117,6 +122,7 @@
     
     document.getElementById("container-instructions").style.display = "none";
     
+    
     var stimStartTime, 
 	    listening = false;
     
@@ -139,7 +145,6 @@
 
     var next = function() {
         if (stims.length===0) {
-            console.log("finishing because no more stims");
 			finish();
 		}
 		else {
@@ -148,7 +153,8 @@
             show_stimulus(stim[3]);
             //stimStartTime = new Date().getTime();
             listening = true;
-            console.log("listening!");
+            
+            d3.select("#VideoInfo").html("The video will play when you are holding the slider. It will pause if you let go.");
 
             var video = document.getElementById("vid");
 
@@ -160,6 +166,7 @@
 
             slider.onmousedown = function(){
                 console.log("Mouse down");
+                d3.select("#VideoInfo").html(" Press Space to Continue to the Next Practice Trial");
                 vid.play();
             }
 
