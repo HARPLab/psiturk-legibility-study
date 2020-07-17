@@ -74,16 +74,27 @@ var LegibilityExperiment = function() {
 			stim = stims.shift();
             if(stim[2] == "show_video"){
                     document.getElementById("container-exp").style.display = "block";
-                    document.getElementById("container-question").style.display = "none";
+//                    document.getElementById("container-question").style.display = "none";
                     document.getElementById("container-bot-check").style.display = "none";
 
+                    //Control Slider values
+                    var slider = document.getElementById("confSlider");
+                    d3.select("#sliderValueMyTable").html(slider.value+ "%");
+                    d3.select("#sliderValueOtherTable").html(slider.value+ "%");
+
+                    // Update the current slider value (each time you drag the slider handle)
+                    slider.oninput = function() {
+                      d3.select("#sliderValueMyTable").html(100-slider.value + "%");
+                      d3.select("#sliderValueOtherTable").html(slider.value + "%");
+                    }
+                    
                     show_stimulus(stim[3]);
                     stimStartTime = new Date().getTime();
                     listening = true;
-               }
+            }
             else{ //check for bot
                 document.getElementById("container-exp").style.display = "none";
-                document.getElementById("container-question").style.display = "none";
+//                document.getElementById("container-question").style.display = "none";
                 document.getElementById("container-bot-check").style.display = "block";
                 
                 document.getElementById("botcontinue").addEventListener('click', continueClick);
@@ -144,8 +155,15 @@ var LegibilityExperiment = function() {
                                      'condition':stim[4]
                                     }
                                    );            
-            go_to_questionnare();
-            			
+           // go_to_questionnare();
+            
+            d3.select("#sourceComp").remove();
+            
+            //reset the slider's starter value to 50
+            var slider = document.getElementById("confSlider");
+            slider.value = 50;
+            
+            next();			
 		}
 	};
 
@@ -155,55 +173,56 @@ var LegibilityExperiment = function() {
 	};
 	
 	var show_stimulus = function(videoPath) {
-      //  console.log("showing stim: " + videoPath);
+        console.log("showing stim: " + videoPath);
 		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/videos/" + videoPath + "")
-//        d3.select("#stim").html('<p id="video"><video width="620" height="540" controls><source src="../static/videos/' + videoPath + '" type="video/mp4"></video></p>');
 	};
 
+    
+    
 //	var remove_word = function() {
 //		d3.select("#sourceComp").remove();
 //	};
     
-    var go_to_questionnare = function(){
-        
-        //console.log("Questionnare called");
-        
-        record_responses = function() {
-            //console.log("recording responses");
-            //Get confidence score
-            var selectConfidence = document.getElementById("confidence");
-            var confidenceScore = selectConfidence.options[selectConfidence.selectedIndex];
-            
-          
-            //Record the scores for this trial
-            psiTurk.recordTrialData({'phase':'ConfQuestionsResponse', 'ConfidenceScore':confidenceScore.text});
-            
-        //    psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submited'});
-
-	   };
-        
-        document.getElementById("container-question").style.display = "block";
-        document.getElementById("container-exp").style.display = "none";
-        document.getElementById("container-bot-check").style.display = "none";
-        
-       // psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'begin'});
-        
-        d3.select("#sourceComp").remove();
-        
-        //Make the button respond to a click
-        document.getElementById("cont").addEventListener('click', continueClick);
-        
-        function continueClick(){
-            console.log("button pressed");
-            record_responses();
-            document.getElementById("confExpQuestions").reset();
-            psiTurk.saveData();
-            //Do not respond to more clicks
-            document.getElementById("cont").removeEventListener('click', continueClick);
-            //go to next stimulus
-            next();
-        }
-    }
+//    var go_to_questionnare = function(){
+//        
+//        //console.log("Questionnare called");
+//        
+//        record_responses = function() {
+//            //console.log("recording responses");
+//            //Get confidence score
+//            var selectConfidence = document.getElementById("confidence");
+//            var confidenceScore = selectConfidence.options[selectConfidence.selectedIndex];
+//            
+//          
+//            //Record the scores for this trial
+//            psiTurk.recordTrialData({'phase':'ConfQuestionsResponse', 'ConfidenceScore':confidenceScore.text});
+//            
+//        //    psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'submited'});
+//
+//	   };
+//        
+//        document.getElementById("container-question").style.display = "block";
+//        document.getElementById("container-exp").style.display = "none";
+//        document.getElementById("container-bot-check").style.display = "none";
+//        
+//       // psiTurk.recordTrialData({'phase':'ConfQuestions', 'status':'begin'});
+//        
+//        d3.select("#sourceComp").remove();
+//        
+//        //Make the button respond to a click
+//        document.getElementById("cont").addEventListener('click', continueClick);
+//        
+//        function continueClick(){
+//            console.log("button pressed");
+//            record_responses();
+//            document.getElementById("confExpQuestions").reset();
+//            psiTurk.saveData();
+//            //Do not respond to more clicks
+//            document.getElementById("cont").removeEventListener('click', continueClick);
+//            //go to next stimulus
+//            next();
+//        }
+//    }
 
 	
 	// Load the stage.html snippet into the body of the page
