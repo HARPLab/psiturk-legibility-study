@@ -76,6 +76,7 @@ h1 {
   padding-top: 15px;
 }
 
+/*
 .slider {
   -webkit-appearance: none;
   width: 100%;
@@ -87,13 +88,15 @@ h1 {
   -webkit-transition: .2s;
   transition: opacity .2s;
 }
+*/
 
-/* Mouse-over effects */
+/* Mouse-over effects 
 .slider:hover {
-  opacity: 1; /* Fully shown on mouse-over */
+  opacity: 1;
 }
+*/
 
-/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */ 
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -111,3 +114,4 @@ h1 {
   background: steelblue;
   cursor: pointer;
 }
+*/

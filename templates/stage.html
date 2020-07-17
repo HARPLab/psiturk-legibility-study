@@ -8,7 +8,7 @@
         </p>
 -->
 		<div id="video">
-            <video id = "vid" width="620" height="540" autoplay></video>
+            <video id = "vid" width="620" height="540"></video>
         </div>
         
         <div>
@@ -18,7 +18,22 @@
                 <p>My Table</p>
                 <p id="sliderValueMyTable"></p>
             </div>
-            <div class="col-sm-8"><input type="range" min="0" max="100" value="50" steps="10" class="slider" id="confSlider"/></div>
+            <div class="col-sm-8">
+                <input type="range" min="0" max="100" value="" steps="10" list="steplist" class="slider" id="confSlider"/>
+                <datalist id="steplist">
+                    <option>0</option>
+                    <option>10</option>
+                    <option>20</option>
+                    <option>30</option>
+                    <option>40</option>
+                    <option>50</option>
+                    <option>60</option>
+                    <option>70</option>
+                    <option>80</option>
+                    <option>90</option>
+                    <option>100</option>
+                </datalist>
+            </div>
             <div class="col-sm-2">
                 <p>Other Table</p>
                 <p id="sliderValueOtherTable"></p>

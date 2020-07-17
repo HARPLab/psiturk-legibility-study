@@ -48,6 +48,8 @@ var LegibilityExperiment = function() {
     //reaction time is tracked by setting start time once the stimulus has been loaded into the page with show_stimulus() and setting end time once a key response has been registered. rt is calculated by subtracting the start and end time. 
 	var stimStartTime, // time word is presented
 	    listening = false;
+    
+    var sliderEvents =[]; //to collect the (moveTime, myTableConfValue) events for each stimulus
 
 	// Altering the Stimuli
 	var stims = [
@@ -77,20 +79,42 @@ var LegibilityExperiment = function() {
 //                    document.getElementById("container-question").style.display = "none";
                     document.getElementById("container-bot-check").style.display = "none";
 
+                
+                    //present stimulus
+                    show_stimulus(stim[3]);
+                    stimStartTime = new Date().getTime();
+                    listening = true;
+                
+                    var video = document.getElementById("vid");
+                
                     //Control Slider values
                     var slider = document.getElementById("confSlider");
                     d3.select("#sliderValueMyTable").html(slider.value+ "%");
                     d3.select("#sliderValueOtherTable").html(slider.value+ "%");
 
-                    // Update the current slider value (each time you drag the slider handle)
+                    slider.onmousedown = function(){
+                        console.log("Mouse down");
+                        vid.play();
+                    }
+                    
+                    slider.onmouseup = function(){
+                        console.log("Mouse up");
+                        vid.pause();
+                    }
+                    
+                     //Update the current slider value (each time you drag the slider handle)
                     slider.oninput = function() {
                       d3.select("#sliderValueMyTable").html(100-slider.value + "%");
                       d3.select("#sliderValueOtherTable").html(slider.value + "%");
+
+                      var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
+                      var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
+                      sliderEvents.push(newEvent);
                     }
                     
-                    show_stimulus(stim[3]);
-                    stimStartTime = new Date().getTime();
-                    listening = true;
+                    
+                    
+                
             }
             else{ //check for bot
                 document.getElementById("container-exp").style.display = "none";
@@ -105,7 +129,7 @@ var LegibilityExperiment = function() {
                     //console.log(botCheckResponse);
           
                     //Record the scores for this trial
-                    psiTurk.recordTrialData({'phase':'BotCheck', 'BotCheckResponse':botCheckQuestion.value});
+                    psiTurk.recordTrialData({'phase':'BOTCHECK', 'BotCheckResponse':botCheckQuestion.value});
                     psiTurk.saveData();
                             //Do not respond to more clicks
                     document.getElementById("botcontinue").removeEventListener('click', continueClick);
@@ -145,14 +169,15 @@ var LegibilityExperiment = function() {
 			listening = false;
 			var hit = response == stim[1];
 
-			psiTurk.recordTrialData({'phase':"TEST",
-                                     'stimulus':stim[0],
-                                     'destination':stim[1],
-                                     'relation':stim[2],
-                                     'response':response,
-                                     'hit':hit,
-                                     'rt':rt,
-                                     'condition':stim[4]
+			psiTurk.recordTrialData({'phase':"TRIAL",
+                                     //'stimulus':stim[0],
+                                     //'destination':stim[1],
+                                     //'relation':stim[2],
+                                     //'response':response,
+                                     //'hit':hit,
+                                     //'rt':rt,
+                                     //'condition':stim[4],
+                                     'events':sliderEvents
                                     }
                                    );            
            // go_to_questionnare();
@@ -162,6 +187,9 @@ var LegibilityExperiment = function() {
             //reset the slider's starter value to 50
             var slider = document.getElementById("confSlider");
             slider.value = 50;
+            
+            //reset sliderEvents to be empty
+            sliderEvents = [];
             
             next();			
 		}
