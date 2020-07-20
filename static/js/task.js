@@ -75,56 +75,60 @@ var LegibilityExperiment = function() {
 		else {
 			stim = stims.shift();
             if(stim[2] == "show_video"){
-                    document.getElementById("container-exp").style.display = "block";
-                    document.getElementById("container-instructions").style.display = "none";
-                    document.getElementById("container-bot-check").style.display = "none";
+                document.getElementById("container-exp").style.display = "block";
+                document.getElementById("container-instructions").style.display = "none";
+                document.getElementById("container-bot-check").style.display = "none";
+                document.getElementById("container-slider-info").style.display = "block";
 
-                
-                    //present stimulus
-                    show_stimulus(stim[3]);
-                    stimStartTime = new Date().getTime();
-                    listening = true;
-                
-                    var video = document.getElementById("vid");
-                
-                    video.onended = function(){
-                        console.log("The video has ended");
-                        trialEnded();
-                    }
-                
-                    //Control Slider values
-                    var slider = document.getElementById("confSlider");
-                    d3.select("#sliderValueMyTable").html(slider.value+ "%");
-                    d3.select("#sliderValueOtherTable").html(slider.value+ "%");
 
-                    slider.onmousedown = function(){
-                        console.log("Mouse down");
-                        video.play();
-                    }
-                    
-                    slider.onmouseup = function(){
-                        console.log("Mouse up");
-                        video.pause();
-                    }
-                    
-                     //Update the current slider value (each time you drag the slider handle)
-                    slider.oninput = function() {
-                      d3.select("#sliderValueMyTable").html(100-slider.value + "%");
-                      d3.select("#sliderValueOtherTable").html(slider.value + "%");
+                //present stimulus
+                show_stimulus(stim[3]);
+                stimStartTime = new Date().getTime();
+                listening = true;
 
-                      var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
-                      var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
-                      sliderEvents.push(newEvent);
-                    }
-                    
-                    
-                    
-                
+                var video = document.getElementById("vid");
+
+                video.onended = function(){
+                    console.log("The video has ended");
+                    trialEnded();
+                }
+
+                //Control Slider values
+                var slider = document.getElementById("confSlider");
+                d3.select("#sliderValueMyTable").html(slider.value+ "%");
+                d3.select("#sliderValueOtherTable").html(slider.value+ "%");
+
+                slider.onmousedown = function(){
+                    console.log("Mouse down");
+                    document.getElementById("container-slider-info").style.display = "none";
+                    video.play();
+                }
+
+                slider.onmouseup = function(){
+                    console.log("Mouse up");
+                    document.getElementById("container-slider-info").style.display = "block";
+                    video.pause();
+                }
+
+                 //Update the current slider value (each time you drag the slider handle)
+                slider.oninput = function() {
+                  d3.select("#sliderValueMyTable").html(100-slider.value + "%");
+                  d3.select("#sliderValueOtherTable").html(slider.value + "%");
+
+                  var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
+                  var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
+                  sliderEvents.push(newEvent);
+                }
+
+
+
+
             }
             else{ //check for bot
                 document.getElementById("container-exp").style.display = "none";
                 document.getElementById("container-instructions").style.display = "none";
                 document.getElementById("container-bot-check").style.display = "block";
+                document.getElementById("container-slider-info").style.display = "none";
                 
                 document.getElementById("botcontinue").addEventListener('click', continueClick);
         
@@ -217,6 +221,7 @@ var trialEnded = function() {
     document.getElementById("container-exp").style.display = "none";
     document.getElementById("container-instructions").style.display = "block";
     document.getElementById("container-bot-check").style.display = "none";
+    document.getElementById("container-slider-info").style.display = "none";
     
     var rt = new Date().getTime() - stimStartTime;
 //    listening = false;
