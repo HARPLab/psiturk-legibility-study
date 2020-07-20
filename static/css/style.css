@@ -105,6 +105,7 @@ h1 {
   border-radius: 50%; 
   background: steelblue;
   cursor: pointer;
+  pointer-events: none;
 }
 
 .slider::-moz-range-thumb {

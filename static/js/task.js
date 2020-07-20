@@ -76,7 +76,7 @@ var LegibilityExperiment = function() {
 			stim = stims.shift();
             if(stim[2] == "show_video"){
                     document.getElementById("container-exp").style.display = "block";
-//                    document.getElementById("container-question").style.display = "none";
+                    document.getElementById("container-instructions").style.display = "none";
                     document.getElementById("container-bot-check").style.display = "none";
 
                 
@@ -87,6 +87,11 @@ var LegibilityExperiment = function() {
                 
                     var video = document.getElementById("vid");
                 
+                    video.onended = function(){
+                        console.log("The video has ended");
+                        trialEnded();
+                    }
+                
                     //Control Slider values
                     var slider = document.getElementById("confSlider");
                     d3.select("#sliderValueMyTable").html(slider.value+ "%");
@@ -94,12 +99,12 @@ var LegibilityExperiment = function() {
 
                     slider.onmousedown = function(){
                         console.log("Mouse down");
-                        vid.play();
+                        video.play();
                     }
                     
                     slider.onmouseup = function(){
                         console.log("Mouse up");
-                        vid.pause();
+                        video.pause();
                     }
                     
                      //Update the current slider value (each time you drag the slider handle)
@@ -118,7 +123,7 @@ var LegibilityExperiment = function() {
             }
             else{ //check for bot
                 document.getElementById("container-exp").style.display = "none";
-//                document.getElementById("container-question").style.display = "none";
+                document.getElementById("container-instructions").style.display = "none";
                 document.getElementById("container-bot-check").style.display = "block";
                 
                 document.getElementById("botcontinue").addEventListener('click', continueClick);
@@ -141,59 +146,60 @@ var LegibilityExperiment = function() {
 		}
 	};
 	
-	var response_handler = function(e) {
-		if (!listening) return;
-
-		var keyCode = e.keyCode,
-			response;
-
-		switch (keyCode) {
-			case 37:
-				// "left arrow" means my table
-				response="mine";
-				break;
-			case 39:
-				// "right arrow" means other table
-				response="other";
-				break;
-			case 32:
-				// "Space"
-				response="skip";
-				break;
-			default:
-				response = "";
-				break;
-		}
-		if (response.length>0) {
-            var rt = new Date().getTime() - stimStartTime;
-			listening = false;
-			var hit = response == stim[1];
-
-			psiTurk.recordTrialData({'phase':"TRIAL",
-                                     //'stimulus':stim[0],
-                                     //'destination':stim[1],
-                                     //'relation':stim[2],
-                                     //'response':response,
-                                     //'hit':hit,
-                                     //'rt':rt,
-                                     //'condition':stim[4],
-                                     'events':sliderEvents
-                                    }
-                                   );            
-           // go_to_questionnare();
-            
-            d3.select("#sourceComp").remove();
-            
-            //reset the slider's starter value to 50
-            var slider = document.getElementById("confSlider");
-            slider.value = 50;
-            
-            //reset sliderEvents to be empty
-            sliderEvents = [];
-            
-            next();			
-		}
-	};
+//	var response_handler = function(e) {
+//		if (!listening) return;
+//
+//		var keyCode = e.keyCode,
+//			response;
+//
+//		switch (keyCode) {
+//			case 37:
+//				// "left arrow" means my table
+//				response="mine";
+//				break;
+//			case 39:
+//				// "right arrow" means other table
+//				response="other";
+//				break;
+//			case 32:
+//				// "Space"
+//				response="skip";
+//				break;
+//			default:
+//				response = "";
+//				break;
+//		}
+//		if (response.length>0) {
+//            var rt = new Date().getTime() - stimStartTime;
+//			listening = false;
+//			var hit = response == stim[1];
+//
+//			psiTurk.recordTrialData({'phase':"TRIAL",
+//                                     //'stimulus':stim[0],
+//                                     //'destination':stim[1],
+//                                     //'relation':stim[2],
+//                                     //'response':response,
+//                                     //'hit':hit,
+//                                     //'rt':rt,
+//                                     //'condition':stim[4],
+//                                     'events':sliderEvents
+//                                    }
+//                                   );            
+//           // go_to_questionnare();
+//            
+//            d3.select("#sourceComp").remove();
+//            d3.select("#vid").remove();
+//            
+//            //reset the slider's starter value to 50
+//            var slider = document.getElementById("confSlider");
+//            slider.value = 50;
+//            
+//            //reset sliderEvents to be empty
+//            sliderEvents = [];
+//            
+//            next();			
+//		}
+//	};
 
 	var finish = function() {
 	    $("body").unbind("keydown", response_handler); // Unbind keys
@@ -202,10 +208,58 @@ var LegibilityExperiment = function() {
 	
 	var show_stimulus = function(videoPath) {
         console.log("showing stim: " + videoPath);
+        d3.select("#video-container").append("video").attr("id", "vid").attr("width","620").attr("height", "540");
 		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/videos/" + videoPath + "")
 	};
 
     
+var trialEnded = function() {
+    document.getElementById("container-exp").style.display = "none";
+    document.getElementById("container-instructions").style.display = "block";
+    document.getElementById("container-bot-check").style.display = "none";
+    
+    var rt = new Date().getTime() - stimStartTime;
+//    listening = false;
+//    var hit = response == stim[1];
+
+    psiTurk.recordTrialData({'phase':"TRIAL",
+                             //'stimulus':stim[0],
+                             //'destination':stim[1],
+                             //'relation':stim[2],
+                             //'response':response,
+                             //'hit':hit,
+                             //'rt':rt,
+                             //'condition':stim[4],
+                             'events':sliderEvents
+                            }
+                           );            
+
+    d3.select("#sourceComp").remove();
+    d3.select("#vid").remove();
+
+    //reset the slider's starter value to 50
+    var slider = document.getElementById("confSlider");
+    slider.value = 50;
+
+    //reset sliderEvents to be empty
+    sliderEvents = [];
+
+    //Make the button respond to a click
+    document.getElementById("cont").addEventListener('click', continueClick);
+
+    function continueClick(){
+        console.log("continue button pressed");
+        psiTurk.saveData();
+        //Do not respond to more clicks
+        document.getElementById("cont").removeEventListener('click', continueClick);
+        //go to next stimulus
+        next();
+    }
+    
+    //next();			
+    
+}
+
     
 //	var remove_word = function() {
 //		d3.select("#sourceComp").remove();
