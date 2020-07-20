@@ -46,8 +46,10 @@ var instructionPages = [ // add as a list as many pages as you like
 var LegibilityExperiment = function() {
 
     //reaction time is tracked by setting start time once the stimulus has been loaded into the page with show_stimulus() and setting end time once a key response has been registered. rt is calculated by subtracting the start and end time. 
-	var stimStartTime, // time word is presented
-	    listening = false;
+//	var stimStartTime, // time word is presented
+//	    stimPauseTime,
+//        stimPlayTime,
+//        listening = false;
     
     var sliderEvents =[]; //to collect the (moveTime, myTableConfValue) events for each stimulus
 
@@ -74,6 +76,10 @@ var LegibilityExperiment = function() {
 		}
 		else {
 			stim = stims.shift();
+            var stimStartTime, // time word is presented
+	            stimPauseTime,
+                stimPlayTime;
+            
             if(stim[2] == "show_video"){
                 document.getElementById("container-exp").style.display = "block";
                 document.getElementById("container-instructions").style.display = "none";
@@ -83,8 +89,8 @@ var LegibilityExperiment = function() {
 
                 //present stimulus
                 show_stimulus(stim[3]);
-                stimStartTime = new Date().getTime();
-                listening = true;
+//                stimStartTime = new Date().getTime();
+//                listening = true;
 
                 var video = document.getElementById("vid");
 
@@ -100,12 +106,26 @@ var LegibilityExperiment = function() {
 
                 slider.onmousedown = function(){
                     console.log("Mouse down");
+                    
+                    if (typeof stimStartTime == 'undefined'){
+                        stimStartTime = new Date().getTime(); //First time video starts
+                        console.log("video start time: " + stimStartTime.toString());
+                    }
+                    else {
+                        console.log("start after a pause");
+                        stimPlayTime = new Date().getTime(); //Time play begins again
+                        var pauseTime = stimPlayTime - stimPauseTime; //calculate length of pause
+                        console.log("length of pause " + pauseTime.toString());
+                        stimStartTime = stimStartTime + pauseTime; //update start time to compensate for the pause
+                    }
+                    
                     document.getElementById("container-slider-info").style.display = "none";
                     video.play();
                 }
 
                 slider.onmouseup = function(){
-                    console.log("Mouse up");
+                    console.log("Pause");
+                    stimPauseTime = new Date().getTime();
                     document.getElementById("container-slider-info").style.display = "block";
                     video.pause();
                 }
@@ -117,6 +137,7 @@ var LegibilityExperiment = function() {
 
                   var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
                   var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
+                  console.log("newEvent logged: " + newEvent.toString());
                   sliderEvents.push(newEvent);
                 }
 
@@ -150,61 +171,6 @@ var LegibilityExperiment = function() {
 		}
 	};
 	
-//	var response_handler = function(e) {
-//		if (!listening) return;
-//
-//		var keyCode = e.keyCode,
-//			response;
-//
-//		switch (keyCode) {
-//			case 37:
-//				// "left arrow" means my table
-//				response="mine";
-//				break;
-//			case 39:
-//				// "right arrow" means other table
-//				response="other";
-//				break;
-//			case 32:
-//				// "Space"
-//				response="skip";
-//				break;
-//			default:
-//				response = "";
-//				break;
-//		}
-//		if (response.length>0) {
-//            var rt = new Date().getTime() - stimStartTime;
-//			listening = false;
-//			var hit = response == stim[1];
-//
-//			psiTurk.recordTrialData({'phase':"TRIAL",
-//                                     //'stimulus':stim[0],
-//                                     //'destination':stim[1],
-//                                     //'relation':stim[2],
-//                                     //'response':response,
-//                                     //'hit':hit,
-//                                     //'rt':rt,
-//                                     //'condition':stim[4],
-//                                     'events':sliderEvents
-//                                    }
-//                                   );            
-//           // go_to_questionnare();
-//            
-//            d3.select("#sourceComp").remove();
-//            d3.select("#vid").remove();
-//            
-//            //reset the slider's starter value to 50
-//            var slider = document.getElementById("confSlider");
-//            slider.value = 50;
-//            
-//            //reset sliderEvents to be empty
-//            sliderEvents = [];
-//            
-//            next();			
-//		}
-//	};
-
 	var finish = function() {
 //	    $("body").unbind("keydown", response_handler); // Unbind keys
 	    currentview = new Questionnaire();
@@ -223,17 +189,11 @@ var trialEnded = function() {
     document.getElementById("container-bot-check").style.display = "none";
     document.getElementById("container-slider-info").style.display = "none";
     
-    var rt = new Date().getTime() - stimStartTime;
-//    listening = false;
-//    var hit = response == stim[1];
 
     psiTurk.recordTrialData({'phase':"TRIAL",
                              //'stimulus':stim[0],
                              //'destination':stim[1],
                              //'relation':stim[2],
-                             //'response':response,
-                             //'hit':hit,
-                             //'rt':rt,
                              //'condition':stim[4],
                              'events':sliderEvents
                             }
