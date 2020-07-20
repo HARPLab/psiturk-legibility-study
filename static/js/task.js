@@ -15,7 +15,7 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
 var pages = [
 	//"instructions/instruct-ready.html",
     "instructions/instruct-1.html",
-    "instructions/practice.html",
+    //"instructions/practice.html",
 	"stage.html",
 	"postquestionnaire.html",
     "questions.html"
@@ -25,7 +25,7 @@ psiTurk.preloadPages(pages);
 
 var instructionPages = [ // add as a list as many pages as you like
 	"instructions/instruct-1.html",
-    "instructions/practice.html",
+   // "instructions/practice.html",
    // "instructions/instruct-ready.html"
 ];
 
@@ -206,7 +206,7 @@ var LegibilityExperiment = function() {
 //	};
 
 	var finish = function() {
-	    $("body").unbind("keydown", response_handler); // Unbind keys
+//	    $("body").unbind("keydown", response_handler); // Unbind keys
 	    currentview = new Questionnaire();
 	};
 	
@@ -317,7 +317,7 @@ var trialEnded = function() {
 
 	// Register the response handler that is defined above to handle any
 	// key down events.
-	$("body").focus().keydown(response_handler); 
+//	$("body").focus().keydown(response_handler); 
 
 	// Start the test
 	next();
