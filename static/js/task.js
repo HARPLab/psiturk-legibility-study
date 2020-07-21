@@ -101,21 +101,29 @@ var LegibilityExperiment = function() {
 
                 //Control Slider values
                 var slider = document.getElementById("confSlider");
-                d3.select("#sliderValueMyTable").html(slider.value+ "%");
+                
+                //ensure the slider's value has been reset
+                console.log("in next! slider value is: " + slider.value);
+                slider.value = 50;
+                
+                d3.select("#sliderValueMyTable").html(100-slider.value+ "%");
                 d3.select("#sliderValueOtherTable").html(slider.value+ "%");
+                
+                
+                
 
                 slider.onmousedown = function(){
-                    console.log("Mouse down");
+                    //console.log("Mouse down");
                     
                     if (typeof stimStartTime == 'undefined'){
                         stimStartTime = new Date().getTime(); //First time video starts
-                        console.log("video start time: " + stimStartTime.toString());
+//                        console.log("video start time: " + stimStartTime.toString());
                     }
                     else {
-                        console.log("start after a pause");
+//                        console.log("start after a pause");
                         stimPlayTime = new Date().getTime(); //Time play begins again
                         var pauseTime = stimPlayTime - stimPauseTime; //calculate length of pause
-                        console.log("length of pause " + pauseTime.toString());
+//                        console.log("length of pause " + pauseTime.toString());
                         stimStartTime = stimStartTime + pauseTime; //update start time to compensate for the pause
                     }
                     
@@ -124,7 +132,7 @@ var LegibilityExperiment = function() {
                 }
 
                 slider.onmouseup = function(){
-                    console.log("Pause");
+//                    console.log("Pause");
                     stimPauseTime = new Date().getTime();
                     document.getElementById("container-slider-info").style.display = "block";
                     video.pause();
@@ -137,7 +145,7 @@ var LegibilityExperiment = function() {
 
                   var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
                   var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
-                  console.log("newEvent logged: " + newEvent.toString());
+                  //console.log("newEvent logged: " + newEvent.toString());
                   sliderEvents.push(newEvent);
                 }
 
@@ -184,6 +192,7 @@ var LegibilityExperiment = function() {
 
     
 var trialEnded = function() {
+    console.log("trial ended");
     document.getElementById("container-exp").style.display = "none";
     document.getElementById("container-instructions").style.display = "block";
     document.getElementById("container-bot-check").style.display = "none";
@@ -204,7 +213,9 @@ var trialEnded = function() {
 
     //reset the slider's starter value to 50
     var slider = document.getElementById("confSlider");
+    console.log("slider's value is:" + slider.value +"; it will now be reset:");
     slider.value = 50;
+    console.log("slider's value is now:" + slider.value);
 
     //reset sliderEvents to be empty
     sliderEvents = [];

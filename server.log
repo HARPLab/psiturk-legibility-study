@@ -3294,3 +3294,82 @@ TemplateNotFound: psiturk
 [2020-07-20 13:00:43 -0400] [39669] [CRITICAL] WORKER TIMEOUT (pid:74529)
 [2020-07-20 13:00:43 -0400] [39669] [CRITICAL] WORKER TIMEOUT (pid:74530)
 [2020-07-20 13:00:43 -0400] [39669] [CRITICAL] WORKER TIMEOUT (pid:74531)
+[2020-07-21 10:46:03 -0400] [1908] [ERROR] Socket error processing request.
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 135, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 191, in handle_request
+    six.reraise(*sys.exc_info())
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/six.py", line 625, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 182, in handle_request
+    resp.write(item)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/http/wsgi.py", line 353, in write
+    util.write(self.sock, arg, self.chunked)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/util.py", line 304, in write
+    sock.sendall(data)
+OSError: [Errno 41] Protocol wrong type for socket
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1899)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1900)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1901)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1902)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1903)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1904)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1905)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1906)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1907)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1908)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1909)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1910)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1911)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1912)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1913)
+[2020-07-21 10:50:08 -0400] [1896] [CRITICAL] WORKER TIMEOUT (pid:1915)
+[2020-07-21 10:53:55 -0400] [2004] [ERROR] Socket error processing request.
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 135, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 191, in handle_request
+    six.reraise(*sys.exc_info())
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/six.py", line 625, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 182, in handle_request
+    resp.write(item)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/http/wsgi.py", line 353, in write
+    util.write(self.sock, arg, self.chunked)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/util.py", line 304, in write
+    sock.sendall(data)
+OSError: [Errno 41] Protocol wrong type for socket
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2322)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2323)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2324)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2325)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2328)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2330)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2331)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2332)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2333)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2334)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2335)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2336)
+[2020-07-21 11:12:21 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2337)
+[2020-07-21 11:29:07 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2326)
+[2020-07-21 11:29:07 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2327)
+[2020-07-21 11:29:07 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2329)
+[2020-07-21 11:29:07 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2338)
+[2020-07-21 11:32:53 -0400] [2319] [CRITICAL] WORKER TIMEOUT (pid:2371)
+[2020-07-21 11:34:14 -0400] [2485] [ERROR] Socket error processing request.
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 135, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 191, in handle_request
+    six.reraise(*sys.exc_info())
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/six.py", line 625, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 182, in handle_request
+    resp.write(item)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/http/wsgi.py", line 353, in write
+    util.write(self.sock, arg, self.chunked)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/util.py", line 304, in write
+    sock.sendall(data)
+OSError: [Errno 41] Protocol wrong type for socket
