@@ -1,108 +1,196 @@
-#Version Using sqlite3
-
-import sqlite3
+from sqlalchemy import create_engine, MetaData, Table
 import json
-import sqlalchemy
 import pandas as pd
 import scipy.stats as stats
 
-db_url = "participants.db"
-table_name = 'newdev'
+
+'''
+ START: BOILER PLATE SET UP
+'''
+db_url = "sqlite:///participants.db"
+table_name = 'datacollectiondev'
 data_column_name = 'datastring'
- 
-con = sqlite3.connect(db_url)
-cur = con.cursor()
+# boilerplace sqlalchemy setup
+engine = create_engine(db_url)
+metadata = MetaData()
+metadata.bind = engine
+table = Table(table_name, metadata, autoload=True)
+# make a query and loop through
+s = table.select()
+rows = s.execute()
 
-cur.execute('SELECT datastring FROM newdev')
-rows = cur.fetchall()
 
-#currently just choosing the most recent participant's data
-mostRecent = len(rows) -1
+data = []
 
-#participant is a tuple. Its length is 1, and the value is a string
-participant = rows[mostRecent]
-
-#turn the string into a python dictionary
-participantDict = json.loads(participant[0])
-#there are 13 entries in the dictionary: condition, counterbalance, assignmentId, workerId, hitId, currenttrial, bonus, data, questiondata, eventdata, useragent, mode, status
-
-data = participantDict.get("data") 
-#the data key has all the trial data
-#data is a list, where each entry is its own dictionary
-
-#three lists to collect a single participant's confidence scores, trial accuracy, and reaction times
-partConfScores =[]
-allConfResponses = True
-trialAccuracy = []
-reactionTimes = []
-botCheckResponse = ""
-botCheckPass = True
-
-#each entry is a dictionary. with four keys: uniqueid, current_trial, dateTime, trialdata
-for entry in data:
-    #trialdata contains the data stored at each step of the study
-    trialData = entry.get("trialdata")
+#For use in excluding participants:
+    ##status codes of subjects who completed experiment
+    #statuses = [3,4,5,7]
+    ## if you have workers you wish to exclude, add them here
+    #exclude = []
+    #for row in rows:
+    #    # only use subjects who completed experiment and aren't excluded
+    #    if row['status'] in statuses and row['uniqueid'] not in exclude:
+    #        data.append(row[data_column_name])
     
-    phase = trialData.get("phase")
-    if phase == "ConfQuestionsResponse": #if its a trial with a confidence score value
-        confScore = trialData.get("ConfidenceScore")
-                
-        if len(confScore) > 1:
-            #Trim the confScore if it is 1,5,or 10
-            confScore = confScore[0:2] 
-                    
-        if confScore == "": #if the participant did not make a selection, there will be a blank 
-            partConfScores.append("")
-            allConfResponses = False
-        else:
-            confScore = int(confScore) #make it an integer
-            partConfScores.append(confScore)
-        
-    if phase == "TEST": #if its a trial with a stimulus
-        #not needed at this time
-        #stimulusname = trialData.get("stimulus") 
-        #tableDest = trialData.get("destination") 
-        #condition = trialData.get("condition)
-        
-        correct = trialData.get("hit")
-        reactionTime = trialData.get("rt")
-        
-        trialAccuracy.append(correct)
-        reactionTimes.append(int(reactionTime))
-        
-        
-    if phase == "BotCheck":
-        botCheckResponse = trialData.get("BotCheckResponse")
-        if len(botCheckResponse) != 2: #response too short or too long
-            botCheckPass = False
-        else:
-            letter = botCheckResponse[0:1]
-            digit = botCheckResponse[1:2]
-            if digit not in "0123456789": #second value not a digit
-                botCheckPass = False
-            if letter not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz": #first value not a letter
-                botCheckPass = False
-        
-        
-        
-        
-        
-        
-print("Confidence Scores:", partConfScores)
-print("Answered all confidence questions?", allConfResponses)
-print("Trial Accuracies:", trialAccuracy)
-print("RTs:", reactionTimes)
-print("Bot check response:", botCheckResponse)
-print("Passed bot check?", botCheckPass)
+#For use when not excluding participants:
+for row in rows:
+        data.append(row[data_column_name])
 
-        
+# Now we have all participant datastrings in a list.
+# Let's make it a bit easier to work with:
+
+# parse each participant's datastring as json object
+# and take the 'data' sub-object
+data = [json.loads(part)['data'] for part in data]
+
+# insert uniqueid field into trialdata in case it wasn't added
+# in experiment:
+for part in data:
+    for record in part:
+        record['trialdata']['uniqueid'] = record['uniqueid']
+    #print(part)
+
+    
+# flatten nested list so we just have a list of the trialdata recorded
+# each time psiturk.recordTrialData(trialdata) was called.
+data = [record['trialdata'] for part in data for record in part]
+
+# Put all subjects' trial data into a dataframe object from the
+# 'pandas' python library: one option among many for analysis
+df = pd.DataFrame(data)
+'''
+ END: BOILER PLATE SET UP
+'''
+
+'''
+ START: TABLE DEFINITIONS
+'''
+
+#Just stimulus trials
+df_trials = df[['uniqueid', 'phase', 'events', 'IV', 'goaltable', 'viewpoint']] 
+df_trials = df_trials[df_trials['phase'] == 'TRIAL']
+#print("============Stimulus trials==================")
+#print(df_trials)
+
+#Just botcheck trials
+df_botcheck = df[['uniqueid', 'phase', 'BotCheckResponse']]
+df_botcheck = df_botcheck[df_botcheck['phase'] == 'BOTCHECK']
+#print("============Botcheck trials==================")
+#print(df_botcheck)
+
+#Just post questionnaire data
+df_postquestionnaire = df[['uniqueid', 'phase', 'difficultyScore', 'hasRoboticsExperience', 'additionalComments']]
+df_postquestionnaire = df_postquestionnaire[df_postquestionnaire['phase'] == 'postquestionnaire']
+#print("============Postquestionnaire questions==================")
+#print(df_postquestionnaire)
+
+'''
+ END: TABLE DEFINITIONS
+'''
+
+'''
+ START: METHOD DECLARATIONS
+'''
+#Given a trial (IV, goal, viewpoint), a timestamp, and a uniqueid, return the accuracy at that timestamp 
+def get_accuracy_at_timestamp(trial, pid, time):
+    print("empty method")
+
+
+#Given a trial (IV, goal, viewpoint), a timestamp, and a uniqueid, return the confidence at that timestamp 
+#If a time is given that is greater than the final timestamp or less than one, returns None
+def get_confidence_at_timestamp(trial, pid, time):
+    this_participant = get_trial_row(trial, pid)
+    #get the slider event data, access the list (of lists) it is storing
+    slider_events = this_participant['events']
+    slider_events = slider_events.array[0]
+    
+    last_event_time = slider_events[len(slider_events)-1][0]
+    if time > last_event_time:
+        return None
+        #return slider_events[len(slider_events)-1][1] #last_event_value
+    elif time < 1:
+        return None
+        #return slider_events[0][1] #first_event_value
+    
+    #Find the most recently recorded confidence value to the time provided.
+    i = 0
+    for event in slider_events:
+        timestamp = event[0] #both are ints
+        value = event[1]
+        if timestamp == time: #found the exact timestamp, report the value
+            return value
+        elif timestamp > time: #found a greater timestamp, report the previous value
+            return slider_events[i-1][1]
+        else: #otherwise, continue
+            i = i+1
+            continue 
+    
+    
+#Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall accuracy of the trial 
+def get_accuracy_overall(trial, pid):
+    print("empty method")
+
+#Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall confidence of the trial 
+def get_confidence_overall(trial, pid):
+    print("empty method")
     
 
-con.close()
+# Return a tuple representing which video this trial presented
+# Independent variable: Omn, S,or M 
+# Goal Table: 1 = Same Side Before, 2 = Viewpoint, 3 = Same Side After, 4 = Across, 5 = Perpendicular
+# Viewpoint: forward, backward, or side
+def get_trial(iv, goal, view):
+    return (iv, goal, view)
+
+#Return all rows that meet the trial criteria for a specific participant
+#returns an empty empty dataframe if no such rows exist
+def get_trial_row(trial, pid):
+    iv = trial[0]
+    goal = trial[1]
+    view = trial[2]
+    #get all the rows that match that trial specification
+    all_participants = df_trials[(df_trials['IV'] == iv) & (df_trials['goaltable'] == goal) & (df_trials['viewpoint'] == view)]
+    if all_participants.empty:
+        return None;
+    #find the specified participant
+    this_participant = all_participants[all_participants['uniqueid'] == pid]
+    if this_participant.empty:
+        return None;
+    return this_participant
 
 
-# TODO: Data Analysis. 
-    #Look here: https://www.geeksforgeeks.org/create-a-pandas-dataframe-from-lists/
-    #and here: https://reneshbedre.github.io/blog/anova.html
+    
+'''
+ END: METHOD DECLARATIONS
+'''
 
 
+'''
+ START: DATA PROCESSING
+'''
+#Get the set of uniqueids (no duplicates)
+#idSet = set()
+#for ind in df.index: #how to iterate through rows
+#    row = df.loc[ind]
+#    idSet.add(row['uniqueid'])
+#
+##test the get_trial method   
+#for ind in df_trials.index:
+#    row = df.loc[ind]
+#    trial = get_trial(row['IV'], row['goaltable'], row['viewpoint'])
+#
+#practiceTrial = ('Omn', '2', 'side')
+#practiceID = 'debug2J5A7H:debugQAOCVR'
+#practiceTimeStamp = 5660
+##
+##print(get_trial_rows(('Omn', '2', 'side')))
+##print(get_trial_rows(practiceTrial))
+#
+#print(get_confidence_at_timestamp(practiceTrial, practiceID, practiceTimeStamp))
+
+'''
+ END: DATA PROCESSING
+'''
+
+
+    

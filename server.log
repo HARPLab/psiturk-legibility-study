@@ -3373,3 +3373,64 @@ Traceback (most recent call last):
   File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/util.py", line 304, in write
     sock.sendall(data)
 OSError: [Errno 41] Protocol wrong type for socket
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3028)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3029)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3030)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3031)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3032)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3033)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3034)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3035)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3036)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3037)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3038)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3039)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3040)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3041)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3042)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3043)
+[2020-07-21 11:57:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3044)
+[2020-07-21 12:00:04 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3067)
+[2020-07-21 12:06:41 -0400] [3282] [ERROR] Socket error processing request.
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 135, in handle
+    self.handle_request(listener, req, client, addr)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 191, in handle_request
+    six.reraise(*sys.exc_info())
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/six.py", line 625, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/workers/sync.py", line 182, in handle_request
+    resp.write(item)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/http/wsgi.py", line 353, in write
+    util.write(self.sock, arg, self.chunked)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/gunicorn/util.py", line 304, in write
+    sock.sendall(data)
+OSError: [Errno 41] Protocol wrong type for socket
+[2020-07-21 13:02:50 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3068)
+[2020-07-21 13:02:50 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3070)
+[2020-07-21 13:02:50 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3072)
+[2020-07-21 13:02:50 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3077)
+[2020-07-21 13:02:50 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3081)
+[2020-07-21 13:02:50 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3325)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3066)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3069)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3071)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3073)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3074)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3075)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3076)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3078)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3079)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3080)
+[2020-07-21 13:02:57 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3082)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3759)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3760)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3761)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3762)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3763)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3764)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3767)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3768)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3769)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3770)
+[2020-07-21 14:00:42 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:3771)

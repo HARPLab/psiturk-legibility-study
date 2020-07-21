@@ -16,11 +16,11 @@ allow_repeats = false
 
 [Database Parameters]
 database_url = sqlite:///participants.db
-table_name = newdev
+table_name = datacollectiondev
 
 [Server Parameters]
 host = 0.0.0.0
-port = 22363
+port = 22364
 cutoff_time = 30
 logfile = server.log
 loglevel = 2

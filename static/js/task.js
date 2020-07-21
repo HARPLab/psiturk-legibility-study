@@ -55,14 +55,17 @@ var LegibilityExperiment = function() {
 
 	// Altering the Stimuli
 	var stims = [
-            //[Stimulus name, correct answer, trial type, video location, condition]
-			["Other Viewpoint 1", "other", "show_video", "otherRobotV1.mp4", "baseline"],
-            ["Other Viewpoint 2", "other", "show_video", "otherRobotV2.mp4", "baseline"],
-			["Mine Viewpoint 1", "mine", "show_video", "mineRobotV1.mp4", "baseline"],
-            ["Mine Viewpoint 2", "mine", "show_video", "mineRobotV2.mp4", "baseline"],
+            //TODO: Remove stimulus name and correct answer, update rest of code
+            //TODO: add IV, goal table, and viewpoint to the trial recorded data
+        
+            //[Stimulus name, trial type, video location, independent variable (Omn, S,or M), goal table (1 = Same Side Before, 2 = Viewpoint, 3 = Same Side After, 4 = Across, 5 = Perpendicular), viewpoint (forward, backward, side)]
+			["Other Viewpoint 1", "show_video", "otherRobotV1.mp4", "Omn", "3", "forward"],
+            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "Omn", "3", "side"],
+			["Mine Viewpoint 1", "show_video", "mineRobotV1.mp4", "Omn", "2", "forward"],
+            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "side"],
             //["Mine Viewpoint 1 Human", "mine", "show_video", "CorrectTable.mp4"],
             //["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"],
-            ["Bot Check Trial", "neither", "bot_check", "n/a", "n/a"]
+            ["Bot Check Trial", "bot_check", "n/a", "n/a"]
 		];
 
 
@@ -80,7 +83,7 @@ var LegibilityExperiment = function() {
 	            stimPauseTime,
                 stimPlayTime;
             
-            if(stim[2] == "show_video"){
+            if(stim[1] == "show_video"){
                 document.getElementById("container-exp").style.display = "block";
                 document.getElementById("container-instructions").style.display = "none";
                 document.getElementById("container-bot-check").style.display = "none";
@@ -88,7 +91,7 @@ var LegibilityExperiment = function() {
 
 
                 //present stimulus
-                show_stimulus(stim[3]);
+                show_stimulus(stim[2]);
 //                stimStartTime = new Date().getTime();
 //                listening = true;
 
@@ -96,7 +99,7 @@ var LegibilityExperiment = function() {
 
                 video.onended = function(){
                     console.log("The video has ended");
-                    trialEnded();
+                    trialEnded(stim);
                 }
 
                 //Control Slider values
@@ -191,7 +194,7 @@ var LegibilityExperiment = function() {
 	};
 
     
-var trialEnded = function() {
+var trialEnded = function(stimulus) {
     console.log("trial ended");
     document.getElementById("container-exp").style.display = "none";
     document.getElementById("container-instructions").style.display = "block";
@@ -200,10 +203,9 @@ var trialEnded = function() {
     
 
     psiTurk.recordTrialData({'phase':"TRIAL",
-                             //'stimulus':stim[0],
-                             //'destination':stim[1],
-                             //'relation':stim[2],
-                             //'condition':stim[4],
+                             'IV': stimulus[3],
+                             'goaltable': stimulus[4],
+                             'viewpoint': stimulus[5],
                              'events':sliderEvents
                             }
                            );            
@@ -321,7 +323,7 @@ var Questionnaire = function() {
         psiTurk.recordTrialData({'phase':'postquestionnaire', 'difficultyScore':difficultyScore.text, 'hasRoboticsExperience':roboticsExperience.text,
         'additionalComments':freeResponse});
         
-		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
+//		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
 
 //		$('textarea').each( function(i, val) {
 //			psiTurk.recordUnstructuredData(this.id, this.value);
@@ -356,7 +358,7 @@ var Questionnaire = function() {
 
 	// Load the questionnaire snippet 
 	psiTurk.showPage('postquestionnaire.html');
-	psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'begin'});
+//	psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'begin'});
 	
 	$("#next").click(function () {
 	    record_responses();
