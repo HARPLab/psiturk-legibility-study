@@ -3570,3 +3570,101 @@ OSError: [Errno 41] Protocol wrong type for socket
 [2020-07-22 13:03:25 -0400] [6461] [CRITICAL] WORKER TIMEOUT (pid:6480)
 [2020-07-22 13:03:25 -0400] [6461] [CRITICAL] WORKER TIMEOUT (pid:6481)
 [2020-07-22 13:03:25 -0400] [6461] [CRITICAL] WORKER TIMEOUT (pid:6482)
+2020-07-22 16:14:57,018 Exception on /templates/Sony-online-consent-form.pdf [GET]
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 2317, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1840, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1743, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/_compat.py", line 36, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1838, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1824, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/experiment.py", line 749, in regularpage
+    return render_template(foldername+"/"+pagename)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/templating.py", line 134, in render_template
+    return _render(ctx.app.jinja_env.get_or_select_template(template_name_or_list),
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/environment.py", line 930, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/environment.py", line 883, in get_template
+    return self._load_template(name, self.make_globals(globals))
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/environment.py", line 857, in _load_template
+    template = self.loader.load(self, name, globals)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/loaders.py", line 115, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/templating.py", line 58, in get_source
+    return self._get_source_fast(environment, template)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/templating.py", line 86, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: templates/Sony-online-consent-form.pdf
+2020-07-22 16:16:04,088 Exception on /Sony-online-consent-form.pdf [GET]
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 2317, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1840, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1743, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/_compat.py", line 36, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1838, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1824, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/experiment.py", line 747, in regularpage
+    return render_template(pagename)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/templating.py", line 134, in render_template
+    return _render(ctx.app.jinja_env.get_or_select_template(template_name_or_list),
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/environment.py", line 930, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/environment.py", line 883, in get_template
+    return self._load_template(name, self.make_globals(globals))
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/environment.py", line 857, in _load_template
+    template = self.loader.load(self, name, globals)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/loaders.py", line 115, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/templating.py", line 58, in get_source
+    return self._get_source_fast(environment, template)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/templating.py", line 83, in _get_source_fast
+    return loader.get_source(environment, template)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/jinja2/loaders.py", line 184, in get_source
+    contents = f.read().decode(self.encoding)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc4 in position 10: invalid continuation byte
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6544)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8328)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6546)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8329)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6547)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8330)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6549)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8331)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6551)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6552)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6554)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6557)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6558)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6560)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6562)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6564)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6566)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6568)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6570)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6573)
+[2020-07-22 16:28:21 -0400] [2965] [CRITICAL] WORKER TIMEOUT (pid:6575)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8332)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8333)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8334)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8335)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8336)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8337)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8338)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8339)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8340)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8341)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8342)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8343)
+[2020-07-22 16:28:21 -0400] [8325] [CRITICAL] WORKER TIMEOUT (pid:8344)
