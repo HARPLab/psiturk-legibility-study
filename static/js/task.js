@@ -80,9 +80,9 @@ var LegibilityExperiment = function() {
 	stims = _.shuffle(stims); //returns a randomized array
 
 	var next = function() {
-        //console.log("next called");
+        //DEBUG: console.log("next called");
 		if (stims.length===0) {
-            //console.log("finishing because no more stims");
+            //DEBUG: console.log("finishing because no more stims");
 			finish();
 		}
 		else {
@@ -106,7 +106,7 @@ var LegibilityExperiment = function() {
                 var video = document.getElementById("vid");
 
                 video.onended = function(){
-                    console.log("The video has ended");
+                    //DEBUG: console.log("The video has ended");
                     trialEnded(stim);
                 }
 
@@ -114,7 +114,7 @@ var LegibilityExperiment = function() {
                 var slider = document.getElementById("confSlider");
                 
                 //ensure the slider's value has been reset
-                console.log("in next! slider value is: " + slider.value);
+                //DEBUG:console.log("in next! slider value is: " + slider.value);
                 slider.value = 50;
                 
                 d3.select("#sliderValueMyTable").html(100-slider.value+ "%");
@@ -124,17 +124,17 @@ var LegibilityExperiment = function() {
                 
 
                 slider.onmousedown = function(){
-                    //console.log("Mouse down");
+                    //DEBUG: console.log("Mouse down");
                     
                     if (typeof stimStartTime == 'undefined'){
                         stimStartTime = new Date().getTime(); //First time video starts
-//                        console.log("video start time: " + stimStartTime.toString());
+                        //DEBUG: console.log("video start time: " + stimStartTime.toString());
                     }
                     else {
-//                        console.log("start after a pause");
+                        //console.log("start after a pause");
                         stimPlayTime = new Date().getTime(); //Time play begins again
                         var pauseTime = stimPlayTime - stimPauseTime; //calculate length of pause
-//                        console.log("length of pause " + pauseTime.toString());
+                       //DEBUG: console.log("length of pause " + pauseTime.toString());
                         stimStartTime = stimStartTime + pauseTime; //update start time to compensate for the pause
                     }
                     
@@ -143,7 +143,7 @@ var LegibilityExperiment = function() {
                 }
 
                 slider.onmouseup = function(){
-//                    console.log("Pause");
+                    //DEBUG: console.log("Pause");
                     stimPauseTime = new Date().getTime();
                     d3.select("#container-slider-info").html("The video has not finished playing. Please hold the slider to advance video and indicate confidence.");
                     document.getElementById("container-slider-info").style.display = "block";
@@ -157,7 +157,7 @@ var LegibilityExperiment = function() {
 
                   var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
                   var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
-                  //console.log("newEvent logged: " + newEvent.toString());
+                  //DEBUG: console.log("newEvent logged: " + newEvent.toString());
                   sliderEvents.push(newEvent);
                 }
 
@@ -176,7 +176,7 @@ var LegibilityExperiment = function() {
                 function continueClick(){
                     var botCheckQuestion = document.getElementById("botcheck");
                     var botCheckResponse = botCheckQuestion.value;
-                    //console.log(botCheckResponse);
+                    //DEBUG: console.log(botCheckResponse);
           
                     //Record the scores for this trial
                     psiTurk.recordTrialData({'phase':'BOTCHECK', 'BotCheckResponse':botCheckQuestion.value});
@@ -197,14 +197,14 @@ var LegibilityExperiment = function() {
 	};
 	
 	var show_stimulus = function(videoPath) {
-        console.log("showing stim: " + videoPath);
+        //DEBUG: console.log("showing stim: " + videoPath);
         d3.select("#video-container").append("video").attr("id", "vid").attr("width","620").attr("height", "540");
 		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/videos/" + videoPath + "")
 	};
 
     
 var trialEnded = function(stimulus) {
-    console.log("trial ended");
+    //DEBUG: console.log("trial ended");
     document.getElementById("container-exp").style.display = "none";
     document.getElementById("container-instructions").style.display = "block";
     document.getElementById("container-bot-check").style.display = "none";
@@ -224,9 +224,9 @@ var trialEnded = function(stimulus) {
 
     //reset the slider's starter value to 50
     var slider = document.getElementById("confSlider");
-    console.log("slider's value is:" + slider.value +"; it will now be reset:");
+    //DEBUG: console.log("slider's value is:" + slider.value +"; it will now be reset:");
     slider.value = 50;
-    console.log("slider's value is now:" + slider.value);
+    //DEBUG: console.log("slider's value is now:" + slider.value);
 
     //reset sliderEvents to be empty
     sliderEvents = [];
@@ -238,7 +238,7 @@ var trialEnded = function(stimulus) {
     document.getElementById("cont").addEventListener('click', continueClick);
 
     function continueClick(){
-        console.log("continue button pressed");
+        //DEBUG: console.log("continue button pressed");
         psiTurk.saveData();
         //Do not respond to more clicks
         document.getElementById("cont").removeEventListener('click', continueClick);

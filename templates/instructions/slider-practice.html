@@ -101,11 +101,12 @@
         var sliderEvents =[];
         var practiceNumber = 1;
         document.getElementById("tryagain").style.display = "none";
-        document.getElementById("navbuttons").style.display = "none";
+    //TODO: ADD BACK. ONLY COMMENTED OUT FOR EASE OF DEVELOPMENT
+       // document.getElementById("navbuttons").style.display = "none";
         var video = document.getElementById("vid");
 
         video.onended = function(){
-            //console.log("The video has ended");
+            //DEBUG: console.log("The video has ended");
             trialEnded();
         }
 
@@ -122,17 +123,17 @@
 
 
         slider.onmousedown = function(){
-            //console.log("Mouse down");
+            //DEBUG: console.log("Mouse down");
 
             if (typeof stimStartTime == 'undefined'){
                 stimStartTime = new Date().getTime(); //First time video starts
-//                        console.log("video start time: " + stimStartTime.toString());
+                //DEBUG: console.log("video start time: " + stimStartTime.toString());
             }
             else {
-//                        console.log("start after a pause");
+                //DEBUG: console.log("start after a pause");
                 stimPlayTime = new Date().getTime(); //Time play begins again
                 var pauseTime = stimPlayTime - stimPauseTime; //calculate length of pause
-//                        console.log("length of pause " + pauseTime.toString());
+                //DEBUG: console.log("length of pause " + pauseTime.toString());
                 stimStartTime = stimStartTime + pauseTime; //update start time to compensate for the pause
             }
 
@@ -141,7 +142,7 @@
         }
 
         slider.onmouseup = function(){
-//                    console.log("Pause");
+            //DEBUG: console.log("Pause");
             stimPauseTime = new Date().getTime();
             document.getElementById("container-slider-info").style.display = "block";
             video.pause();
@@ -154,14 +155,14 @@
 
           var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
           var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
-          //console.log("newEvent logged: " + newEvent.toString());
+          //DEBUG: console.log("newEvent logged: " + newEvent.toString());
           sliderEvents.push(newEvent);
         }
 
         
         var trialEnded = function() {
             
-            console.log("trial ended");
+            //DEBUG: console.log("trial ended");
         
             psiTurk.recordTrialData({'phase':"PRACTICE",
                                      'events':sliderEvents,
@@ -178,7 +179,7 @@
             document.getElementById("againbutton").addEventListener('click', continueClick);
 
             function continueClick(){
-                console.log("try again button pressed");
+                //DEBUG: console.log("try again button pressed");
                 //Do not respond to more clicks
                 document.getElementById("againbutton").removeEventListener('click', continueClick);
                 //show the video again
@@ -186,12 +187,12 @@
                 document.getElementById("tryagain").style.display = "none";
                 //reset the slider's starter value to 50
                 var slider = document.getElementById("confSlider");
-                console.log("slider's value is:" + slider.value +"; it will now be reset:");
+                //DEBUG: console.log("slider's value is:" + slider.value +"; it will now be reset:");
                 slider.value = 50;
                 d3.select("#sliderValueRed").html(100-slider.value+ "%");
                 d3.select("#sliderValueBlue").html(slider.value+ "%");
                 d3.select("#source").attr("src","../../static/videos/tutorial.mp4")
-                console.log("slider's value is now:" + slider.value);
+                //DEBUG:console.log("slider's value is now:" + slider.value);
                  //reset sliderEvents to be empty
                 sliderEvents = [];		
 
