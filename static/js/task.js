@@ -18,6 +18,7 @@ var pages = [
     "instructions/instruct-2.html",
     "instructions/instruct-3.html",
     "instructions/slider-practice.html",
+    "instructions/instruct-4.html",
     //"instructions/practice.html",
 	"stage.html",
 	"postquestionnaire.html",
@@ -29,8 +30,9 @@ psiTurk.preloadPages(pages);
 var instructionPages = [ // add as a list as many pages as you like
 	"instructions/instruct-1.html",
     "instructions/instruct-2.html",
-    "instructions/slider-practice.html",
     "instructions/instruct-3.html",
+    "instructions/slider-practice.html",
+    "instructions/instruct-4.html",
    // "instructions/practice.html",
    // "instructions/instruct-ready.html"
 ];
@@ -143,6 +145,7 @@ var LegibilityExperiment = function() {
                 slider.onmouseup = function(){
 //                    console.log("Pause");
                     stimPauseTime = new Date().getTime();
+                    d3.select("#container-slider-info").html("The video has not finished playing. Please hold the slider to advance video and indicate confidence.");
                     document.getElementById("container-slider-info").style.display = "block";
                     video.pause();
                 }
@@ -227,6 +230,9 @@ var trialEnded = function(stimulus) {
 
     //reset sliderEvents to be empty
     sliderEvents = [];
+    
+    //reset the message about holding the slider
+    d3.select("#container-slider-info").html("Hold the slider to play the video and indicate confidence.");
 
     //Make the button respond to a click
     document.getElementById("cont").addEventListener('click', continueClick);

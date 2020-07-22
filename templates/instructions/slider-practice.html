@@ -3,31 +3,77 @@
     <h1>Tutorial</h1>
 
     <hr />
+    
+    <div id="container-exp">
+        <div id="trial">
+            <p>Below is a video of a rectangle continuously changing colors. As the video plays, decide what percentage of the rectangle is red and what percentage is blue. Use the slider to continuously indicate your judgement. </p>
+            <p>The video will play when you are holding the slider. The video will pause when you let go of the slider. </p>
+            <hr/>
+            
+            <div id="practice">
+                <div id="video-container">
+                    <video id="vid" height=500= width=640>
+                        <source id="souce" src="../../static/videos/tutorial.mp4">
+                    </video>
+                </div>
 
-    <div class="instructions well">
 
-        <p>
-            You will now learn about the mechanics of the slider you will use to report your confidence during the task. 
-        </p>
-        <p>
-            While the practice task below is different from the one you will be performing during the study, the slider and its mechanics will remain the same.
-        </p>
-        <p>
-            During the practice, the video will play repeatedly to allow you to become comfortable using the slider.
-            <br>
-            During the study, the video will only play once. 
-        </p>
+                <div>
+
+                    <div class="row">
+                    <div class="col-sm-2">
+                        <p>Red</p>
+                        <p id="sliderValueRed"></p>
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="range" min="0" max="100" value="" steps="10" list="steplist" class="slider" id="confSlider"/>
+                        <datalist id="steplist">
+                            <option>0</option>
+                            <option>10</option>
+                            <option>20</option>
+                            <option>30</option>
+                            <option>40</option>
+                            <option>50</option>
+                            <option>60</option>
+                            <option>70</option>
+                            <option>80</option>
+                            <option>90</option>
+                            <option>100</option>
+                        </datalist>
+                    </div>
+                    <div class="col-sm-2">
+                        <p>Blue</p>
+                        <p id="sliderValueBlue"></p>
+                    </div>
+                    </div>
 
 
-        <script type="text/javascript">
-        //console.log(psiTurk.getInstructionIndicator())
-        </script>
+                </div>
 
+                <div id="container-slider-info">
+                    <p>Hold the slider to advance video and make percentage judgement.</p>
+                    <br>
+                </div>
+            </div>
+            
+            
+            <div id="tryagain">
+                    <p>The video has ended.
+                    <br>
+                    During the study, when the video ends, you will be taken to the next trial and will not be able to watch the video again.
+                    <br>
+                    If you would like to practice again, press Try Again.
+                    </p>
+                
+                <div>
+                    <button id="againbutton">Try Again</button>
+                </div>
+            </div>
+        </div>
     </div>
+  
 
-    <hr />
-
-    <div class="instructionsnav">
+    <div id="navbuttons" class="instructionsnav">
         <div class="row">
             <div class="col-xs-2">
                 <button type="button" id="prev" value="prev" class="btn btn-primary btn-lg previous">
@@ -45,3 +91,116 @@
     </div>
 
 </div>
+
+<script>
+
+
+        //present stimulus
+//                stimStartTime = new Date().getTime();
+//                listening = true;
+        var sliderEvents =[];
+        var practiceNumber = 1;
+        document.getElementById("tryagain").style.display = "none";
+        document.getElementById("navbuttons").style.display = "none";
+        var video = document.getElementById("vid");
+
+        video.onended = function(){
+            //console.log("The video has ended");
+            trialEnded();
+        }
+
+        //Control Slider values
+        var slider = document.getElementById("confSlider");
+
+        //ensure the slider's value has been reset
+        slider.value = 50;
+
+        d3.select("#sliderValueRed").html(100-slider.value+ "%");
+        d3.select("#sliderValueBlue").html(slider.value+ "%");
+
+
+
+
+        slider.onmousedown = function(){
+            //console.log("Mouse down");
+
+            if (typeof stimStartTime == 'undefined'){
+                stimStartTime = new Date().getTime(); //First time video starts
+//                        console.log("video start time: " + stimStartTime.toString());
+            }
+            else {
+//                        console.log("start after a pause");
+                stimPlayTime = new Date().getTime(); //Time play begins again
+                var pauseTime = stimPlayTime - stimPauseTime; //calculate length of pause
+//                        console.log("length of pause " + pauseTime.toString());
+                stimStartTime = stimStartTime + pauseTime; //update start time to compensate for the pause
+            }
+
+            document.getElementById("container-slider-info").style.display = "none";
+            video.play();
+        }
+
+        slider.onmouseup = function(){
+//                    console.log("Pause");
+            stimPauseTime = new Date().getTime();
+            document.getElementById("container-slider-info").style.display = "block";
+            video.pause();
+        }
+
+         //Update the current slider value (each time you drag the slider handle)
+        slider.oninput = function() {
+          d3.select("#sliderValueRed").html(100-slider.value + "%");
+          d3.select("#sliderValueBlue").html(slider.value + "%");
+
+          var eventTime = new Date().getTime() - stimStartTime; //time into the trial the event occurs
+          var newEvent = [eventTime, 100-slider.value]; //(moveTime, myTableConfValue)
+          //console.log("newEvent logged: " + newEvent.toString());
+          sliderEvents.push(newEvent);
+        }
+
+        
+        var trialEnded = function() {
+            
+            console.log("trial ended");
+        
+            psiTurk.recordTrialData({'phase':"PRACTICE",
+                                     'events':sliderEvents,
+                                     'practiceNumber':practiceNumber
+                                    }
+                                   );            
+
+            
+            //remove the slider and video to indicate it is finished
+            document.getElementById("practice").style.display = "none";
+            document.getElementById("tryagain").style.display = "block";
+            document.getElementById("navbuttons").style.display = "block";
+            
+            document.getElementById("againbutton").addEventListener('click', continueClick);
+
+            function continueClick(){
+                console.log("try again button pressed");
+                //Do not respond to more clicks
+                document.getElementById("againbutton").removeEventListener('click', continueClick);
+                //show the video again
+                document.getElementById("practice").style.display = "block";
+                document.getElementById("tryagain").style.display = "none";
+                //reset the slider's starter value to 50
+                var slider = document.getElementById("confSlider");
+                console.log("slider's value is:" + slider.value +"; it will now be reset:");
+                slider.value = 50;
+                d3.select("#sliderValueRed").html(100-slider.value+ "%");
+                d3.select("#sliderValueBlue").html(slider.value+ "%");
+                d3.select("#source").attr("src","../../static/videos/tutorial.mp4")
+                console.log("slider's value is now:" + slider.value);
+                 //reset sliderEvents to be empty
+                sliderEvents = [];		
+
+            }
+
+        }
+
+
+
+
+</script>
+
