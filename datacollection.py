@@ -92,23 +92,53 @@ df_postquestionnaire = df_postquestionnaire[df_postquestionnaire['phase'] == 'po
  START: METHOD DECLARATIONS
 '''
 #Given a trial (IV, goal, viewpoint), a timestamp, and a uniqueid, return the accuracy at that timestamp 
+#If confidence value is greater than 50 and the robot is approaching their table: Accurate (True)
+#If confidence value is less than 50 and the robot is not approaching their table: Accurate (True)
+#If confidence value is 50, returns None 
+#Otherwise, they were inaccurate (False)
 def get_accuracy_at_timestamp(trial, pid, time):
-    print("empty method")
-
+    conf_val = get_confidence_at_timestamp(trial, pid, time) #conf_val is how sure they are that the server is approaching their table
+    
+    if conf_val == None:
+        print("The time is out of range or Participant " + pid + " did not complete trial " + str(trial))
+        return None
+    
+    #DEBUG: print(conf_val)
+    correct_answer = trial[1] #table 2 is participant's table, any others is a different table
+    #DEBUG: print(correct_answer)
+    if conf_val == 50:
+        return None
+    elif (correct_answer == '2' and conf_val > 50):
+        return True
+    elif (correct_answer != '2' and conf_val < 50):
+        return True
+    else:
+        return False
+    
+    
+    
 
 #Given a trial (IV, goal, viewpoint), a timestamp, and a uniqueid, return the confidence at that timestamp 
+#Confidence Value = Confidence that the server is approaching the PARTICIPANT's table
 #If a time is given that is greater than the final timestamp or less than one, returns None
 def get_confidence_at_timestamp(trial, pid, time):
     this_participant = get_trial_row(trial, pid)
+    
+    if this_participant.empty:
+        print("Participant " + pid + " did not complete trial " + str(trial))
+        return None
+    
     #get the slider event data, access the list (of lists) it is storing
     slider_events = this_participant['events']
     slider_events = slider_events.array[0]
     
     last_event_time = slider_events[len(slider_events)-1][0]
     if time > last_event_time:
+        print("The time is out of range")
         return None
         #return slider_events[len(slider_events)-1][1] #last_event_value
     elif time < 1:
+        print("The time is out of range")
         return None
         #return slider_events[0][1] #first_event_value
     
@@ -131,6 +161,7 @@ def get_accuracy_overall(trial, pid):
     print("empty method")
 
 #Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall confidence of the trial 
+#Confidence Value = Confidence that the server is approaching MY table
 def get_confidence_overall(trial, pid):
     print("empty method")
     
@@ -157,9 +188,7 @@ def get_trial_row(trial, pid):
     if this_participant.empty:
         return None;
     return this_participant
-
-
-    
+ 
 '''
  END: METHOD DECLARATIONS
 '''
@@ -168,25 +197,28 @@ def get_trial_row(trial, pid):
 '''
  START: DATA PROCESSING
 '''
+
 #Get the set of uniqueids (no duplicates)
 #idSet = set()
 #for ind in df.index: #how to iterate through rows
 #    row = df.loc[ind]
 #    idSet.add(row['uniqueid'])
 #
+#DEBUG:
 ##test the get_trial method   
 #for ind in df_trials.index:
 #    row = df.loc[ind]
 #    trial = get_trial(row['IV'], row['goaltable'], row['viewpoint'])
 #
-#practiceTrial = ('Omn', '2', 'side')
-#practiceID = 'debug2J5A7H:debugQAOCVR'
-#practiceTimeStamp = 5660
+practiceTrial = ('Omn', '3', 'side')
+practiceID = 'debug2J5A7H:debugQAOCVR'
+practiceTimeStamp = 4000
 ##
 ##print(get_trial_rows(('Omn', '2', 'side')))
 ##print(get_trial_rows(practiceTrial))
 #
 #print(get_confidence_at_timestamp(practiceTrial, practiceID, practiceTimeStamp))
+print(get_accuracy_at_timestamp(practiceTrial, practiceID, practiceTimeStamp))
 
 '''
  END: DATA PROCESSING
