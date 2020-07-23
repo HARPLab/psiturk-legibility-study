@@ -8,7 +8,7 @@ import scipy.stats as stats
  START: BOILER PLATE SET UP
 '''
 db_url = "sqlite:///participants.db"
-table_name = 'datacollectiondev'
+table_name = 'datacollectiondev2'
 data_column_name = 'datastring'
 # boilerplace sqlalchemy setup
 engine = create_engine(db_url)
@@ -122,15 +122,8 @@ def get_accuracy_at_timestamp(trial, pid, time):
 #Confidence Value = Confidence that the server is approaching the PARTICIPANT's table
 #If a time is given that is greater than the final timestamp or less than one, returns None
 def get_confidence_at_timestamp(trial, pid, time):
-    this_participant = get_trial_row(trial, pid)
     
-    if this_participant.empty:
-        print("Participant " + pid + " did not complete trial " + str(trial))
-        return None
-    
-    #get the slider event data, access the list (of lists) it is storing
-    slider_events = this_participant['events']
-    slider_events = slider_events.array[0]
+    slider_events = get_slider_events(trial, pid)
     
     last_event_time = slider_events[len(slider_events)-1][0]
     if time > last_event_time:
@@ -156,9 +149,61 @@ def get_confidence_at_timestamp(trial, pid, time):
             continue 
     
     
-#Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall accuracy of the trial 
+#Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall accuracy of the trial.
+#Will return True is the participant was correct for a longer period of time than they were wrong
+#Does not consider timestamps when the participant had 50% confidence
 def get_accuracy_overall(trial, pid):
-    print("empty method")
+    
+    slider_events = get_slider_events(trial, pid)
+    num_events = len(slider_events)
+    total_correct_time = 0
+    total_incorrect_time = 0
+    
+    #TODO: UPDATE WITH LENGTH OF VIDEO
+    end_of_video = slider_events[num_events-1][0] #ONlY FOR NOW
+    
+    num_events = len(slider_events)
+    #DEBUG: print("num events", num_events)
+    
+    for i in range(0,num_events-1):
+        cur_event_timestamp = slider_events[i][0] #time of current event
+        next_event_timestamp = slider_events[i+1][0] #time of next event
+        time_until_change = next_event_timestamp - cur_event_timestamp #time between current event and next event
+#        print("cur", cur_event_timestamp)
+#        print("next", next_event_timestamp)
+#        print("dif", time_until_change)
+        
+        #add the amount of time between current event and next event to either total correct time or total incorrect time, depending on the accuracy at the timestamp
+        cur_trial_accuracy = get_accuracy_at_timestamp(trial, pid, cur_event_timestamp)
+        if cur_trial_accuracy == None: 
+            continue
+        elif cur_trial_accuracy: #if true (correct)
+            total_correct_time = total_correct_time + time_until_change
+        else: #if false (incorrect)
+            total_incorrect_time = total_incorrect_time + time_until_change
+
+    #add the time after the final event
+    last_event_time = slider_events[num_events-1][0]
+    #DEBUG:print("last stamp", last_event_time)
+    
+    time_until_change = end_of_video - last_event_time
+    last_trial_accuracy = get_accuracy_at_timestamp(trial, pid, last_event_time)
+    if last_trial_accuracy: #if true (correct)
+        total_correct_time = total_correct_time + time_until_change
+    elif not last_trial_accuracy: #if false (incorrect)
+         total_incorrect_time = total_incorrect_time + time_until_change
+    #else, if none, do neither
+       
+
+    #DEBUG: print(total_correct_time)
+    #DEBUG: print(total_incorrect_time)
+    
+    if total_correct_time > total_incorrect_time:
+        return True
+    else:
+        return False
+    
+
 
 #Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall confidence of the trial 
 #Confidence Value = Confidence that the server is approaching MY table
@@ -186,8 +231,23 @@ def get_trial_row(trial, pid):
     #find the specified participant
     this_participant = all_participants[all_participants['uniqueid'] == pid]
     if this_participant.empty:
-        return None;
+        print("Participant " + pid + " did not complete trial " + str(trial))
+        return None
     return this_participant
+
+#Given a trial row, returns the list of lists that represents the slider events that took place during that trial
+def get_slider_events(trial, pid):
+    
+    trial_row = get_trial_row(trial, pid)
+    if trial_row.empty:
+        print("Participant " + pid + " did not complete trial " + str(trial))
+        return None
+    
+    #get the slider event data, access the list (of lists) it is storing
+    slider_events = trial_row['events']
+    slider_events = slider_events.array[0]
+    return slider_events
+    
  
 '''
  END: METHOD DECLARATIONS
@@ -210,15 +270,15 @@ def get_trial_row(trial, pid):
 #    row = df.loc[ind]
 #    trial = get_trial(row['IV'], row['goaltable'], row['viewpoint'])
 #
-practiceTrial = ('Omn', '3', 'side')
-practiceID = 'debug2J5A7H:debugQAOCVR'
+practiceTrial = ('Omn', '2', 'side')
+practiceID = 'debugR670K8:debugRTWCKD'
 practiceTimeStamp = 4000
 ##
 ##print(get_trial_rows(('Omn', '2', 'side')))
 ##print(get_trial_rows(practiceTrial))
 #
 #print(get_confidence_at_timestamp(practiceTrial, practiceID, practiceTimeStamp))
-print(get_accuracy_at_timestamp(practiceTrial, practiceID, practiceTimeStamp))
+print(get_accuracy_overall(practiceTrial, practiceID))
 
 '''
  END: DATA PROCESSING
