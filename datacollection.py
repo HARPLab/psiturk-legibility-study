@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, MetaData, Table
 import json
 import pandas as pd
 import scipy.stats as stats
+import matplotlib.pyplot as plt
 
 
 '''
@@ -84,6 +85,15 @@ df_postquestionnaire = df_postquestionnaire[df_postquestionnaire['phase'] == 'po
 #print("============Postquestionnaire questions==================")
 #print(df_postquestionnaire)
 
+
+#Get the set of uniqueids (no duplicates)
+idSet = set()
+for ind in df.index: #how to iterate through rows
+    row = df.loc[ind]
+    idSet.add(row['uniqueid'])
+    
+#DEBUG:print(idSet)
+
 '''
  END: TABLE DEFINITIONS
 '''
@@ -91,6 +101,51 @@ df_postquestionnaire = df_postquestionnaire[df_postquestionnaire['phase'] == 'po
 '''
  START: METHOD DECLARATIONS
 '''
+#Return row that meets the trial criteria for a specific participant
+#returns an empty empty dataframe if no such rows exist
+def get_trial_row(trial, pid):
+    iv = trial[0]
+    goal = trial[1]
+    view = trial[2]
+    #get all the rows that match that trial specification
+    all_participants = df_trials[(df_trials['IV'] == iv) & (df_trials['goaltable'] == goal) & (df_trials['viewpoint'] == view)]
+    if all_participants.empty:
+        return None;
+    #find the specified participant
+    this_participant = all_participants[all_participants['uniqueid'] == pid]
+    if this_participant.empty:
+        print("Participant " + pid + " did not complete trial " + str(trial))
+        return None
+    print("THIS PARTICIPANT", this_participant)
+    return this_participant
+
+#Return rows that meets the trial criteria for all participants
+#returns an empty empty dataframe if no such rows exist
+def get_trial_row_all_participants(trial):
+    frames =[]
+    
+    for ID in idSet:
+        frames.append(get_trial_row(trial,ID))
+        
+    result = pd.concat(frames)
+#    print(result)
+    return result
+    
+    
+
+#Given a trial row, returns the list of lists that represents the slider events that took place during that trial
+def get_slider_events(trial_row):
+
+    if trial_row.empty:
+        print("Participant " + pid + " did not complete trial " + str(trial))
+        return None
+    
+    #get the slider event data, access the list (of lists) it is storing
+    slider_events = trial_row['events']
+#    print("IN GET_SLIDER_EVENTS", slider_events)
+    slider_events = slider_events.array[0]
+    return slider_events
+
 #Given a trial (IV, goal, viewpoint), a timestamp, and a uniqueid, return the accuracy at that timestamp 
 #If confidence value is greater than 50 and the robot is approaching their table: Accurate (True)
 #If confidence value is less than 50 and the robot is not approaching their table: Accurate (True)
@@ -115,15 +170,13 @@ def get_accuracy_at_timestamp(trial, pid, time):
     else:
         return False
     
-    
-    
-
 #Given a trial (IV, goal, viewpoint), a timestamp, and a uniqueid, return the confidence at that timestamp 
 #Confidence Value = Confidence that the server is approaching the PARTICIPANT's table
 #If a time is given that is greater than the final timestamp or less than one, returns None
-def get_confidence_at_timestamp(trial, pid, time):
+def get_confidence_at_timestamp(trial_row, time):
     
-    slider_events = get_slider_events(trial, pid)
+    slider_events = get_slider_events(trial_row)
+    print(slider_events)
     
     last_event_time = slider_events[len(slider_events)-1][0]
     if time > last_event_time:
@@ -152,9 +205,9 @@ def get_confidence_at_timestamp(trial, pid, time):
 #Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall accuracy of the trial.
 #Will return True is the participant was correct for a longer period of time than they were wrong
 #Does not consider timestamps when the participant had 50% confidence
-def get_accuracy_overall(trial, pid):
+def get_accuracy_overall(trial_row):
     
-    slider_events = get_slider_events(trial, pid)
+    slider_events = get_slider_events(trial_row)
     num_events = len(slider_events)
     total_correct_time = 0
     total_incorrect_time = 0
@@ -204,50 +257,79 @@ def get_accuracy_overall(trial, pid):
         return False
     
 
-
+    
 #Given a trial (IV, goal, viewpoint) and a uniqueid, return the overall confidence of the trial 
 #Confidence Value = Confidence that the server is approaching MY table
-def get_confidence_overall(trial, pid):
+def get_confidence_overall(trial_row):
     print("empty method")
-    
+    return None
+ 
 
-# Return a tuple representing which video this trial presented
-# Independent variable: Omn, S,or M 
-# Goal Table: 1 = Same Side Before, 2 = Viewpoint, 3 = Same Side After, 4 = Across, 5 = Perpendicular
-# Viewpoint: forward, backward, or side
-def get_trial(iv, goal, view):
-    return (iv, goal, view)
 
-#Return all rows that meet the trial criteria for a specific participant
-#returns an empty empty dataframe if no such rows exist
-def get_trial_row(trial, pid):
-    iv = trial[0]
-    goal = trial[1]
-    view = trial[2]
-    #get all the rows that match that trial specification
-    all_participants = df_trials[(df_trials['IV'] == iv) & (df_trials['goaltable'] == goal) & (df_trials['viewpoint'] == view)]
-    if all_participants.empty:
-        return None;
-    #find the specified participant
-    this_participant = all_participants[all_participants['uniqueid'] == pid]
-    if this_participant.empty:
-        print("Participant " + pid + " did not complete trial " + str(trial))
-        return None
-    return this_participant
+#Given a  trial (IV, goal, viewpoint) and a uniqueid, return the last timestamp when the participant was wrong
+def get_last_incorrect_timestamp(trial_row):
+    print("empty method")
+    return None
 
-#Given a trial row, returns the list of lists that represents the slider events that took place during that trial
-def get_slider_events(trial, pid):
+
+#Given a  trial (IV, goal, viewpoint) and a uniqueid, return the last timestamps when the participant changed their mind.
+#
+def get_reversal_timestamps(trial_row):
+    print("empty method")
+    return None
+
+#Given an IV (Omn, S, M), return a dictionary of trials and their accuracies
+def get_overall_accuracy_across_IV(iv):
+    print("empty method")
+    return None
+
+#Given an IV (Omn, S, M), return a dictionary of trials and their confidences
+def get_overall_confidence_across_IV(iv):
+    print("empty method")
+    return None
+
+#for plotting time by confidence
+def separate_timestamps_and_values(trial_row):
+    slider_events = get_slider_events(trial_row)
+    timestamps = []
+    confValues = []
+    for event in slider_events:
+        timestamps.append(event[0])
+        confValues.append(event[1])
+    return((timestamps, confValues)) 
+
+#Given a trial and uniqueid, plot the participants's confidence values over time
+def plot_confidence_one_participant(trial_row):
+    events = separate_timestamps_and_values(trial_row)
+    times = events[0]
+    values = events[1]
     
-    trial_row = get_trial_row(trial, pid)
-    if trial_row.empty:
-        print("Participant " + pid + " did not complete trial " + str(trial))
-        return None
+    plt.plot(times, values)
+    plt.xlabel('Timestamp (milliseconds)')
+    plt.ylabel('Confidence Value "My Table"')
+    plt.title('Confidence Values for Participant ' + pid + ' During Trial ' + str(trial))
+    plt.show()
     
-    #get the slider event data, access the list (of lists) it is storing
-    slider_events = trial_row['events']
-    slider_events = slider_events.array[0]
-    return slider_events
+#Given a trial, plot all participants' confidence values over time
+def plot_confidence_all_participants(trial):
+    frames = get_trial_row_all_participants(trial)
     
+    for ind in frames.index:
+        row = frames.loc[ind]
+        pid = row['uniqueid']
+        print("PASSING", row)
+        events = separate_timestamps_and_values(row)
+        times = events[0]
+        values = events[1]
+        plt.plot(times, values)
+    
+    plt.xlabel('Timestamp (milliseconds)')
+    plt.ylabel('Confidence Value "My Table"')
+    plt.title('Confidence Values for All Participants During Trial ' + str(trial))
+    plt.show()
+        
+
+
  
 '''
  END: METHOD DECLARATIONS
@@ -277,8 +359,13 @@ practiceTimeStamp = 4000
 ##print(get_trial_rows(('Omn', '2', 'side')))
 ##print(get_trial_rows(practiceTrial))
 #
-#print(get_confidence_at_timestamp(practiceTrial, practiceID, practiceTimeStamp))
-print(get_accuracy_overall(practiceTrial, practiceID))
+print(get_confidence_at_timestamp(get_trial_row(practiceTrial, practiceID), practiceTimeStamp))
+#print(get_accuracy_overall(get_trial_row(practiceTrial, practiceID)))
+##plot_confidence_one_participant(practiceTrial, practiceID)
+#
+#get_trial_row_all_participants(practiceTrial)
+#      
+plot_confidence_all_participants(practiceTrial)
 
 '''
  END: DATA PROCESSING
