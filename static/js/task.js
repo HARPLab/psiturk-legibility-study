@@ -210,12 +210,16 @@ var trialEnded = function(stimulus) {
     document.getElementById("container-bot-check").style.display = "none";
     document.getElementById("container-slider-info").style.display = "none";
     
-
+    var video = document.getElementById("vid");
+    trial_duration = video.duration;
+    
     psiTurk.recordTrialData({'phase':"TRIAL",
                              'IV': stimulus[3],
                              'goaltable': stimulus[4],
                              'viewpoint': stimulus[5],
-                             'events':sliderEvents
+                             'events':sliderEvents,
+                             'condition':mycondition,
+                             'videoduraction':trial_duration
                             }
                            );            
 

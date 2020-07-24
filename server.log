@@ -8227,3 +8227,239 @@ UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc4 in position 10: invalid
 [2020-07-23 18:40:33 -0400] [9610] [CRITICAL] WORKER TIMEOUT (pid:18064)
 [2020-07-23 18:40:33 -0400] [9610] [CRITICAL] WORKER TIMEOUT (pid:18067)
 [2020-07-23 18:40:33 -0400] [9610] [CRITICAL] WORKER TIMEOUT (pid:18068)
+2020-07-24 12:08:26,385 Exception on /exp [GET]
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1278, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 593, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: database is locked
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 2317, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1840, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1743, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/_compat.py", line 36, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1838, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1824, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/user_utils.py", line 23, in new_func
+    resp = make_response(func(*args, **kwargs))
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/experiment.py", line 454, in start_exp
+    db_session.commit()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/scoping.py", line 163, in do
+    return getattr(self.registry(), name)(*args, **kwargs)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1042, in commit
+    self.transaction.commit()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 504, in commit
+    self._prepare_impl()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 483, in _prepare_impl
+    self.session.flush()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2523, in flush
+    self._flush(objects)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2664, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 69, in __exit__
+    exc_value, with_traceback=exc_tb,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2624, in _flush
+    flush_context.execute()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/unitofwork.py", line 422, in execute
+    rec.execute(self)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/unitofwork.py", line 589, in execute
+    uow,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/persistence.py", line 245, in save_obj
+    insert,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/persistence.py", line 1083, in _emit_insert_statements
+    c = cached_connections[connection].execute(statement, multiparams)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1014, in execute
+    return meth(self, multiparams, params)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 298, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1133, in _execute_clauseelement
+    distilled_params,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1318, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1512, in _handle_dbapi_exception
+    sqlalchemy_exception, with_traceback=exc_info[2], from_=e
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1278, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 593, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO datacollectiondev2 (uniqueid, assignmentid, workerid, hitid, ipaddress, browser, platform, language, cond, counterbalance, codeversion, beginhit, beginexp, endhit, bonus, status, mode, datastring) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('debugTY8FH7:debugBS1AID', 'debugBS1AID', 'debugTY8FH7', 'debugTQADBA', '127.0.0.1', 'safari', 'macos', 'UNKNOWN', 2, 0, '1.0', '2020-07-24 12:08:21.328985', None, None, 0.0, 1, 'debug', None)]
+(Background on this error at: http://sqlalche.me/e/13/e3q8)
+2020-07-24 12:09:56,810 Exception on /exp [GET]
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1278, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 593, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: database is locked
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 2317, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1840, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1743, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/_compat.py", line 36, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1838, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1824, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/user_utils.py", line 23, in new_func
+    resp = make_response(func(*args, **kwargs))
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/experiment.py", line 454, in start_exp
+    db_session.commit()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/scoping.py", line 163, in do
+    return getattr(self.registry(), name)(*args, **kwargs)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1042, in commit
+    self.transaction.commit()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 504, in commit
+    self._prepare_impl()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 483, in _prepare_impl
+    self.session.flush()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2523, in flush
+    self._flush(objects)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2664, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 69, in __exit__
+    exc_value, with_traceback=exc_tb,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2624, in _flush
+    flush_context.execute()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/unitofwork.py", line 422, in execute
+    rec.execute(self)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/unitofwork.py", line 589, in execute
+    uow,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/persistence.py", line 245, in save_obj
+    insert,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/persistence.py", line 1083, in _emit_insert_statements
+    c = cached_connections[connection].execute(statement, multiparams)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1014, in execute
+    return meth(self, multiparams, params)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 298, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1133, in _execute_clauseelement
+    distilled_params,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1318, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1512, in _handle_dbapi_exception
+    sqlalchemy_exception, with_traceback=exc_info[2], from_=e
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1278, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 593, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO newdev (uniqueid, assignmentid, workerid, hitid, ipaddress, browser, platform, language, cond, counterbalance, codeversion, beginhit, beginexp, endhit, bonus, status, mode, datastring) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('debug0GAX9J:debugNVKYH2', 'debugNVKYH2', 'debug0GAX9J', 'debugF047BR', '127.0.0.1', 'safari', 'macos', 'UNKNOWN', 2, 0, '1.0', '2020-07-24 12:09:51.751627', None, None, 0.0, 1, 'debug', None)]
+(Background on this error at: http://sqlalche.me/e/13/e3q8)
+2020-07-24 12:16:03,960 Exception on /exp [GET]
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1278, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 593, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: database is locked
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 2317, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1840, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1743, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/_compat.py", line 36, in reraise
+    raise value
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1838, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/flask/app.py", line 1824, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/user_utils.py", line 23, in new_func
+    resp = make_response(func(*args, **kwargs))
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/psiturk/experiment.py", line 454, in start_exp
+    db_session.commit()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/scoping.py", line 163, in do
+    return getattr(self.registry(), name)(*args, **kwargs)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1042, in commit
+    self.transaction.commit()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 504, in commit
+    self._prepare_impl()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 483, in _prepare_impl
+    self.session.flush()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2523, in flush
+    self._flush(objects)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2664, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 69, in __exit__
+    exc_value, with_traceback=exc_tb,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 2624, in _flush
+    flush_context.execute()
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/unitofwork.py", line 422, in execute
+    rec.execute(self)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/unitofwork.py", line 589, in execute
+    uow,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/persistence.py", line 245, in save_obj
+    insert,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/persistence.py", line 1083, in _emit_insert_statements
+    c = cached_connections[connection].execute(statement, multiparams)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1014, in execute
+    return meth(self, multiparams, params)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 298, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1133, in _execute_clauseelement
+    distilled_params,
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1318, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1512, in _handle_dbapi_exception
+    sqlalchemy_exception, with_traceback=exc_info[2], from_=e
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1278, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/elliemamantov/anaconda3/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 593, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO newdev (uniqueid, assignmentid, workerid, hitid, ipaddress, browser, platform, language, cond, counterbalance, codeversion, beginhit, beginexp, endhit, bonus, status, mode, datastring) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('debugI0RM1X:debugWONCA9', 'debugWONCA9', 'debugI0RM1X', 'debugI4VB7V', '127.0.0.1', 'safari', 'macos', 'UNKNOWN', 2, 0, '1.0', '2020-07-24 12:15:58.901918', None, None, 0.0, 1, 'debug', None)]
+(Background on this error at: http://sqlalche.me/e/13/e3q8)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24168)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24169)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24170)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24171)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24172)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24173)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24174)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24175)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24176)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24177)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24178)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24179)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24180)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24181)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24182)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24183)
+[2020-07-24 12:56:14 -0400] [24165] [CRITICAL] WORKER TIMEOUT (pid:24184)
