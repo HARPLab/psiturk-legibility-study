@@ -9,7 +9,7 @@ CONSTANTS and FLAGS
 '''
 ACCURACY_OPTION = 2
 UNSURE_WINDOW = 0 #the amount of values around 50 that counts as people being unsure. 0 = participants are only unsure if confidence value is 50
-REVERSALS_WINDOW = 0 #the amount of values around 50 that don't count as the participant changing their mind. 0 = participants change their mind every time the confidence value passes 50
+REVERSALS_WINDOW = 1 #the amount of values around 50 that don't count as the participant changing their mind. 0 = participants change their mind every time the confidence value passes 50
 
 '''
  START: BOILER PLATE SET UP
@@ -178,7 +178,7 @@ def get_avg_accuracy_overall(perspective, pathing_method):
     for frame in frames:
         acc_averages.append(get_avg_accuracy_trial(frame))
         
-    print(acc_averages)
+    #DEBUG: print(acc_averages)
     
     #Take the average of averages. Return that
     sum_averages = 0
@@ -194,18 +194,30 @@ def get_avg_accuracy_overall(perspective, pathing_method):
 
 '''
 Given a perspective and pathing method, returns the average number of reversals that happened during all trials that used that perspective and pathing method
+
+Also can collect the times the reversals happens, but does not do anything with them as of now
 '''
 def get_average_num_reversals_overall(perspective, pathing_method):
     frames = get_dfs(perspective, pathing_method)
     
     #get the average from each frame and add it to averages
     total_reversals = 0
+    num_frames = len(frames)
+#    print("Number of frames: ", num_frames)
     for frame in frames:
-        total_reversals = total_reversals + get_reversals_trial(frame)
+        reversals_and_times = get_reversals_trial(frame)
+        reversals = reversals_and_times[0]
+        times = reversals_and_times[1]
+        #not using times right now
+        #total_reversals = total_reversals + get_reversals_trial(frame)
+        total_reversals = total_reversals + reversals
         
-    print(total_reversals)
     #Take the average of total reversals. Return that
-    return None
+    avg_reversals = total_reversals/num_frames
+    #DEBUG: print("total reversals: ", total_reversals)
+    #DEBUG: print("average: ", avg_reversals)
+    
+    return avg_reversals
 
 '''
 Given a dataframe representing a trial row, return the average confidence value reported.
@@ -329,11 +341,53 @@ def get_avg_accuracy_trial(trial_row):
     
 
 '''
-Given a dataframe representinga trial_row, return the number of reversals the participant made
+Given a dataframe representinga trial_row, returns a tuple that contains the number of reversals the participant made and a list of the timestamps at which the participant makes a reversal
 '''    
 def get_reversals_trial(trial_row):
-    print("empty method")
-    return None
+    #DEBUG: print("==========new reversals trial method call ==========")
+    
+    #Since we only care about when it crossed the threshold of 50, we don't care whether the goal was their table or a different table. The two slider sides will be called above_half and below_half instead then
+    above_half = 50 + REVERSALS_WINDOW
+    below_half = 50 - REVERSALS_WINDOW
+    
+    slider_events = get_slider_events(trial_row)
+    num_events = len(slider_events)
+
+    time_of_reversals = []
+    num_reversals = 0
+    
+    prev_guess = None
+    
+    for i in range(0,num_events):
+        event = slider_events[i]
+        value = event[1]
+        time = event[0]
+        #DEBUG: print("event", event)
+        #DEBUG: print("prev_guess: ", prev_guess)
+        if prev_guess == None: #no guess yet
+            #DEBUG: print("unsure")
+            if value >= above_half: #if the new event is an above_half guess
+                prev_guess = 'above_half'
+            elif value <= below_half:  #if the new event is an below_half guess
+                prev_guess = 'below_half'
+            else: #the participant is still unsure
+                continue
+        elif ((value >= above_half) and (prev_guess == 'below_half')): #the new event is an above_half guess and the last event was a below_half guess
+            #DEBUG print("reversal because value is above half and previous guess was below half")
+            num_reversals = num_reversals + 1
+            time_of_reversals.append(time)
+            prev_guess = 'above_half'
+        elif ((value <= below_half) and (prev_guess == 'above_half')): #the new event is an below_half guess and the last event was a above_half guess
+            #DEGUG: print("reversal because value is below half and previous guess was above half")
+            num_reversals = num_reversals + 1
+            time_of_reversals.append(time)
+            prev_guess = 'below_half'
+        else:
+            continue
+    
+    #DEBUG: print("num reversals", num_reversals)
+    #DEBUG: print("time of reversals", time_of_reversals)
+    return (num_reversals, time_of_reversals)
     
     
 '''
@@ -392,19 +446,22 @@ def get_slider_events(trial_row):
  START: DATA PROCESSING
 '''
 
-practiceTrial = ('Omn', '2', 'side')
-practiceID = 'debugR670K8:debugRTWCKD'
-practiceTimeStamp = 4000
-practicePerspective = '0'
+perspectives = ['0','1']
+pathingMethods = ['Omn', "M", "SA", "SB"]
+
 practicePathingMethod = 'Omn'
 
-#get_avg_confidence_overall(practicePerspective, practicePathingMethod)
-print(get_avg_accuracy_overall(practicePerspective, practicePathingMethod))
-#get_num_reversals_overall(practicePerspective, practicePathingMethod)
-#
-#get_avg_confidence_trial(trial_row)
-#get_avg_accuracy_trial(trial_row)
-#get_avg_confidence_trial(trial_row)
+for perspective in perspectives:
+   # for method in pathingMethods:
+
+    avg_confidence = get_avg_confidence_overall(perspective, practicePathingMethod)
+    avg_accuracy = get_avg_accuracy_overall(perspective, practicePathingMethod)
+    avg_reversals = get_average_num_reversals_overall(perspective, practicePathingMethod)
+    print("===Perspective " + perspective + "====")
+    print("Average Confidence Score for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_confidence))
+    print("Average Accuracy Score for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_accuracy))
+    print("Average Reversals for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_reversals))
+
 '''
  END: DATA PROCESSING
 '''
