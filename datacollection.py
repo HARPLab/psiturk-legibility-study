@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 import statsmodels.api as sm
 import statsmodels.formula.api as ols
+from pingouin import pairwise_tukey
 
 '''
 CONSTANTS and FLAGS
@@ -538,7 +539,7 @@ singleB_acc = singleB_0_acc + singleB_1_acc
 singleB_rev = singleB_0_rev + singleB_1_rev
 
 #Construct the data frames 
-columns = ['omniscient', 'multiple', 'singleA', 'singleB']
+columns = ['Omn', 'M', 'SA', 'SB']
 accuracies_list = [omniscient_acc, multiple_acc, singleA_acc, singleB_acc]
 #print("accuracies list: ", accuracies_list)
 confidences_list = [omniscient_conf, multiple_conf, singleA_conf, singleB_conf]
@@ -558,16 +559,25 @@ reversals_df = pd.DataFrame (revs_list).transpose()
 reversals_df.columns = columns
 print(reversals_df)
 
-##boxplots
-accuracy_df.boxplot()
-plt.title("Accuracy Across Pathing Method")
-plt.show()
-confidence_df.boxplot()
-plt.title("Confidence Across Pathing Method")
-plt.show()
-reversals_df.boxplot()
-plt.title("Reversals Across Pathing Method")
-plt.show()
+#Boxplots 
+
+##Accuracy
+#accuracy_df.boxplot()
+#plt.title("Accuracy Across Pathing Method")
+#plt.show()
+
+#
+##Confidence
+#confidence_df.boxplot()
+#plt.title("Confidence Across Pathing Method")
+#plt.show()
+#
+#
+##Reversals
+#reversals_df.boxplot()
+#plt.title("Reversals Across Pathing Method")
+#plt.show()
+
 
 '''
  END: GROUP ALL AVERAGES
@@ -577,9 +587,82 @@ plt.show()
 '''
  START: ANOVA
 '''
+#Accuracy
+
+#stats f_oneway function takes the groups as inputs and returns F and P-values
+print("=====ANOVA, Accuracy:=====")
+fvalue_acc, pvalue_acc = stats.f_oneway(accuracy_df['Omn'], accuracy_df['M'], accuracy_df['SA'], accuracy_df['SB'])
+print("fvalue,pvalue: " + str(fvalue_acc) + ',' +str(pvalue_acc))
+
+#get ANOVA table 
+accuracy_df_melt = pd.melt(accuracy_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
+accuracy_df_melt.columns = ['index', 'treatments', 'value']
+# Ordinary Least Squares (OLS) model
+model_acc = ols.ols('value ~ C(treatments)', data=accuracy_df_melt).fit()
+anova_table_acc = sm.stats.anova_lm(model_acc,typ=2)
+print(anova_table_acc)
+print("==========================")
 
 
+#Confidence
+print("=====ANOVA, Confidence:=====")
+fvalue_conf, pvalue_conf = stats.f_oneway(confidence_df['Omn'], confidence_df['M'], confidence_df['SA'], confidence_df['SB'])
+print("fvalue,pvalue: " + str(fvalue_conf) + ',' +str(pvalue_conf))
 
+
+#get ANOVA table 
+confidence_df_melt = pd.melt(confidence_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
+confidence_df_melt.columns = ['index', 'treatments', 'value']
+# Ordinary Least Squares (OLS) model
+model_conf = ols.ols('value ~ C(treatments)', data=confidence_df_melt).fit()
+anova_table_conf = sm.stats.anova_lm(model_conf,typ=2)
+print(anova_table_conf)
+print("=============================")
+
+
+#Reversals
+print("=====ANOVA, Reversals:=====")
+fvalue_rev, pvalue_rev = stats.f_oneway(confidence_df['Omn'], confidence_df['M'], confidence_df['SA'], confidence_df['SB'])
+print("fvalue,pvalue: " + str(fvalue_rev) + ',' +str(pvalue_rev))
+
+
+#get ANOVA table 
+reversals_df_melt = pd.melt(reversals_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
+reversals_df_melt.columns = ['index', 'treatments', 'value']
+# Ordinary Least Squares (OLS) model
+model_rev = ols.ols('value ~ C(treatments)', data=reversals_df_melt).fit()
+anova_table_rev = sm.stats.anova_lm(model_rev,typ=2)
+print(anova_table_rev)
+print("=============================")
 '''
  END: ANOVA
+'''
+
+'''
+ START: TUKEY HSD TEST
+'''
+
+#Accuracy
+print("=======Tukey Test, Accuracy:========")
+#perform multiple pairwise comparison (Turkey HSD)
+m_comp_acc = pairwise_tukey(data=accuracy_df_melt, dv='value', between='treatments')
+print(m_comp_acc)
+print("======================")
+
+#Confidence
+print("=======Tukey Test, Confidence:========")
+#perform multiple pairwise comparison (Turkey HSD)
+m_comp_conf = pairwise_tukey(data=confidence_df_melt, dv='value', between='treatments')
+print(m_comp_conf)
+print("======================")
+
+#Reversals
+print("=======Tukey Test, Reversals:========")
+#perform multiple pairwise comparison (Turkey HSD)
+m_comp_rev = pairwise_tukey(data=reversals_df_melt, dv='value', between='treatments')
+print(m_comp_rev)
+print("======================")
+
+'''
+ END: TUKEY HSD TEST
 '''
