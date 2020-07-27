@@ -3,6 +3,9 @@ import json
 import pandas as pd
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import scipy.stats as stats
+import statsmodels.api as sm
+import statsmodels.formula.api as ols
 
 '''
 CONSTANTS and FLAGS
@@ -10,12 +13,13 @@ CONSTANTS and FLAGS
 ACCURACY_OPTION = 2
 UNSURE_WINDOW = 0 #the amount of values around 50 that counts as people being unsure. 0 = participants are only unsure if confidence value is 50
 REVERSALS_WINDOW = 1 #the amount of values around 50 that don't count as the participant changing their mind. 0 = participants change their mind every time the confidence value passes 50
+RETURN_LIST_OF_AVERAGES = False #if you want the list of all the trials' averages (or total list of reversals) rather than the overall averages
 
 '''
  START: BOILER PLATE SET UP
 '''
 db_url = "sqlite:///participants.db"
-table_name = 'datacollectiondev5'
+table_name = 'datacollectiondev6'
 data_column_name = 'datastring'
 # boilerplace sqlalchemy setup
 engine = create_engine(db_url)
@@ -124,9 +128,10 @@ def get_dfs(perspective, pathing_method):
     for ind in df_trials.index:
         row = df_trials.loc[ind]
         pid = row['uniqueid']
+        pathMethod = row['IV']
         condition = row['condition']
     
-        if int(condition) == int(perspective):
+        if ((int(condition) == int(perspective)) and (pathing_method == pathMethod)):
             frames.append(row)
     return frames
 
@@ -140,13 +145,15 @@ In other words, whatever the goal was, a 100 confidence score represents that th
 '''
 def get_avg_confidence_overall(perspective, pathing_method):
     frames = get_dfs(perspective, pathing_method)
-
-    #DEBUG: print(frames)
     
     #get the average from each frame and add it to averages
     conf_averages = []
     for frame in frames:
         conf_averages.append(get_avg_confidence_trial(frame))
+        
+    if RETURN_LIST_OF_AVERAGES:
+        #return the list of averages rather than an overall average
+        return conf_averages
         
     #DEBUG: print(conf_averages)
     sum_averages = 0
@@ -178,7 +185,9 @@ def get_avg_accuracy_overall(perspective, pathing_method):
     for frame in frames:
         acc_averages.append(get_avg_accuracy_trial(frame))
         
-    #DEBUG: print(acc_averages)
+    if RETURN_LIST_OF_AVERAGES:
+        #return the list of averages rather than an overall average
+        return acc_averages
     
     #Take the average of averages. Return that
     sum_averages = 0
@@ -203,14 +212,20 @@ def get_average_num_reversals_overall(perspective, pathing_method):
     #get the average from each frame and add it to averages
     total_reversals = 0
     num_frames = len(frames)
+    
+    list_of_reversals = []
 #    print("Number of frames: ", num_frames)
     for frame in frames:
         reversals_and_times = get_reversals_trial(frame)
         reversals = reversals_and_times[0]
         times = reversals_and_times[1]
+        list_of_reversals.append(reversals)
         #not using times right now
         #total_reversals = total_reversals + get_reversals_trial(frame)
         total_reversals = total_reversals + reversals
+        
+    if RETURN_LIST_OF_AVERAGES:
+        return list_of_reversals
         
     #Take the average of total reversals. Return that
     avg_reversals = total_reversals/num_frames
@@ -443,25 +458,128 @@ def get_slider_events(trial_row):
 
 
 '''
- START: DATA PROCESSING
+ START: GATHER OVERALL AVERAGES
 '''
 
-perspectives = ['0','1']
-pathingMethods = ['Omn', "M", "SA", "SB"]
-
-practicePathingMethod = 'Omn'
-
-for perspective in perspectives:
-   # for method in pathingMethods:
-
-    avg_confidence = get_avg_confidence_overall(perspective, practicePathingMethod)
-    avg_accuracy = get_avg_accuracy_overall(perspective, practicePathingMethod)
-    avg_reversals = get_average_num_reversals_overall(perspective, practicePathingMethod)
-    print("===Perspective " + perspective + "====")
-    print("Average Confidence Score for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_confidence))
-    print("Average Accuracy Score for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_accuracy))
-    print("Average Reversals for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_reversals))
+#perspectives = ['0','1']
+#pathingMethods = ['Omn', "M", "SA", "SB"]
+#
+#practicePathingMethod = 'Omn'
+#
+#for method in pathingMethods:
+#    for perspective in perspectives:
+#
+#        avg_confidence = get_avg_confidence_overall(perspective, practicePathingMethod)
+#        avg_accuracy = get_avg_accuracy_overall(perspective, practicePathingMethod)
+#        avg_reversals = get_average_num_reversals_overall(perspective, practicePathingMethod)
+#        print("===Method " + method + ", Perspective " + perspective +"====")
+#        print("Average Confidence Score for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_confidence))
+#        print("Average Accuracy Score for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_accuracy))
+#        print("Average Reversals for perspective " + perspective + " and pathing method " + practicePathingMethod + ": " + str(avg_reversals))
 
 '''
- END: DATA PROCESSING
+ END: GATHER OVERALL AVERAGES
+'''
+
+
+'''
+ START: GROUP ALL AVERAGES
+'''
+
+RETURN_LIST_OF_AVERAGES = True
+
+omniscient_0_conf = get_avg_confidence_overall('0', 'Omn')
+omniscient_0_acc = get_avg_accuracy_overall('0', 'Omn')
+omniscient_0_rev = get_average_num_reversals_overall('0', 'Omn')
+
+omniscient_1_conf = get_avg_confidence_overall('1', 'Omn')
+omniscient_1_acc = get_avg_accuracy_overall('1', 'Omn')
+omniscient_1_rev = get_average_num_reversals_overall('1', 'Omn')
+
+omniscient_conf = omniscient_0_conf + omniscient_1_conf
+omniscient_acc = omniscient_0_acc + omniscient_1_acc
+omniscient_rev = omniscient_0_rev + omniscient_1_rev
+
+
+multiple_0_conf = get_avg_confidence_overall('0', 'M')
+multiple_0_acc = get_avg_accuracy_overall('0', 'M')
+multiple_0_rev = get_average_num_reversals_overall('0', 'M')
+
+multiple_1_conf = get_avg_confidence_overall('1', 'M')
+multiple_1_acc = get_avg_accuracy_overall('1', 'M')
+multiple_1_rev = get_average_num_reversals_overall('1', 'M')
+
+multiple_conf = multiple_0_conf + multiple_1_conf
+multiple_acc = multiple_0_acc + multiple_1_acc
+multiple_rev = multiple_0_rev + multiple_1_rev
+
+singleA_0_conf = get_avg_confidence_overall('0', 'SA')
+singleA_0_acc = get_avg_accuracy_overall('0', 'SA')
+singleA_0_rev = get_average_num_reversals_overall('0', 'SA')
+
+singleA_1_conf = get_avg_confidence_overall('1', 'SA')
+singleA_1_acc = get_avg_accuracy_overall('1', 'SA')
+singleA_1_rev = get_average_num_reversals_overall('1', 'SA')
+
+singleA_conf = singleA_0_conf + singleA_1_conf
+singleA_acc = singleA_0_acc + singleA_1_acc
+singleA_rev = singleA_0_rev + singleA_1_rev
+
+singleB_0_conf = get_avg_confidence_overall('0', 'SB')
+singleB_0_acc = get_avg_accuracy_overall('0', 'SB')
+singleB_0_rev = get_average_num_reversals_overall('0', 'SB')
+
+singleB_1_conf = get_avg_confidence_overall('1', 'SB')
+singleB_1_acc = get_avg_accuracy_overall('1', 'SB')
+singleB_1_rev = get_average_num_reversals_overall('1', 'SB')
+
+singleB_conf = singleB_0_conf + singleB_1_conf
+singleB_acc = singleB_0_acc + singleB_1_acc
+singleB_rev = singleB_0_rev + singleB_1_rev
+
+#Construct the data frames 
+columns = ['omniscient', 'multiple', 'singleA', 'singleB']
+accuracies_list = [omniscient_acc, multiple_acc, singleA_acc, singleB_acc]
+#print("accuracies list: ", accuracies_list)
+confidences_list = [omniscient_conf, multiple_conf, singleA_conf, singleB_conf]
+#print("confidences list: ", accuracies_list)
+revs_list = [omniscient_rev, multiple_rev, singleA_rev, singleB_rev]
+#print("revs list: ", accuracies_list)
+
+accuracy_df = pd.DataFrame (accuracies_list).transpose()
+accuracy_df.columns = columns
+print(accuracy_df)
+
+confidence_df = pd.DataFrame (confidences_list).transpose()
+confidence_df.columns = columns
+print(confidence_df) 
+
+reversals_df = pd.DataFrame (revs_list).transpose()
+reversals_df.columns = columns
+print(reversals_df)
+
+##boxplots
+accuracy_df.boxplot()
+plt.title("Accuracy Across Pathing Method")
+plt.show()
+confidence_df.boxplot()
+plt.title("Confidence Across Pathing Method")
+plt.show()
+reversals_df.boxplot()
+plt.title("Reversals Across Pathing Method")
+plt.show()
+
+'''
+ END: GROUP ALL AVERAGES
+'''
+
+
+'''
+ START: ANOVA
+'''
+
+
+
+'''
+ END: ANOVA
 '''

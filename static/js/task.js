@@ -66,11 +66,11 @@ var LegibilityExperiment = function() {
             //TODO: Remove stimulus name and correct answer, update rest of code
             //TODO: add IV, goal table, and viewpoint to the trial recorded data
         
-            //[Stimulus name, trial type, video location, independent variable (Omn, S,or M), goal table (1 = Same Side Before, 2 = Viewpoint, 3 = Same Side After, 4 = Across, 5 = Perpendicular), viewpoint (forward, backward, side)]
-			["Other Viewpoint 1", "show_video", "otherRobotV1.mp4", "Omn", "3", "forward"],
-            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "Omn", "3", "side"],
-			["Mine Viewpoint 1", "show_video", "mineRobotV1.mp4", "Omn", "2", "forward"],
-            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "side"],
+            //[Stimulus name, trial type, video location, independent variable (Omn, S,or M), goal table (1 = Before Table, 2 = Pespective Table, 3 = Across, 4 = Perpendicular), viewpoint (A or B)]
+			["Other Viewpoint 1", "show_video", "otherRobotV1.mp4", "M", "3", "A"],
+            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "SA", "3", "A"],
+			["Mine Viewpoint 1", "show_video", "mineRobotV1.mp4", "SB", "2", "A"],
+            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "A"],
             //["Mine Viewpoint 1 Human", "mine", "show_video", "CorrectTable.mp4"],
             //["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"],
             ["Bot Check Trial", "bot_check", "n/a", "n/a"]
