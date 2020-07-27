@@ -61,25 +61,32 @@ var LegibilityExperiment = function() {
     
     var sliderEvents =[]; //to collect the (moveTime, myTableConfValue) events for each stimulus
 
-	// Altering the Stimuli
-	var stims = [
-            //TODO: Remove stimulus name and correct answer, update rest of code
-            //TODO: add IV, goal table, and viewpoint to the trial recorded data
-        
+	// Set the Stimuli
+	var stims; 
+    
+    //Set which stimuli they see based on their condition
+    if (mycondition == '0'){ //Perspective A
+        console.log("Condition 0!");
+        stims = [
             //[Stimulus name, trial type, video location, independent variable (Omn, S,or M), goal table (1 = Before Table, 2 = Pespective Table, 3 = Across, 4 = Perpendicular), viewpoint (A or B)]
 			["Other Viewpoint 1", "show_video", "otherRobotV1.mp4", "M", "3", "A"],
-            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "SA", "3", "A"],
+//            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "SA", "3", "B"],
 			["Mine Viewpoint 1", "show_video", "mineRobotV1.mp4", "SB", "2", "A"],
-            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "A"],
-            //["Mine Viewpoint 1 Human", "mine", "show_video", "CorrectTable.mp4"],
-            //["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"],
+//            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "B"],
             ["Bot Check Trial", "bot_check", "n/a", "n/a"]
 		];
-    
-    if mycondition == '0':
-        console.log("Condition is 0! yay")
-    else:
-        console.log("Condition is 1! yay")
+    }
+    else{ //Perspective B
+        console.log("Condition 1!");
+        stims = [
+            //[Stimulus name, trial type, video location, independent variable (Omn, S,or M), goal table (1 = Before Table, 2 = Pespective Table, 3 = Across, 4 = Perpendicular), viewpoint (A or B)]
+//			["Other Viewpoint 1", "show_video", "otherRobotV1.mp4", "M", "3", "A"],
+            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "SA", "3", "B"],
+//			["Mine Viewpoint 1", "show_video", "mineRobotV1.mp4", "SB", "2", "A"],
+            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "B"],
+            ["Bot Check Trial", "bot_check", "n/a", "n/a"]
+		];
+    }
 
 
 	stims = _.shuffle(stims); //returns a randomized array
