@@ -34,20 +34,19 @@ rows = s.execute()
 
 data = []
 
-#For use in excluding participants:
-    ##status codes of subjects who completed experiment
-    #statuses = [3,4,5,7]
-    ## if you have workers you wish to exclude, add them here
-    #exclude = []
-    #for row in rows:
-    #    # only use subjects who completed experiment and aren't excluded
-    #    if row['status'] in statuses and row['uniqueid'] not in exclude:
-    #        data.append(row[data_column_name])
+#status codes of subjects who completed experiment
+statuses = [3,4,5,7]
+# if you have workers you wish to exclude, add them here
+exclude = []
+for row in rows:
+    # only use subjects who completed experiment and aren't excluded
+    if row['status'] in statuses and row['uniqueid'] not in exclude:
+        data.append(row[data_column_name])
     
 #For use when not excluding participants:
-for row in rows:
-        data.append(row[data_column_name])
-        #ids.append((row['assignmentID'], condition))
+#for row in rows:
+#        data.append(row[data_column_name])
+#        #ids.append((row['assignmentID'], condition))
         
 
 # Now we have all participant datastrings in a list.

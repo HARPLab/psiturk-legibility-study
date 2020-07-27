@@ -1,18 +1,71 @@
-<div id="container-questionnaire">
+<div id="container-questionnaire" class="class1">
     <h1>Task Complete</h1>
 
     <hr />
 
-    <p>You are finished!  Thank you for your contributions to science. </p>
+    <p>You are finished!  Thank you for your contributions to science. Please answer the following questions before submitting.</p>
 
   
     <div class="instructions well">
 
         <form id="postquiz" action="debrief" method="post">
   
+            <h3>Demographics</h3>
+            
             <div class="row question">
                 <div class="col-md-8">
-                    On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the task:
+                    On a scale of 1-5 (where 5 is the most experience), please rate how much experience you have with robotics:
+                </div>
+                <div class="col-md-4">
+                    <select id="experience" name="experience">
+                        <option value="5" >5 - Lots of experience</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1 - No experience</option>
+                        <option value="0" SELECTED></option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row question">
+                <div class="col-md-8">
+                    What is your gender?
+                </div>
+                <div class="col-md-4">
+                    <select id="gender" name="gender">
+                        <option value="Male" >Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Nonbinary">Nonbinary</option>
+                        <option value="Other">Prefer to self-describe below
+                        <option value="NoReport">Prefer not to say</option>
+                        <option value="Unselected" SELECTED></option>
+                    </select>
+                </div>
+            </div>
+            <div class="row question">
+                <div class="col-md-8">If you would prefer to self-describe your gender, please do so here: </div> 
+               <div class="col-md-4"><input type="text" id="selfdescribegender"></div>
+            </div>
+            
+            <div class="row question">
+                <div class="col-md-8">What is your age?</div> 
+               
+                <div class="col-md-4"><input type="text" id="age"></div>
+            </div>
+            
+            <div class="row question">
+                <div class="col-md-8">Where are you currently located?</div> 
+               
+                <div class="col-md-4">City: <input type="text" id="city"></div>
+                <div class="col-md-4">State (if applicable): <input type="text" id="state"></div>
+                <div class="col-md-4">Country: <input type="text" id="country"></div>
+            </div>
+            
+            <h3>Task Questions</h3>
+            <div class="row question">
+                <div class="col-md-8">
+                    On a scale of 1-10 (where 10 is the most difficult), please rate how <b>difficult</b> you found the task:
                 </div>
                 <div class="col-md-4">
                     <select id="difficulty" name="difficulty">
@@ -31,34 +84,55 @@
                 </div>
             </div>
             
+            
             <div class="row question">
-                 <div class="col-md-8">
-                   Do you have a significant amount of experience with robotics?
+                <div class="col-md-8">
+                    On a scale of 1-10 (where 10 is the most similar to your expectations), please rate how well the robot's motion <b>matched your expectations</b>:
                 </div>
-
                 <div class="col-md-4">
-                    <div class="col-md-4">
-                    <select id="experience" name="experience">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
+                    <select id="expectations" name="expectations">
+                        <option value="10">10 - Extremely similar</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5" >5 - Moderately similar</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1 - Did not match at all</option>
                         <option value="0" SELECTED></option>
                     </select>
-                    </div>
                 </div>
+            </div>
+            
+            
+            
+            <div class="row question">
+                <div class="col-md-8">Was there anything that made the robot's motion hard to understand?</div> 
+               
+                <div class="col-md-4"><input type="text" id="hardtounderstand" size="120"></div>
+            </div>
+            
+            
+             <div class="row question">
+                <div class="col-md-8">Are there any changes that would have made the robot's motion easier to understand?</div> 
+               
+                <div class="col-md-4"><input type="text" id="easiertounderstand" size="120"></div>
             </div>
             
             <div class="row question">
                 <div class="col-md-8">Do you have any other comments about the task?</div> 
                
-                <div class="col-md-4"><input type="text" id="postcomments"></div>
+                <div class="col-md-4"><input type="text" id="othercomments" size="120"></div>
             </div>
+            
 
 
         </form>
     </div>
 
     <hr />
-
 
     <div class="instructionsnav">
         <div class="row">
@@ -76,3 +150,12 @@
 
 
 </div>
+
+
+<style>
+    .class1{
+        padding-top: 20px;
+        padding-left: 30px;
+    
+    }
+</style>

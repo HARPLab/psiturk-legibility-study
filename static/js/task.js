@@ -75,6 +75,11 @@ var LegibilityExperiment = function() {
             //["Other Viewpoint 1 Human", "mine", "show_video", "IncorrectTable.mp4"],
             ["Bot Check Trial", "bot_check", "n/a", "n/a"]
 		];
+    
+    if mycondition == '0':
+        console.log("Condition is 0! yay")
+    else:
+        console.log("Condition is 1! yay")
 
 
 	stims = _.shuffle(stims); //returns a randomized array
@@ -328,16 +333,55 @@ var Questionnaire = function() {
         var selectDifficulty = document.getElementById("difficulty");
         var difficultyScore = selectDifficulty.options[selectDifficulty.selectedIndex];
         
-        //Robotics Experience
+        //Expectation Score
+        var selectExpectation = document.getElementById("expectations");
+        var expectationScore = selectExpectation.options[selectExpectation.selectedIndex];
+        
+        //Did anything make it hard to understand?
+        var hardToUnderstand = document.getElementById("hardtounderstand");
+        var hardToUnderstandResponse = hardToUnderstand.value;
+        
+        //Any changes that could have made it easier to understand?
+        var easierToUnderstand = document.getElementById("easiertounderstand");
+        var easierToUnderstandResponse = easierToUnderstand.value;
+        
+        //Other comments?
+        var otherComments = document.getElementById("othercomments");
+        var freeResponse = otherComments.value;
+        
+        //Experience
         var selectExperience = document.getElementById("experience");
-        var roboticsExperience = selectExperience.options[selectExperience.selectedIndex]; 
+        var experienceScore = selectExperience.options[selectExperience.selectedIndex];
         
-        //Free Response
-        var freeResponseQuestion = document.getElementById("postcomments");
-        var freeResponse = freeResponseQuestion.value;
+        //Gender
+        var selectGender = document.getElementById("gender");
+        var gender = selectGender.options[selectGender.selectedIndex];
         
-        psiTurk.recordTrialData({'phase':'postquestionnaire', 'difficultyScore':difficultyScore.text, 'hasRoboticsExperience':roboticsExperience.text,
-        'additionalComments':freeResponse});
+        //Self describe gender
+        var selfDescribeGender = document.getElementById("selfdescribegender");
+        var selfGender = selfDescribeGender.value;
+        
+        //Age
+        var describeAge = document.getElementById("age");
+        var age = describeAge.value;
+        
+        //Country
+        var describeCountry = document.getElementById("country");
+        var country = describeCountry.value;
+        
+        
+        psiTurk.recordTrialData({'phase':'POSTQUESTIONAIRE',
+                                 'difficultyScore':difficultyScore.text, 
+                                 'expectationScore':expectationScore.text, 
+                                 'hardToUnderstand':hardToUnderstandResponse,
+                                 'easierToUnderstand':easierToUnderstandResponse,
+                                 'otherComments':freeResponse,
+                                 'experienceScore':experienceScore.text, 
+                                 'gender':gender.text,
+                                 'selfDescribedGender':selfGender,
+                                 'age':age,
+                                 'country':country
+                                });
         
 //		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
 
