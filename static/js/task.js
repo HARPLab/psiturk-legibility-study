@@ -372,6 +372,15 @@ var Questionnaire = function() {
         var describeAge = document.getElementById("age");
         var age = describeAge.value;
         
+        
+        //City
+        var describeCity = document.getElementById("city");
+        var city = describeCity.value;
+        
+        //State
+        var describeState = document.getElementById("state");
+        var state = describeState.value;
+        
         //Country
         var describeCountry = document.getElementById("country");
         var country = describeCountry.value;
@@ -387,6 +396,8 @@ var Questionnaire = function() {
                                  'gender':gender.text,
                                  'selfDescribedGender':selfGender,
                                  'age':age,
+                                 'city':city,
+                                 'state':state,
                                  'country':country
                                 });
         

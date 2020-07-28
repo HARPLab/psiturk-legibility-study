@@ -55,12 +55,20 @@
             </div>
             
             <div class="row question">
-                <div class="col-md-8">Where are you currently located?</div> 
-               
+                <div class="col-md-5">Where are you currently located?</div> 
                 <div class="col-md-4">City: <input type="text" id="city"></div>
-                <div class="col-md-4">State (if applicable): <input type="text" id="state"></div>
+            </div>
+            
+            <div class="row question">
+                <div class="col-md-5"></div> 
+                 <div class="col-md-4">State (if applicable): <input type="text" id="state"></div>
+            </div>
+            
+            <div class="row question">
+                <div class="col-md-5"></div> 
                 <div class="col-md-4">Country: <input type="text" id="country"></div>
             </div>
+        
             
             <h3>Task Questions</h3>
             <div class="row question">
@@ -109,22 +117,22 @@
             
             
             <div class="row question">
-                <div class="col-md-8">Was there anything that made the robot's motion hard to understand?</div> 
+                <div class="col-md-6">Was there anything that made the robot's motion hard to understand?</div> 
                
-                <div class="col-md-4"><input type="text" id="hardtounderstand" size="120"></div>
+                <div class="col-md-6"><input type="text" id="hardtounderstand" size="80" class="textbox"></div>
             </div>
             
             
              <div class="row question">
-                <div class="col-md-8">Are there any changes that would have made the robot's motion easier to understand?</div> 
+                <div class="col-md-6">Are there any changes that would have made the robot's motion easier to understand?</div> 
                
-                <div class="col-md-4"><input type="text" id="easiertounderstand" size="120"></div>
+                <div class="col-md-6"><input type="text" id="easiertounderstand" size="80" class="textbox"></div>
             </div>
             
             <div class="row question">
-                <div class="col-md-8">Do you have any other comments about the task?</div> 
+                <div class="col-md-6">Do you have any other comments about the task?</div> 
                
-                <div class="col-md-4"><input type="text" id="othercomments" size="120"></div>
+                <div class="col-md-6"><input type="text" id="othercomments" size="80" class="textbox"></div>
             </div>
             
 
@@ -157,5 +165,9 @@
         padding-top: 20px;
         padding-left: 30px;
     
+    }
+    
+    .textbox{
+        height: 70px;
     }
 </style>
