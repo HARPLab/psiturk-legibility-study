@@ -37,7 +37,7 @@ var instructionPages = [ // add as a list as many pages as you like
    // "instructions/instruct-ready.html"
 ];
 
-
+console.log("in task.js THE CONDITION IS " + mycondition);
 /********************
 * HTML manipulation
 *
@@ -52,38 +52,57 @@ var instructionPages = [ // add as a list as many pages as you like
 * Legibility Task       *
 ********************/
 var LegibilityExperiment = function() {
-
-    //reaction time is tracked by setting start time once the stimulus has been loaded into the page with show_stimulus() and setting end time once a key response has been registered. rt is calculated by subtracting the start and end time. 
-//	var stimStartTime, // time word is presented
-//	    stimPauseTime,
-//        stimPlayTime,
-//        listening = false;
     
     var sliderEvents =[]; //to collect the (moveTime, myTableConfValue) events for each stimulus
 
 	// Set the Stimuli
 	var stims; 
+    console.log("in task.js THE CONDITION IS " + mycondition);
     
     //Set which stimuli they see based on their condition
-    if (mycondition == '0'){ //Perspective A
+    if (mycondition == '0'){ //Condition 0 = Perspective A = Back to door = Closer to Robot
         console.log("Condition 0!");
         stims = [
-            //[Stimulus name, trial type, video location, independent variable (Omn, S,or M), goal table (1 = Before Table, 2 = Pespective Table, 3 = Across, 4 = Perpendicular), viewpoint (A or B)]
-			["Other Viewpoint 1", "show_video", "otherRobotV1.mp4", "M", "3", "A"],
-//            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "SA", "3", "B"],
-			["Mine Viewpoint 1", "show_video", "mineRobotV1.mp4", "SB", "2", "A"],
-//            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "B"],
+            //[Stimulus nickname, trial type, stimulus video name (form: pathingMethod_goalTable_Pperspective), pathing method (Omn, SA, SB,or M), goal table (0 = Before Table, 1 = Pespective Table, 2 = Across, 3 = Perpendicular), viewpoint (A or B)]
+			["Goal: 0, PathMethod: SA", "show_video", "A_0_PA.mp4", "SA", "0", "A"],
+            ["Goal: 1, PathMethod: SA", "show_video", "A_1_PA.mp4", "SA", "1", "A"],
+            ["Goal: 2, PathMethod: SA", "show_video", "A_2_PA.mp4", "SA", "2", "A"],
+            ["Goal: 3, PathMethod: SA", "show_video", "A_3_PA.mp4", "SA", "3", "A"],
+            ["Goal: 0, PathMethod: SB", "show_video", "B_0_PA.mp4", "SB", "0", "A"],
+            ["Goal: 1, PathMethod: SB", "show_video", "B_1_PA.mp4", "SB", "1", "A"],
+            ["Goal: 2, PathMethod: SB", "show_video", "B_2_PA.mp4", "SB", "2", "A"],
+            ["Goal: 3, PathMethod: SB", "show_video", "B_3_PA.mp4", "SB", "3", "A"],
+            ["Goal: 0, PathMethod: M", "show_video", "Multi_0_PA.mp4", "M", "0", "A"],
+            ["Goal: 1, PathMethod: M", "show_video", "Multi_1_PA.mp4", "M", "1", "A"],
+            ["Goal: 2, PathMethod: M", "show_video", "Multi_2_PA.mp4", "M", "2", "A"],
+            ["Goal: 3, PathMethod: M", "show_video", "Multi_3_PA.mp4", "M", "3", "A"],
+            ["Goal: 0, PathMethod: Omn", "show_video", "Omn_0_PA.mp4", "Omn", "0", "A"],
+            ["Goal: 1, PathMethod: Omn", "show_video", "Omn_1_PA.mp4", "Omn", "1", "A"],
+            ["Goal: 2, PathMethod: Omn", "show_video", "Omn_2_PA.mp4", "Omn", "2", "A"],
+            ["Goal: 3, PathMethod: Omn", "show_video", "Omn_3_PA.mp4", "Omn", "3", "A"],
             ["Bot Check Trial", "bot_check", "n/a", "n/a"]
 		];
     }
-    else{ //Perspective B
+    else{ //Condition 1 = Perspective B = Facing door = Farther from Robot
         console.log("Condition 1!");
         stims = [
-            //[Stimulus name, trial type, video location, independent variable (Omn, S,or M), goal table (1 = Before Table, 2 = Pespective Table, 3 = Across, 4 = Perpendicular), viewpoint (A or B)]
-//			["Other Viewpoint 1", "show_video", "otherRobotV1.mp4", "M", "3", "A"],
-            ["Other Viewpoint 2", "show_video", "otherRobotV2.mp4", "SA", "3", "B"],
-//			["Mine Viewpoint 1", "show_video", "mineRobotV1.mp4", "SB", "2", "A"],
-            ["Mine Viewpoint 2", "show_video", "mineRobotV2.mp4", "Omn", "2", "B"],
+            //[Stimulus nickname, trial type, stimulus video name, pathing method (Omn, SA, SB,or M), goal table (0 = Before Table, 1 = Pespective Table, 2 = Across, 3 = Perpendicular), viewpoint (A or B)]
+            ["Goal: 0, PathMethod: SA", "show_video", "A_0_PB.mp4", "SA", "0", "B"],
+            ["Goal: 1, PathMethod: SA", "show_video", "A_1_PB.mp4", "SA", "1", "B"],
+            ["Goal: 2, PathMethod: SA", "show_video", "A_2_PB.mp4", "SA", "2", "B"],
+            ["Goal: 3, PathMethod: SA", "show_video", "A_3_PB.mp4", "SA", "3", "B"],
+            ["Goal: 0, PathMethod: SB", "show_video", "B_0_PB.mp4", "SB", "0", "B"],
+            ["Goal: 1, PathMethod: SB", "show_video", "B_1_PB.mp4", "SB", "1", "B"],
+            ["Goal: 2, PathMethod: SB", "show_video", "B_2_PB.mp4", "SB", "2", "B"],
+            ["Goal: 3, PathMethod: SB", "show_video", "B_3_PB.mp4", "SB", "3", "B"],
+            ["Goal: 0, PathMethod: M", "show_video", "Multi_0_PB.mp4", "M", "0", "B"],
+            ["Goal: 1, PathMethod: M", "show_video", "Multi_1_PB.mp4", "M", "1", "B"],
+            ["Goal: 2, PathMethod: M", "show_video", "Multi_2_PB.mp4", "M", "2", "B"],
+            ["Goal: 3, PathMethod: M", "show_video", "Multi_3_PB.mp4", "M", "3", "B"],
+            ["Goal: 0, PathMethod: Omn", "show_video", "Omn_0_PB.mp4", "Omn", "0", "B"],
+            ["Goal: 1, PathMethod: Omn", "show_video", "Omn_1_PB.mp4", "Omn", "1", "B"],
+            ["Goal: 2, PathMethod: Omn", "show_video", "Omn_2_PB.mp4", "Omn", "2", "B"],
+            ["Goal: 3, PathMethod: Omn", "show_video", "Omn_3_PB.mp4", "Omn", "3", "B"],   
             ["Bot Check Trial", "bot_check", "n/a", "n/a"]
 		];
     }
@@ -211,7 +230,7 @@ var LegibilityExperiment = function() {
 	var show_stimulus = function(videoPath) {
         //DEBUG: console.log("showing stim: " + videoPath);
         d3.select("#video-container").append("video").attr("id", "vid").attr("width","620").attr("height", "540");
-		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/videos/" + videoPath + "")
+		d3.select("#vid").append("source").attr("id", "sourceComp").attr("src", "../static/stimuli_videos/" + videoPath + "")
 	};
 
     
@@ -335,32 +354,16 @@ var Questionnaire = function() {
 	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
 
 	record_responses = function() {
-
-        //Difficulty Score
-        var selectDifficulty = document.getElementById("difficulty");
-        var difficultyScore = selectDifficulty.options[selectDifficulty.selectedIndex];
         
-        //Expectation Score
-        var selectExpectation = document.getElementById("expectations");
-        var expectationScore = selectExpectation.options[selectExpectation.selectedIndex];
-        
-        //Did anything make it hard to understand?
-        var hardToUnderstand = document.getElementById("hardtounderstand");
-        var hardToUnderstandResponse = hardToUnderstand.value;
-        
-        //Any changes that could have made it easier to understand?
-        var easierToUnderstand = document.getElementById("easiertounderstand");
-        var easierToUnderstandResponse = easierToUnderstand.value;
-        
-        //Other comments?
-        var otherComments = document.getElementById("othercomments");
-        var freeResponse = otherComments.value;
+        //Name; Pilot
+        var nameQ = document.getElementById("name");
+        var nameResp = nameQ.value;
         
         //Experience
         var selectExperience = document.getElementById("experience");
         var experienceScore = selectExperience.options[selectExperience.selectedIndex];
         
-        //Gender
+         //Gender
         var selectGender = document.getElementById("gender");
         var gender = selectGender.options[selectGender.selectedIndex];
         
@@ -368,37 +371,52 @@ var Questionnaire = function() {
         var selfDescribeGender = document.getElementById("selfdescribegender");
         var selfGender = selfDescribeGender.value;
         
-        //Age
-        var describeAge = document.getElementById("age");
-        var age = describeAge.value;
+         //Age
+        var ageQuest = document.getElementById("age");
+        var age = ageQuest.value;
         
+        //Difficulty Score
+        var selectDifficulty = document.getElementById("difficulty");
+        var difficultyScore = selectDifficulty.options[selectDifficulty.selectedIndex];
         
-        //City
-        var describeCity = document.getElementById("city");
-        var city = describeCity.value;
+        //Was there anything that made the robot's motion hard to understand?
+        var hardToUnderstand = document.getElementById("hardtounderstand");
+        var hardToUnderstandResponse = hardToUnderstand.value;
         
-        //State
-        var describeState = document.getElementById("state");
-        var state = describeState.value;
+        //Are there any changes that would have made the robot's motion easier to understand?
+        var easierToUnderstand = document.getElementById("easiertounderstand");
+        var easierToUnderstandResponse = easierToUnderstand.value;
         
-        //Country
-        var describeCountry = document.getElementById("country");
-        var country = describeCountry.value;
+        //Was there anything that the robot did that surprised you?
+        var surpriseQuest = document.getElementById("surprise");
+        var surprise = surpriseQuest.value;
+    
+        //What were your expectations of how a robot would move in the restaurant?
+        var expectationsQuest = document.getElementById("expectations");
+        var expectationResp = expectationsQuest.value;
         
+        //Were there any differences between how the robot moved and how a human waiter might move?
+        var differencesQuest = document.getElementById("differences");
+        var differences = differencesQuest.value;
+        
+        //Other comments?
+        var otherComments = document.getElementById("othercomments");
+        var freeResponse = otherComments.value;
+    
         
         psiTurk.recordTrialData({'phase':'POSTQUESTIONAIRE',
-                                 'difficultyScore':difficultyScore.text, 
-                                 'expectationScore':expectationScore.text, 
-                                 'hardToUnderstand':hardToUnderstandResponse,
-                                 'easierToUnderstand':easierToUnderstandResponse,
-                                 'otherComments':freeResponse,
+                                 'name':nameResp,
                                  'experienceScore':experienceScore.text, 
                                  'gender':gender.text,
                                  'selfDescribedGender':selfGender,
                                  'age':age,
-                                 'city':city,
-                                 'state':state,
-                                 'country':country
+                                 'difficultyScore':difficultyScore.text, 
+                                 'hardToUnderstand':hardToUnderstandResponse,
+                                 'easierToUnderstand':easierToUnderstandResponse,
+                                 'surprised':surprise,
+                                 'expectations':expectationResp,
+                                 'differences':differences,
+                                 'otherComments':freeResponse
                                 });
         
 //		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});

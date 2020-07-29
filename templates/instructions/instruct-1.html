@@ -5,7 +5,9 @@
 	<hr />
 
 	<div class="instructions well">
-
+        <h2 id = "condition">
+            
+        </h2>
 	    <p>
             A video clip of a robot server in a restaraunt will play. 
         </p>
@@ -19,7 +21,7 @@
            Once the video has finished playing, the trial will automatically end and you will be prompted to press a button to continue to the next trial. 
         </p>
         <p>
-            You will start with a tutorial that will familiarize you with the layout of the restaraunt and the mechanics of the slider that you will use to report your confidence level. Press 'Next' to begin this tutorial.
+            You will start with a tutorial that will familiarize you with the layout of the restaurant and the mechanics of the slider that you will use to report your confidence level. Press 'Next' to begin this tutorial.
         </p>
 
 	    <script type="text/javascript">
@@ -47,3 +49,8 @@
     </div>
 
 </div>
+
+<script>
+var mycondition = condition;
+d3.select("#condition").html("You are in condition " + mycondition + ". Please note this value. After you finish the experiment once, please do it again in the other condition. If you get the same condition, just quit and try again. Thank you ")
+</script>

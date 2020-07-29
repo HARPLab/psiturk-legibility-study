@@ -13,6 +13,11 @@
             <h3>Demographics</h3>
             
             <div class="row question">
+                <div class="col-md-8">What is your name (pilot testing only)? </div> 
+               <div class="col-md-4"><input type="text" id="name"></div>
+            </div>
+            
+            <div class="row question">
                 <div class="col-md-8">
                     On a scale of 1-5 (where 5 is the most experience), please rate how much experience you have with robotics:
                 </div>
@@ -53,21 +58,6 @@
                
                 <div class="col-md-4"><input type="text" id="age"></div>
             </div>
-            
-            <div class="row question">
-                <div class="col-md-5">Where are you currently located?</div> 
-                <div class="col-md-4">City: <input type="text" id="city"></div>
-            </div>
-            
-            <div class="row question">
-                <div class="col-md-5"></div> 
-                 <div class="col-md-4">State (if applicable): <input type="text" id="state"></div>
-            </div>
-            
-            <div class="row question">
-                <div class="col-md-5"></div> 
-                <div class="col-md-4">Country: <input type="text" id="country"></div>
-            </div>
         
             
             <h3>Task Questions</h3>
@@ -92,30 +82,6 @@
                 </div>
             </div>
             
-            
-            <div class="row question">
-                <div class="col-md-8">
-                    On a scale of 1-10 (where 10 is the most similar to your expectations), please rate how well the robot's motion <b>matched your expectations</b>:
-                </div>
-                <div class="col-md-4">
-                    <select id="expectations" name="expectations">
-                        <option value="10">10 - Extremely similar</option>
-                        <option value="9">9</option>
-                        <option value="8">8</option>
-                        <option value="7">7</option>
-                        <option value="6">6</option>
-                        <option value="5" >5 - Moderately similar</option>
-                        <option value="4">4</option>
-                        <option value="3">3</option>
-                        <option value="2">2</option>
-                        <option value="1">1 - Did not match at all</option>
-                        <option value="0" SELECTED></option>
-                    </select>
-                </div>
-            </div>
-            
-            
-            
             <div class="row question">
                 <div class="col-md-6">Was there anything that made the robot's motion hard to understand?</div> 
                
@@ -128,6 +94,27 @@
                
                 <div class="col-md-6"><input type="text" id="easiertounderstand" size="80" class="textbox"></div>
             </div>
+            
+            <div class="row question">
+                <div class="col-md-6">Was there anything that the robot did that surprised you?</div> 
+               
+                <div class="col-md-6"><input type="text" id="surprise" size="80" class="textbox"></div>
+            </div>
+            
+            
+            <div class="row question">
+                <div class="col-md-6">What were your expectations of how a robot would move in the restaurant?</div> 
+               
+                <div class="col-md-6"><input type="text" id="expectations" size="80" class="textbox"></div>
+            </div>
+            
+        
+            <div class="row question">
+                <div class="col-md-6">Were there any differences between how the robot moved and how a human waiter might move?</div> 
+               
+                <div class="col-md-6"><input type="text" id="differences" size="80" class="textbox"></div>
+            </div>
+            
             
             <div class="row question">
                 <div class="col-md-6">Do you have any other comments about the task?</div> 
