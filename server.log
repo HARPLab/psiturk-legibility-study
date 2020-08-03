@@ -8495,3 +8495,4 @@ sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) database is locked
 [2020-07-26 17:04:48 -0400] [30223] [CRITICAL] WORKER TIMEOUT (pid:30310)
 [2020-07-26 17:04:48 -0400] [30223] [CRITICAL] WORKER TIMEOUT (pid:30311)
 [2020-07-26 17:04:48 -0400] [30223] [CRITICAL] WORKER TIMEOUT (pid:30312)
+2020-07-29 16:33:40,442 browser_type_not_allowed (1014) {'assignmentId': [u'debuglJtEW'], 'workerId': [u'debug0NzYw'], 'hitId': [u'debugvVIO4'], 'mode': [u'debug']}
