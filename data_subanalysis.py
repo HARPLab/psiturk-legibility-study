@@ -145,7 +145,7 @@ for item in genderList:
 Given a perspective and pathing method, returns a list of data frames.
 Each data frame represents a trial that used that pathing method from a participant in that perspective condition.
 '''
-def get_dfs(perspective, pathing_method):
+def get_dfs(perspective, pathing_method, goal=None):
     #only get the dataframes that match this perspective and pathing method
     frames =[]
     for ind in df_trials.index:
@@ -153,9 +153,14 @@ def get_dfs(perspective, pathing_method):
         pid = row['uniqueid']
         pathMethod = row['IV']
         condition = row['condition']
-    
-        if ((int(condition) == int(perspective)) and (pathing_method == pathMethod)):
-            frames.append(row)
+
+        # TODO switch to condition assembly style statements
+        if goal != None:
+            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod) and (pathing_method == pathMethod)):
+                frames.append(row)
+        else:
+            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod)):
+                frames.append(row)
     return frames
 
 '''
@@ -166,8 +171,8 @@ If the goal of the trial is not the participant's table, a 90 confidence value m
 
 In other words, whatever the goal was, a 100 confidence score represents that they were 100% confidence and their guess was correct. 
 '''
-def get_avg_confidence_overall(perspective, pathing_method):
-    frames = get_dfs(perspective, pathing_method)
+def get_avg_confidence_overall(perspective, pathing_method, goal):
+    frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
     conf_averages = []
@@ -200,8 +205,8 @@ Accuracy value can be calculated as
     Option 2: (total time correct + 0.5 * total time unsure) / total time
 Which option is being used is determined by the flag ACCURACY_OPTION
 '''
-def get_avg_accuracy_overall(perspective, pathing_method):
-    frames = get_dfs(perspective, pathing_method)
+def get_avg_accuracy_overall(perspective, pathing_method, goal):
+    frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
     acc_averages = []
@@ -232,8 +237,8 @@ Given a perspective and pathing method, returns the average number of reversals 
 
 Also can collect the times the reversals happens, but does not do anything with them as of now
 '''
-def get_average_num_reversals_overall(perspective, pathing_method):
-    frames = get_dfs(perspective, pathing_method)
+def get_average_num_reversals_overall(perspective, pathing_method, goal):
+    frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
     total_reversals = 0
@@ -538,6 +543,8 @@ def get_slider_events(trial_row):
 
 perspectives = ['0','1']
 pathingMethods = ['Omn', "M", "SA", "SB"]
+goals = [0, 1, 2, 3]
+
 #
 #practicePathingMethod = 'Omn'
 #
@@ -554,6 +561,17 @@ for method in pathingMethods:
 
 # Gather data for some useful subsections of stuff
 
+
+for method in pathingMethods:
+    for perspective in perspectives:
+        for goal in goals:
+            avg_confidence = get_avg_confidence_overall(perspective, method, goal)
+            avg_accuracy = get_avg_accuracy_overall(perspective, method, goal)
+            avg_reversals = get_average_num_reversals_overall(perspective, method, goal)
+            print("===Goal" + goal + "Method " + method + ", Perspective " + perspective +"====")
+            print("GOAL " + goal + " -> Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
+            print("GOAL " + goal + " -> Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
+            print("GOAL " + goal + " -> Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
 
 '''
  END: GATHER OVERALL AVERAGES
@@ -690,6 +708,9 @@ reversals_df.boxplot()
 plt.title("Reversals Across Pathing Method")
 plt.show()
 
+# TODO
+for goal in goals:
+    pass
 
 '''
  END: GROUP ALL AVERAGES
