@@ -157,7 +157,7 @@ def get_dfs(perspective, pathing_method, goal=None):
 
         # TODO switch to condition assembly style statements
         if goal != None:
-            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod) and (goal == goaltable)):
+            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod) and (int(goal) == int(goaltable))):
                 frames.append(row)
         else:
             if ((int(condition) == int(perspective)) and (pathing_method == pathMethod)):
@@ -562,7 +562,7 @@ goals = [0, 1, 2, 3]
 goal_names = ["BEFORE", "ME", "ACROSS", "PAST"]
 
 all_frames = get_all_frames()
-df.to_csv('pilot_data.zip')  
+df.to_csv('pilot_data.csv')  
 
 #
 #practicePathingMethod = 'Omn'
