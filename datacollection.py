@@ -647,7 +647,7 @@ avgr = sum(singleB_rev)/len(singleB_rev)
 print("reversal avg: " + str(avgr))
 
 #Construct the data frames 
-columns = ['Omn', 'M', 'SA', 'SB']
+columns = ['No perspectives', 'Both', 'Persp. A', 'Persp. B']
 accuracies_list = [omniscient_acc, multiple_acc, singleA_acc, singleB_acc]
 #print("accuracies list: ", accuracies_list)
 confidences_list = [omniscient_conf, multiple_conf, singleA_conf, singleB_conf]
@@ -672,19 +672,19 @@ reversals_df.columns = columns
 ##Accuracy
 print("BOXPLOTS")
 accuracy_df.boxplot()
-plt.title("Accuracy Across Pathing Method")
+plt.title("Accuracy Across Path Planning Method")
 plt.show()
 
 #
 ##Confidence
 confidence_df.boxplot()
-plt.title("Confidence Across Pathing Method")
+plt.title("Continuous Correctness Across Path Planning Method")
 plt.show()
 #
 #
 ##Reversals
 reversals_df.boxplot()
-plt.title("Reversals Across Pathing Method")
+plt.title("Reversals Across Path Planning Method")
 plt.show()
 
 
