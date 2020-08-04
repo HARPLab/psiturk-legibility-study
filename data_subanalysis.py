@@ -732,19 +732,22 @@ plt.show()
 for goal in goals:
     goal_label = goal_names[goal]
 
-    goal_acc_df = pd.DataFrame(accuracies_list)[int(goaltable) == int(goal)].transpose()
+    goal_acc_df = pd.DataFrame(accuracies_list)
+    goal_acc_df = goal_acc_df.loc[goal_acc_df['goaltable'] == int(goal)].transpose()
     goal_acc_df.columns = columns
     goal_acc_df.boxplot()
     plt.title("Accuracy: " + goal_label)
     plt.savefig("acc-" + goal_label + ".png")
 
-    goal_conf_df = pd.DataFrame(confidences_list)[int(goaltable) == int(goal)].transpose()
+    goal_conf_df = pd.DataFrame(confidences_list)
+    goal_conf_df = goal_conf_df[goal_conf_df['goaltable'] == int(goal)].transpose()
     goal_conf_df.columns = columns
     goal_conf_df.boxplot()
     plt.title("Confidence: " + goal_label)
     plt.savefig("conf-" + goal_label + ".png")
 
-    goal_rev_df = pd.DataFrame(revs_list)[int(goaltable) == int(goal)].transpose()
+    goal_rev_df = pd.DataFrame(revs_list)
+    goal_rev_df = goal_rev_df[goal_rev_df['goaltable'] == int(goal)].transpose()
     goal_rev_df.columns = columns
     goal_rev_df.boxplot()
     plt.title("Reversals: " + goal_label)
