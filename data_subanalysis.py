@@ -171,7 +171,7 @@ If the goal of the trial is not the participant's table, a 90 confidence value m
 
 In other words, whatever the goal was, a 100 confidence score represents that they were 100% confidence and their guess was correct. 
 '''
-def get_avg_confidence_overall(perspective, pathing_method, goal):
+def get_avg_confidence_overall(perspective, pathing_method, goal=None):
     frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
@@ -205,7 +205,7 @@ Accuracy value can be calculated as
     Option 2: (total time correct + 0.5 * total time unsure) / total time
 Which option is being used is determined by the flag ACCURACY_OPTION
 '''
-def get_avg_accuracy_overall(perspective, pathing_method, goal):
+def get_avg_accuracy_overall(perspective, pathing_method, goal=None):
     frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
@@ -237,7 +237,7 @@ Given a perspective and pathing method, returns the average number of reversals 
 
 Also can collect the times the reversals happens, but does not do anything with them as of now
 '''
-def get_average_num_reversals_overall(perspective, pathing_method, goal):
+def get_average_num_reversals_overall(perspective, pathing_method, goal=None):
     frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
