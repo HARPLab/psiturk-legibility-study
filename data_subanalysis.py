@@ -566,26 +566,31 @@ for method in pathingMethods:
         avg_confidence = get_avg_confidence_overall(perspective, method)
         avg_accuracy = get_avg_accuracy_overall(perspective, method)
         avg_reversals = get_average_num_reversals_overall(perspective, method)
+
         print("===Method " + method + ", Perspective " + perspective +"====")
         print("Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
         print("Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
         print("Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
+        print()
 
 # Gather data for some useful subsections of stuff
 
+print()
 lookup_table = {}
-
+goals = [2]
 for method in pathingMethods:
     for perspective in perspectives:
         for goal in goals:
             avg_confidence = get_avg_confidence_overall(perspective, method, goal)
             avg_accuracy = get_avg_accuracy_overall(perspective, method, goal)
             avg_reversals = get_average_num_reversals_overall(perspective, method, goal)
-            print("===Goal" + goal_names[goal] + "Method " + method + ", Perspective " + perspective +"====")
+
+            print("===Goal" + goal_names[goal] + ", Method " + method + ", Perspective " + perspective +"====")
             print("GOAL " + goal_names[goal] + " -> Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
             print("GOAL " + goal_names[goal] + " -> Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
             print("GOAL " + goal_names[goal] + " -> Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
             lookup_table[(method, perspective, goal)] = (avg_confidence, avg_accuracy, avg_reversals)
+            print()
 
 '''
  END: GATHER OVERALL AVERAGES
