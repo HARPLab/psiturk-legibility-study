@@ -544,6 +544,7 @@ def get_slider_events(trial_row):
 perspectives = ['0','1']
 pathingMethods = ['Omn', "M", "SA", "SB"]
 goals = [0, 1, 2, 3]
+goal_names = ["BEFORE", "ME", "ACROSS", "PAST"]
 
 #
 #practicePathingMethod = 'Omn'
@@ -568,10 +569,10 @@ for method in pathingMethods:
             avg_confidence = get_avg_confidence_overall(perspective, method, goal)
             avg_accuracy = get_avg_accuracy_overall(perspective, method, goal)
             avg_reversals = get_average_num_reversals_overall(perspective, method, goal)
-            print("===Goal" + goal + "Method " + method + ", Perspective " + perspective +"====")
-            print("GOAL " + goal + " -> Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
-            print("GOAL " + goal + " -> Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
-            print("GOAL " + goal + " -> Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
+            print("===Goal" + goal_names[goal] + "Method " + method + ", Perspective " + perspective +"====")
+            print("GOAL " + goal_names[goal] + " -> Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
+            print("GOAL " + goal_names[goal] + " -> Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
+            print("GOAL " + goal_names[goal] + " -> Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
 
 '''
  END: GATHER OVERALL AVERAGES
