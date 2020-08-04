@@ -177,6 +177,7 @@ def get_all_frames():
 
         frames.append(row)
     return frames
+
 '''
 Given a perspective and pathing method, returns the average confidence value from all trials that used that perspective and pathing method
 
@@ -559,6 +560,9 @@ perspectives = ['0','1']
 pathingMethods = ['Omn', "M", "SA", "SB"]
 goals = [0, 1, 2, 3]
 goal_names = ["BEFORE", "ME", "ACROSS", "PAST"]
+
+all_frames = get_all_frames()
+df.to_csv('pilot_data.zip')  
 
 #
 #practicePathingMethod = 'Omn'
