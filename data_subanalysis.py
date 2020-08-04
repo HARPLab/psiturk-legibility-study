@@ -153,16 +153,30 @@ def get_dfs(perspective, pathing_method, goal=None):
         pid = row['uniqueid']
         pathMethod = row['IV']
         condition = row['condition']
+        goaltable = row['goaltable']
 
         # TODO switch to condition assembly style statements
         if goal != None:
-            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod) and (pathing_method == pathMethod)):
+            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod) and (goal == goaltable)):
                 frames.append(row)
         else:
             if ((int(condition) == int(perspective)) and (pathing_method == pathMethod)):
                 frames.append(row)
     return frames
 
+
+def get_all_frames():
+    #only get the dataframes that match this perspective and pathing method
+    frames =[]
+    for ind in df_trials.index:
+        row = df_trials.loc[ind]
+        pid = row['uniqueid']
+        pathMethod = row['IV']
+        condition = row['condition']
+        goaltable = row['goaltable']
+
+        frames.append(row)
+    return frames
 '''
 Given a perspective and pathing method, returns the average confidence value from all trials that used that perspective and pathing method
 
@@ -562,6 +576,7 @@ for method in pathingMethods:
 
 # Gather data for some useful subsections of stuff
 
+lookup_table = {}
 
 for method in pathingMethods:
     for perspective in perspectives:
@@ -573,10 +588,15 @@ for method in pathingMethods:
             print("GOAL " + goal_names[goal] + " -> Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
             print("GOAL " + goal_names[goal] + " -> Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
             print("GOAL " + goal_names[goal] + " -> Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
+            lookup_table[(method, perspective, goal)] = (avg_confidence, avg_accuracy, avg_reversals)
 
 '''
  END: GATHER OVERALL AVERAGES
 '''
+# Look at data for "ACROSS"
+
+by_method = []
+headers = ["Accuracy", "Confidence", "Reversals"]
 
 
 '''
