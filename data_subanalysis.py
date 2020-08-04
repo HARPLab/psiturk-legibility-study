@@ -18,6 +18,10 @@ UNSURE_WINDOW = 5 #the amount of values around 50 that counts as people being un
 REVERSALS_WINDOW = 5 #the amount of values around 50 that don't count as the participant changing their mind. 0 = participants change their mind every time the confidence value passes 50
 RETURN_LIST_OF_AVERAGES = False #if you want the list of all the trials' averages (or total list of reversals) rather than the overall averages
 UNSUPPORTED_BROWSER_ERROR = False #for the pilot study, some people used unsupported browsers. If that's the case, this will trigger and adapt the rest of it
+
+FLAG_EXPORT_TO_CSV = True
+
+
 '''
  START: BOILER PLATE SET UP
 '''
@@ -101,7 +105,11 @@ df_postquestionnaire = df[['uniqueid', 'phase', 'name','experienceScore', 'gende
 df_postquestionnaire = df_postquestionnaire[df_postquestionnaire['phase'] == 'POSTQUESTIONAIRE']
 #print("============Postquestionnaire questions==================")
 #print(df_postquestionnaire)
-
+if FLAG_EXPORT_TO_CSV:
+    df_trials.to_csv("pilot-trials.csv")
+    df_botcheck.to_csv("pilot-botcheck.csv")
+    df_postquestionnaire.to_csv("pilot-postquestionnaire.csv")
+    df.to_csv("pilot-all-frames.csv")
 
 #Get the set of uniqueids (no duplicates)
 idSet = set()
@@ -128,6 +136,7 @@ for ind in df_postquestionnaire.index: #how to iterate through rows
 print("Genders: ")
 for item in genderList:
     print(item)
+
 
 '''
  END: TABLE DEFINITIONS
@@ -164,19 +173,6 @@ def get_dfs(perspective, pathing_method, goal=None):
                 frames.append(row)
     return frames
 
-
-def get_all_frames():
-    #only get the dataframes that match this perspective and pathing method
-    frames =[]
-    for ind in df_trials.index:
-        row = df_trials.loc[ind]
-        pid = row['uniqueid']
-        pathMethod = row['IV']
-        condition = row['condition']
-        goaltable = row['goaltable']
-
-        frames.append(row)
-    return frames
 
 '''
 Given a perspective and pathing method, returns the average confidence value from all trials that used that perspective and pathing method
@@ -561,9 +557,6 @@ pathingMethods = ['Omn', "M", "SA", "SB"]
 goals = [0, 1, 2, 3]
 goal_names = ["BEFORE", "ME", "ACROSS", "PAST"]
 
-all_frames = get_all_frames()
-df.to_csv('pilot_data.csv')  
-
 #
 #practicePathingMethod = 'Omn'
 #
@@ -695,6 +688,7 @@ print("reversal avg: " + str(avgr))
 #Construct the data frames 
 columns = ['Omn', 'M', 'SA', 'SB']
 accuracies_list = [omniscient_acc, multiple_acc, singleA_acc, singleB_acc]
+print(accuracies_list)
 #print("accuracies list: ", accuracies_list)
 confidences_list = [omniscient_conf, multiple_conf, singleA_conf, singleB_conf]
 #print("confidences list: ", accuracies_list)
@@ -702,6 +696,7 @@ revs_list = [omniscient_rev, multiple_rev, singleA_rev, singleB_rev]
 #print("revs list: ", accuracies_list)
 
 accuracy_df = pd.DataFrame (accuracies_list).transpose()
+print(accuracy_df)
 accuracy_df.columns = columns
 #print(accuracy_df)
 
@@ -735,7 +730,26 @@ plt.show()
 
 # TODO
 for goal in goals:
-    pass
+    goal_label = goal_names[goal]
+
+    goal_acc_df = pd.DataFrame(accuracies_list)[int(goaltable) == int(goal)].transpose()
+    goal_acc_df.columns = columns
+    goal_acc_df.boxplot()
+    plt.title("Accuracy: " + goal_label)
+    plt.savefig("acc-" + goal_label + ".png")
+
+    goal_conf_df = pd.DataFrame(confidences_list)[int(goaltable) == int(goal)].transpose()
+    goal_conf_df.columns = columns
+    goal_conf_df.boxplot()
+    plt.title("Confidence: " + goal_label)
+    plt.savefig("conf-" + goal_label + ".png")
+
+    goal_rev_df = pd.DataFrame(revs_list)[int(goaltable) == int(goal)].transpose()
+    goal_rev_df.columns = columns
+    goal_rev_df.boxplot()
+    plt.title("Reversals: " + goal_label)
+    plt.savefig("rev-" + goal_label + ".png")
+
 
 '''
  END: GROUP ALL AVERAGES
@@ -749,6 +763,7 @@ for goal in goals:
 
 #stats f_oneway function takes the groups as inputs and returns F and P-values
 print("=====ANOVA, Accuracy:=====")
+print(accuracy_df)
 fvalue_acc, pvalue_acc = stats.f_oneway(accuracy_df['Omn'], accuracy_df['M'], accuracy_df['SA'], accuracy_df['SB'])
 print("fvalue,pvalue: " + str(fvalue_acc) + ',' +str(pvalue_acc))
 
