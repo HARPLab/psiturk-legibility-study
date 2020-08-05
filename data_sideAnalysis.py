@@ -533,16 +533,19 @@ def get_slider_events(trial_row):
 def get_raw_confidence_at_timestamp(trial_row, time):
     
     slider_events = get_slider_events(trial_row)
-    print(slider_events)
-    
+    print("Slider events we are looking at: " + str(slider_events))
+   
+    print("the time we're looking for is: " + str(time))    
+
     last_event_time = slider_events[len(slider_events)-1][0]
+    first_event_time = slider_events[0][0]
     if time > last_event_time:
-        print("The time is out of range")
-        return None
+        #print("The time is out of range")
+        return slider_events[len(slider_events)-1][1]
         #return slider_events[len(slider_events)-1][1] #last_event_value
-    elif time < 1:
-        print("The time is out of range")
-        return None
+    elif time < first_event_time:
+        #print("The time is out of range")
+        return 50 #no move yet, so return 50
         #return slider_events[0][1] #first_event_value
     
     #Find the most recently recorded confidence value to the time provided.
@@ -562,7 +565,7 @@ def get_raw_confidence_at_timestamp(trial_row, time):
 #Confidence Value = Confidence that the server is approaching the PARTICIPANT's table
 #Just the raw confidence value
 #If a time is given that is greater than the final timestamp or less than one, returns None
-def average_raw_confidence_trial(perspective, pathing_method, goaltable):
+def average_raw_confidence_trial(perspective, pathing_method, viewpoint, goaltable):
     
     dfs = get_dfs(perspective, pathing_method)
     
@@ -572,36 +575,37 @@ def average_raw_confidence_trial(perspective, pathing_method, goaltable):
         if (goaltable == frame['goaltable'] and viewpoint == frame['viewpoint']):
             filter_dfs.append(frame)
     
-    for x in filter_dfs:
-        print('video length in the filtered one: ', x['videoduraction'])
-    
-#    slider_events = get_slider_events(trial_row)
-#    print(slider_events)
-#    
-#    last_event_time = slider_events[len(slider_events)-1][0]
-#    if time > last_event_time:
-#        print("The time is out of range")
-#        return None
-#        #return slider_events[len(slider_events)-1][1] #last_event_value
-#    elif time < 1:
-#        print("The time is out of range")
-#        return None
-#        #return slider_events[0][1] #first_event_value
-#    
-#    #Find the most recently recorded confidence value to the time provided.
-#    i = 0
-#    for event in slider_events:
-#        timestamp = event[0] #both are ints
-#        value = event[1]
-#        if timestamp == time: #found the exact timestamp, report the value
-#            return value
-#        elif timestamp > time: #found a greater timestamp, report the previous value
-#            return slider_events[i-1][1]
-#        else: #otherwise, continue
-#            i = i+1
-#            continue 
+    vidLength = 1000* filter_dfs[0]['videoduraction'] #round to the closest milliseconds
+    vidLength = round(vidLength)
+    vidLength = int(vidLength)
+ 
+    timestamps = []
+    for i in range(0,vidLength,50): #average every 50 milliseconds
+        timestamps.append(i)
+    timestamps.append(vidLength - 1)
+#    print("timestamps", timestamps)
 
-            
+    timestamps = timestamps[1:]
+    avg_values = []
+
+    for time in timestamps:
+  #      print("*************NEW TIME STAMP: " + str(time) + " ****************")
+        values_at_time = []
+        for f_frame in filter_dfs:
+             temp = get_raw_confidence_at_timestamp(f_frame, time)
+ #            print("Temp is "+ str(temp))
+             if temp != None:
+                 values_at_time.append(temp)
+   #     print("values_at_time: ", values_at_time)
+        avg_at_time = sum(values_at_time)/len(values_at_time)
+    #    print("avg at time: ", avg_at_time)
+        avg_values.append(avg_at_time)
+
+    print("avg values: ", avg_values)
+    return((timestamps, avg_values))
+
+
+
 #Given a trial and uniqueid, plot the participants's confidence values over time
 def plot_confidence_all_participants(goaltable, pathing_method, perspective):
     events = average_raw_confidence_trial(perspective, pathing_method, goaltable)
@@ -650,4 +654,4 @@ START: graph generation
 #
 #plot_confidence_one_participant(dfs[0])
 
-average_raw_confidence_trial('0', 'Omn', '1')
+average_raw_confidence_trial('0', 'M', 'A', '1')
