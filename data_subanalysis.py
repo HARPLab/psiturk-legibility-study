@@ -736,6 +736,7 @@ plt.show()
 # TODO
 for goal in goals:
     goal_label = goal_names[goal]
+    print(goal_acc_df.keys())
 
     goal_acc_df = pd.DataFrame(accuracies_list)
     goal_acc_df = goal_acc_df.loc[goal_acc_df['goaltable'] == int(goal)].transpose()
