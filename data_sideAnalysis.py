@@ -533,9 +533,9 @@ def get_slider_events(trial_row):
 def get_raw_confidence_at_timestamp(trial_row, time):
     
     slider_events = get_slider_events(trial_row)
-    print("Slider events we are looking at: " + str(slider_events))
+#    print("Slider events we are looking at: " + str(slider_events))
    
-    print("the time we're looking for is: " + str(time))    
+ #   print("the time we're looking for is: " + str(time))    
 
     last_event_time = slider_events[len(slider_events)-1][0]
     first_event_time = slider_events[0][0]
