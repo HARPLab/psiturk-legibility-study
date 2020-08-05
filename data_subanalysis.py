@@ -19,8 +19,8 @@ REVERSALS_WINDOW = 5 #the amount of values around 50 that don't count as the par
 RETURN_LIST_OF_AVERAGES = False #if you want the list of all the trials' averages (or total list of reversals) rather than the overall averages
 UNSUPPORTED_BROWSER_ERROR = False #for the pilot study, some people used unsupported browsers. If that's the case, this will trigger and adapt the rest of it
 
-FLAG_EXPORT_TO_CSV = True
-
+FLAG_EXPORT = True
+FLAG_LOCAL_VERSION = True
 
 '''
  START: BOILER PLATE SET UP
@@ -31,55 +31,61 @@ table_name = dbkeys.table_name
 data_column_name = dbkeys.data_column_name
 
 
-# boilerplace sqlalchemy setup
-engine = create_engine(db_url)
-metadata = MetaData()
-metadata.bind = engine
-table = Table(table_name, metadata, autoload=True)
-# make a query and loop through
-s = table.select()
-rows = s.execute()
+if not FLAG_LOCAL_VERSION:
+    # boilerplace sqlalchemy setup
+    engine = create_engine(db_url)
+    metadata = MetaData()
+    metadata.bind = engine
+    table = Table(table_name, metadata, autoload=True)
+    # make a query and loop through
+    s = table.select()
+    rows = s.execute()
 
 
-data = []
+    data = []
 
-#status codes of subjects who completed experiment
-statuses = [3,4,5,7]
-# if you have workers you wish to exclude, add them here
-exclude = []
-for row in rows:
-    # only use subjects who completed experiment and aren't excluded
-    if row['status'] in statuses and row['uniqueid'] not in exclude:
-        data.append(row[data_column_name])
-    
-#For use when not excluding participants:
-#for row in rows:
-#        data.append(row[data_column_name])
-#        #ids.append((row['assignmentID'], condition))
+    #status codes of subjects who completed experiment
+    statuses = [3,4,5,7]
+    # if you have workers you wish to exclude, add them here
+    exclude = []
+    for row in rows:
+        # only use subjects who completed experiment and aren't excluded
+        if row['status'] in statuses and row['uniqueid'] not in exclude:
+            data.append(row[data_column_name])
+        
+    #For use when not excluding participants:
+    #for row in rows:
+    #        data.append(row[data_column_name])
+    #        #ids.append((row['assignmentID'], condition))
+            
+
+    # Now we have all participant datastrings in a list.
+    # Let's make it a bit easier to work with:
+
+    # parse each participant's datastring as json object
+    # and take the 'data' sub-object
+    data = [json.loads(part)['data'] for part in data]
+
+    # insert uniqueid field into trialdata in case it wasn't added
+    # in experiment:
+    for part in data:
+        for record in part:
+            record['trialdata']['uniqueid'] = record['uniqueid']
         
 
-# Now we have all participant datastrings in a list.
-# Let's make it a bit easier to work with:
+        
+    # flatten nested list so we just have a list of the trialdata recorded
+    # each time psiturk.recordTrialData(trialdata) was called.
+    data = [record['trialdata'] for part in data for record in part]
 
-# parse each participant's datastring as json object
-# and take the 'data' sub-object
-data = [json.loads(part)['data'] for part in data]
+    # Put all subjects' trial data into a dataframe object from the
+    # 'pandas' python library: one option among many for analysis
+    df = pd.DataFrame(data)
 
-# insert uniqueid field into trialdata in case it wasn't added
-# in experiment:
-for part in data:
-    for record in part:
-        record['trialdata']['uniqueid'] = record['uniqueid']
-    
+else:
+    df = pd.read_json('pilot-all-frames.json')
 
-    
-# flatten nested list so we just have a list of the trialdata recorded
-# each time psiturk.recordTrialData(trialdata) was called.
-data = [record['trialdata'] for part in data for record in part]
 
-# Put all subjects' trial data into a dataframe object from the
-# 'pandas' python library: one option among many for analysis
-df = pd.DataFrame(data)
 '''
  END: BOILER PLATE SET UP
 '''
@@ -105,11 +111,11 @@ df_postquestionnaire = df[['uniqueid', 'phase', 'name','experienceScore', 'gende
 df_postquestionnaire = df_postquestionnaire[df_postquestionnaire['phase'] == 'POSTQUESTIONAIRE']
 #print("============Postquestionnaire questions==================")
 #print(df_postquestionnaire)
-if FLAG_EXPORT_TO_CSV:
-    df_trials.to_csv("pilot-trials.csv")
-    df_botcheck.to_csv("pilot-botcheck.csv")
-    df_postquestionnaire.to_csv("pilot-postquestionnaire.csv")
-    df.to_csv("pilot-all-frames.csv")
+if FLAG_EXPORT:
+    df_trials.to_json("pilot-trials.json")
+    df_botcheck.to_json("pilot-botcheck.json")
+    df_postquestionnaire.to_json("pilot-postquestionnaire.json")
+    df.to_json("pilot-all-frames.json")
 
 #Get the set of uniqueids (no duplicates)
 idSet = set()
@@ -497,6 +503,7 @@ def get_lengths_and_values(slider_events, video_length):
         next_event = slider_events[i+1]
         timestamp = event[0]
         next_timestamp = next_event[0]
+
         if timestamp == None: #believe this is another odd case of someone using a non-supported browser, but not sure 
             UNSUPPORTED_BROWSER_ERROR = True
             #print("None timestamp")
