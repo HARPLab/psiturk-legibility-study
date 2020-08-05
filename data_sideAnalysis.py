@@ -526,255 +526,50 @@ def get_slider_events(trial_row):
 
     
 
+#Confidence Value = Confidence that the server is approaching the PARTICIPANT's table
+#Just the raw confidence value
+#If a time is given that is greater than the final timestamp or less than one, returns None
+def get_raw_confidence_at_timestamp(trial_row, time):
+    
+    slider_events = get_slider_events(trial_row)
+    print(slider_events)
+    
+    last_event_time = slider_events[len(slider_events)-1][0]
+    if time > last_event_time:
+        print("The time is out of range")
+        return None
+        #return slider_events[len(slider_events)-1][1] #last_event_value
+    elif time < 1:
+        print("The time is out of range")
+        return None
+        #return slider_events[0][1] #first_event_value
+    
+    #Find the most recently recorded confidence value to the time provided.
+    i = 0
+    for event in slider_events:
+        timestamp = event[0] #both are ints
+        value = event[1]
+        if timestamp == time: #found the exact timestamp, report the value
+            return value
+        elif timestamp > time: #found a greater timestamp, report the previous value
+            return slider_events[i-1][1]
+        else: #otherwise, continue
+            i = i+1
+            continue 
+
+#   
+#Given a trial and uniqueid, plot the participants's confidence values over time
+def plot_confidence_one_participant(trial_row):
+    events = separate_timestamps_and_values(trial_row)
+    times = events[0]
+    values = events[1]
+    
+    plt.plot(times, values)
+    plt.xlabel('Timestamp (milliseconds)')
+    plt.ylabel('Confidence Value "My Table"')
+    plt.title('Confidence Values for Participant ' + pid + ' During Trial ' + str(trial))
+    plt.show()
     
 '''
  END: METHOD DECLARATIONS
-'''
-
-
-'''
- START: GATHER OVERALL AVERAGES
-'''
-
-perspectives = ['0','1']
-pathingMethods = ['Omn', "M", "SA", "SB"]
-#
-#practicePathingMethod = 'Omn'
-#
-for method in pathingMethods:
-    for perspective in perspectives:
-
-        avg_confidence = get_avg_confidence_overall(perspective, method)
-        avg_accuracy = get_avg_accuracy_overall(perspective, method)
-        avg_reversals = get_average_num_reversals_overall(perspective, method)
-        print("===Method " + method + ", Perspective " + perspective +"====")
-        print("Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
-        print("Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
-        print("Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
-
-# Gather data for some useful subsections of stuff
-
-
-'''
- END: GATHER OVERALL AVERAGES
-'''
-
-
-'''
- START: GROUP ALL AVERAGES
-'''
-
-RETURN_LIST_OF_AVERAGES = True
-
-omniscient_0_conf = get_avg_confidence_overall('0', 'Omn')
-omniscient_0_acc = get_avg_accuracy_overall('0', 'Omn')
-omniscient_0_rev = get_average_num_reversals_overall('0', 'Omn')
-
-omniscient_1_conf = get_avg_confidence_overall('1', 'Omn')
-omniscient_1_acc = get_avg_accuracy_overall('1', 'Omn')
-omniscient_1_rev = get_average_num_reversals_overall('1', 'Omn')
-
-omniscient_conf = omniscient_0_conf + omniscient_1_conf
-omniscient_acc = omniscient_0_acc + omniscient_1_acc
-omniscient_rev = omniscient_0_rev + omniscient_1_rev
-
-print("OMN ALL============")
-avg = sum(omniscient_acc)/len(omniscient_acc)
-print("accuracy avg: " + str(avg))
-avgc = sum(omniscient_conf)/len(omniscient_conf)
-print("conf avg: " + str(avgc))
-avgr = sum(omniscient_rev)/len(omniscient_rev)
-print("reversal avg: " + str(avgr))
-
-
-multiple_0_conf = get_avg_confidence_overall('0', 'M')
-multiple_0_acc = get_avg_accuracy_overall('0', 'M')
-multiple_0_rev = get_average_num_reversals_overall('0', 'M')
-
-multiple_1_conf = get_avg_confidence_overall('1', 'M')
-multiple_1_acc = get_avg_accuracy_overall('1', 'M')
-multiple_1_rev = get_average_num_reversals_overall('1', 'M')
-
-multiple_conf = multiple_0_conf + multiple_1_conf
-multiple_acc = multiple_0_acc + multiple_1_acc
-multiple_rev = multiple_0_rev + multiple_1_rev
-
-
-print("Mult ALL============")
-avg = sum(multiple_acc)/len(multiple_acc)
-print("accuracy avg: " + str(avg))
-avgc = sum(multiple_conf)/len(multiple_conf)
-print("conf avg: " + str(avgc))
-avgr = sum(multiple_rev)/len(multiple_rev)
-print("reversal avg: " + str(avgr))
-
-singleA_0_conf = get_avg_confidence_overall('0', 'SA')
-singleA_0_acc = get_avg_accuracy_overall('0', 'SA')
-singleA_0_rev = get_average_num_reversals_overall('0', 'SA')
-
-singleA_1_conf = get_avg_confidence_overall('1', 'SA')
-singleA_1_acc = get_avg_accuracy_overall('1', 'SA')
-singleA_1_rev = get_average_num_reversals_overall('1', 'SA')
-
-singleA_conf = singleA_0_conf + singleA_1_conf
-singleA_acc = singleA_0_acc + singleA_1_acc
-singleA_rev = singleA_0_rev + singleA_1_rev
-
-print("SA ALL============")
-avg = sum(singleA_acc)/len(singleA_acc)
-print("accuracy avg: " + str(avg))
-avgc = sum(singleA_conf)/len(singleA_conf)
-print("conf avg: " + str(avgc))
-avgr = sum(singleA_rev)/len(singleA_rev)
-print("reversal avg: " + str(avgr))
-
-
-singleB_0_conf = get_avg_confidence_overall('0', 'SB')
-singleB_0_acc = get_avg_accuracy_overall('0', 'SB')
-singleB_0_rev = get_average_num_reversals_overall('0', 'SB')
-
-singleB_1_conf = get_avg_confidence_overall('1', 'SB')
-singleB_1_acc = get_avg_accuracy_overall('1', 'SB')
-singleB_1_rev = get_average_num_reversals_overall('1', 'SB')
-
-singleB_conf = singleB_0_conf + singleB_1_conf
-singleB_acc = singleB_0_acc + singleB_1_acc
-singleB_rev = singleB_0_rev + singleB_1_rev
-
-print("SB ALL============")
-avg = sum(singleB_acc)/len(singleB_acc)
-print("accuracy avg: " + str(avg))
-avgc = sum(singleB_conf)/len(singleB_conf)
-print("conf avg: " + str(avgc))
-avgr = sum(singleB_rev)/len(singleB_rev)
-print("reversal avg: " + str(avgr))
-
-#Construct the data frames 
-columns = ['Omn', 'M', 'SA', 'SB']
-accuracies_list = [omniscient_acc, multiple_acc, singleA_acc, singleB_acc]
-#print("accuracies list: ", accuracies_list)
-confidences_list = [omniscient_conf, multiple_conf, singleA_conf, singleB_conf]
-#print("confidences list: ", accuracies_list)
-revs_list = [omniscient_rev, multiple_rev, singleA_rev, singleB_rev]
-#print("revs list: ", accuracies_list)
-
-accuracy_df = pd.DataFrame (accuracies_list).transpose()
-accuracy_df.columns = columns
-#print(accuracy_df)
-
-confidence_df = pd.DataFrame (confidences_list).transpose()
-confidence_df.columns = columns
-#print(confidence_df) 
-
-reversals_df = pd.DataFrame (revs_list).transpose()
-reversals_df.columns = columns
-#print(reversals_df)
-
-#Boxplots 
-
-##Accuracy
-print("BOXPLOTS")
-accuracy_df.boxplot()
-plt.title("Accuracy Across Path Planning Method")
-plt.show()
-
-#
-##Confidence
-confidence_df.boxplot()
-plt.title("Continuous Correctness Across Path Planning Method")
-plt.show()
-#
-#
-##Reversals
-reversals_df.boxplot()
-plt.title("Reversals Across Path Planning Method")
-plt.show()
-
-
-'''
- END: GROUP ALL AVERAGES
-'''
-
-
-'''
- START: ANOVA
-'''
-#Accuracy
-
-#stats f_oneway function takes the groups as inputs and returns F and P-values
-print("=====ANOVA, Accuracy:=====")
-fvalue_acc, pvalue_acc = stats.f_oneway(accuracy_df['Omn'], accuracy_df['M'], accuracy_df['SA'], accuracy_df['SB'])
-print("fvalue,pvalue: " + str(fvalue_acc) + ',' +str(pvalue_acc))
-
-#get ANOVA table 
-accuracy_df_melt = pd.melt(accuracy_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
-accuracy_df_melt.columns = ['index', 'treatments', 'value']
-# Ordinary Least Squares (OLS) model
-model_acc = ols.ols('value ~ C(treatments)', data=accuracy_df_melt).fit()
-anova_table_acc = sm.stats.anova_lm(model_acc,typ=2)
-print(anova_table_acc)
-print("==========================")
-
-
-#Confidence
-print("=====ANOVA, Confidence:=====")
-fvalue_conf, pvalue_conf = stats.f_oneway(confidence_df['Omn'], confidence_df['M'], confidence_df['SA'], confidence_df['SB'])
-print("fvalue,pvalue: " + str(fvalue_conf) + ',' +str(pvalue_conf))
-
-
-#get ANOVA table 
-confidence_df_melt = pd.melt(confidence_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
-confidence_df_melt.columns = ['index', 'treatments', 'value']
-# Ordinary Least Squares (OLS) model
-model_conf = ols.ols('value ~ C(treatments)', data=confidence_df_melt).fit()
-anova_table_conf = sm.stats.anova_lm(model_conf,typ=2)
-print(anova_table_conf)
-print("=============================")
-
-
-#Reversals
-print("=====ANOVA, Reversals:=====")
-fvalue_rev, pvalue_rev = stats.f_oneway(reversals_df['Omn'], reversals_df['M'], reversals_df['SA'], reversals_df['SB'])
-print("fvalue,pvalue: " + str(fvalue_rev) + ',' +str(pvalue_rev))
-
-
-#get ANOVA table 
-reversals_df_melt = pd.melt(reversals_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
-reversals_df_melt.columns = ['index', 'treatments', 'value']
-# Ordinary Least Squares (OLS) model
-model_rev = ols.ols('value ~ C(treatments)', data=reversals_df_melt).fit()
-anova_table_rev = sm.stats.anova_lm(model_rev,typ=2)
-print(anova_table_rev)
-print("=============================")
-'''
- END: ANOVA
-'''
-
-'''
- START: TUKEY HSD TEST
-'''
-
-#Accuracy
-print("=======Tukey Test, Accuracy:========")
-#perform multiple pairwise comparison (Turkey HSD)
-m_comp_acc = pairwise_tukey(data=accuracy_df_melt, dv='value', between='treatments')
-print(m_comp_acc)
-print("======================")
-
-#Confidence
-print("=======Tukey Test, Confidence:========")
-#perform multiple pairwise comparison (Turkey HSD)
-m_comp_conf = pairwise_tukey(data=confidence_df_melt, dv='value', between='treatments')
-print(m_comp_conf)
-print("======================")
-
-#Reversals
-print("=======Tukey Test, Reversals:========")
-#perform multiple pairwise comparison (Turkey HSD)
-m_comp_rev = pairwise_tukey(data=reversals_df_melt, dv='value', between='treatments')
-print(m_comp_rev)
-print("======================")
-
-'''
- END: TUKEY HSD TEST
 '''
