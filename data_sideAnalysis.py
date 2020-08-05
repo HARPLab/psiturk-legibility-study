@@ -566,11 +566,14 @@ def average_raw_confidence_trial(perspective, pathing_method, goaltable):
     
     dfs = get_dfs(perspective, pathing_method)
     
+    filter_dfs = []
+    
     for frame in dfs:
-        print("goaltable: ", frame['goaltable'])
-        print("viewpoint: ", frame['viewpoint'])
-        print("id: ", frame['uniqueid'])
-        print("vidlength: ", frame['videoduraction'])
+        if (goaltable == frame['goaltable'] and viewpoint == frame['viewpoint']):
+            filter_dfs.append(frame)
+    
+    for x in filter_dfs:
+        print('video length in the filtered one: ', x['videoduraction'])
     
 #    slider_events = get_slider_events(trial_row)
 #    print(slider_events)
