@@ -110,24 +110,25 @@ for ind in df.index: #how to iterate through rows
     idSet.add(row['uniqueid'])
     
 print("Number of participants: " + str(len(idSet)))
+print("participants: "+ str(idSet))
 
-ageList = []
-for ind in df_postquestionnaire.index: #how to iterate through rows
-    row = df_postquestionnaire.loc[ind]
-    ageList.append(row['age'])
+#ageList = []
+#for ind in df_postquestionnaire.index: #how to iterate through rows
+#    row = df_postquestionnaire.loc[ind]
+#    ageList.append(row['age'])
 
-print("Ages: ")
-for item in ageList:
-    print(item)
+#print("Ages: ")
+#for item in ageList:
+#    print(item)
 
-genderList = []
-for ind in df_postquestionnaire.index: #how to iterate through rows
-    row = df_postquestionnaire.loc[ind]
-    genderList.append(row['gender'])
+#genderList = []
+#for ind in df_postquestionnaire.index: #how to iterate through rows
+#    row = df_postquestionnaire.loc[ind]
+#    genderList.append(row['gender'])
 
-print("Genders: ")
-for item in genderList:
-    print(item)
+#print("Genders: ")
+#for item in genderList:
+#    print(item)
 
 '''
  END: TABLE DEFINITIONS
@@ -557,19 +558,96 @@ def get_raw_confidence_at_timestamp(trial_row, time):
             i = i+1
             continue 
 
-#   
-#Given a trial and uniqueid, plot the participants's confidence values over time
-def plot_confidence_one_participant(trial_row):
-    events = separate_timestamps_and_values(trial_row)
-    times = events[0]
-    values = events[1]
+
+#Confidence Value = Confidence that the server is approaching the PARTICIPANT's table
+#Just the raw confidence value
+#If a time is given that is greater than the final timestamp or less than one, returns None
+def average_raw_confidence_trial(perspective, pathing_method, goaltable):
     
+    dfs = get_dfs(perspective, pathing_method)
+    
+    filter_dfs = []
+    
+    for frame in dfs:
+        if (goaltable == frame['goaltable'] and viewpoint == frame['viewpoint']):
+            filter_dfs.append(frame)
+    
+    for x in filter_dfs:
+        print('video length in the filtered one: ', x['videoduraction'])
+    
+#    slider_events = get_slider_events(trial_row)
+#    print(slider_events)
+#    
+#    last_event_time = slider_events[len(slider_events)-1][0]
+#    if time > last_event_time:
+#        print("The time is out of range")
+#        return None
+#        #return slider_events[len(slider_events)-1][1] #last_event_value
+#    elif time < 1:
+#        print("The time is out of range")
+#        return None
+#        #return slider_events[0][1] #first_event_value
+#    
+#    #Find the most recently recorded confidence value to the time provided.
+#    i = 0
+#    for event in slider_events:
+#        timestamp = event[0] #both are ints
+#        value = event[1]
+#        if timestamp == time: #found the exact timestamp, report the value
+#            return value
+#        elif timestamp > time: #found a greater timestamp, report the previous value
+#            return slider_events[i-1][1]
+#        else: #otherwise, continue
+#            i = i+1
+#            continue 
+
+            
+#Given a trial and uniqueid, plot the participants's confidence values over time
+def plot_confidence_all_participants(goaltable, pathing_method, perspective):
+    events = average_raw_confidence_trial(perspective, pathing_method, goaltable)
+    times = []
+    values = []
+
+    for event in events:
+        times.append(event[0])
+        values.append(event[1])   
+ 
     plt.plot(times, values)
     plt.xlabel('Timestamp (milliseconds)')
     plt.ylabel('Confidence Value "My Table"')
-    plt.title('Confidence Values for Participant ' + pid + ' During Trial ' + str(trial))
+    plt.title('Average Confidence Value Across Participants for Goal Table ' + goaltable + ', Pathing Method' + pathing_method + ', and perspective ' + perspective)
+    plt.savefig('plot.pdf')
+    plt.show()
+            
+#   
+#Given a trial and uniqueid, plot the participants's confidence values over time
+def plot_confidence_one_participant(trial_row):
+    events = get_slider_events(trial_row)
+    times = []
+    values = []
+
+    for event in events:
+        times.append(event[0])
+        values.append(event[1])   
+ 
+    plt.plot(times, values)
+    plt.xlabel('Timestamp (milliseconds)')
+    plt.ylabel('Confidence Value "My Table"')
+    plt.title('Confidence Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + trial_row['goaltable'] + ', ' + trial_row['IV'])
+    plt.savefig('plot.pdf')
     plt.show()
     
 '''
  END: METHOD DECLARATIONS
 '''
+
+'''
+START: graph generation
+'''
+
+#dfs = get_dfs("0", "Omn")
+#print(dfs[0])
+#
+#plot_confidence_one_participant(dfs[0])
+
+average_raw_confidence_trial('0', 'Omn', '1')
