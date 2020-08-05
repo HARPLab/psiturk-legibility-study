@@ -18,6 +18,10 @@ UNSURE_WINDOW = 5 #the amount of values around 50 that counts as people being un
 REVERSALS_WINDOW = 5 #the amount of values around 50 that don't count as the participant changing their mind. 0 = participants change their mind every time the confidence value passes 50
 RETURN_LIST_OF_AVERAGES = False #if you want the list of all the trials' averages (or total list of reversals) rather than the overall averages
 UNSUPPORTED_BROWSER_ERROR = False #for the pilot study, some people used unsupported browsers. If that's the case, this will trigger and adapt the rest of it
+
+FLAG_EXPORT_TO_CSV = True
+
+
 '''
  START: BOILER PLATE SET UP
 '''
@@ -101,7 +105,11 @@ df_postquestionnaire = df[['uniqueid', 'phase', 'name','experienceScore', 'gende
 df_postquestionnaire = df_postquestionnaire[df_postquestionnaire['phase'] == 'POSTQUESTIONAIRE']
 #print("============Postquestionnaire questions==================")
 #print(df_postquestionnaire)
-
+if FLAG_EXPORT_TO_CSV:
+    df_trials.to_csv("pilot-trials.csv")
+    df_botcheck.to_csv("pilot-botcheck.csv")
+    df_postquestionnaire.to_csv("pilot-postquestionnaire.csv")
+    df.to_csv("pilot-all-frames.csv")
 
 #Get the set of uniqueids (no duplicates)
 idSet = set()
@@ -129,6 +137,7 @@ print("Genders: ")
 for item in genderList:
     print(item)
 
+
 '''
  END: TABLE DEFINITIONS
 '''
@@ -145,7 +154,7 @@ for item in genderList:
 Given a perspective and pathing method, returns a list of data frames.
 Each data frame represents a trial that used that pathing method from a participant in that perspective condition.
 '''
-def get_dfs(perspective, pathing_method):
+def get_dfs(perspective, pathing_method, goal=None):
     #only get the dataframes that match this perspective and pathing method
     frames =[]
     for ind in df_trials.index:
@@ -153,10 +162,17 @@ def get_dfs(perspective, pathing_method):
         pid = row['uniqueid']
         pathMethod = row['IV']
         condition = row['condition']
-    
-        if ((int(condition) == int(perspective)) and (pathing_method == pathMethod)):
-            frames.append(row)
+        goaltable = row['goaltable']
+
+        # TODO switch to condition assembly style statements
+        if goal != None:
+            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod) and (int(goal) == int(goaltable))):
+                frames.append(row)
+        else:
+            if ((int(condition) == int(perspective)) and (pathing_method == pathMethod)):
+                frames.append(row)
     return frames
+
 
 '''
 Given a perspective and pathing method, returns the average confidence value from all trials that used that perspective and pathing method
@@ -166,8 +182,8 @@ If the goal of the trial is not the participant's table, a 90 confidence value m
 
 In other words, whatever the goal was, a 100 confidence score represents that they were 100% confidence and their guess was correct. 
 '''
-def get_avg_confidence_overall(perspective, pathing_method):
-    frames = get_dfs(perspective, pathing_method)
+def get_avg_confidence_overall(perspective, pathing_method, goal=None):
+    frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
     conf_averages = []
@@ -200,8 +216,8 @@ Accuracy value can be calculated as
     Option 2: (total time correct + 0.5 * total time unsure) / total time
 Which option is being used is determined by the flag ACCURACY_OPTION
 '''
-def get_avg_accuracy_overall(perspective, pathing_method):
-    frames = get_dfs(perspective, pathing_method)
+def get_avg_accuracy_overall(perspective, pathing_method, goal=None):
+    frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
     acc_averages = []
@@ -232,8 +248,8 @@ Given a perspective and pathing method, returns the average number of reversals 
 
 Also can collect the times the reversals happens, but does not do anything with them as of now
 '''
-def get_average_num_reversals_overall(perspective, pathing_method):
-    frames = get_dfs(perspective, pathing_method)
+def get_average_num_reversals_overall(perspective, pathing_method, goal=None):
+    frames = get_dfs(perspective, pathing_method, goal)
     
     #get the average from each frame and add it to averages
     total_reversals = 0
@@ -538,6 +554,9 @@ def get_slider_events(trial_row):
 
 perspectives = ['0','1']
 pathingMethods = ['Omn', "M", "SA", "SB"]
+goals = [0, 1, 2, 3]
+goal_names = ["BEFORE", "ME", "ACROSS", "PAST"]
+
 #
 #practicePathingMethod = 'Omn'
 #
@@ -547,17 +566,39 @@ for method in pathingMethods:
         avg_confidence = get_avg_confidence_overall(perspective, method)
         avg_accuracy = get_avg_accuracy_overall(perspective, method)
         avg_reversals = get_average_num_reversals_overall(perspective, method)
+
         print("===Method " + method + ", Perspective " + perspective +"====")
         print("Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
         print("Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
         print("Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
+        print()
 
 # Gather data for some useful subsections of stuff
 
+print()
+lookup_table = {}
+goals = [2]
+for method in pathingMethods:
+    for perspective in perspectives:
+        for goal in goals:
+            avg_confidence = get_avg_confidence_overall(perspective, method, goal)
+            avg_accuracy = get_avg_accuracy_overall(perspective, method, goal)
+            avg_reversals = get_average_num_reversals_overall(perspective, method, goal)
+
+            print("===Goal" + goal_names[goal] + ", Method " + method + ", Perspective " + perspective +"====")
+            print("GOAL " + goal_names[goal] + " -> Average Confidence Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_confidence))
+            print("GOAL " + goal_names[goal] + " -> Average Accuracy Score for perspective " + perspective + " and pathing method " + method + ": " + str(avg_accuracy))
+            print("GOAL " + goal_names[goal] + " -> Average Reversals for perspective " + perspective + " and pathing method " + method + ": " + str(avg_reversals))
+            lookup_table[(method, perspective, goal)] = (avg_confidence, avg_accuracy, avg_reversals)
+            print()
 
 '''
  END: GATHER OVERALL AVERAGES
 '''
+# Look at data for "ACROSS"
+
+by_method = []
+headers = ["Accuracy", "Confidence", "Reversals"]
 
 
 '''
@@ -650,8 +691,9 @@ avgr = sum(singleB_rev)/len(singleB_rev)
 print("reversal avg: " + str(avgr))
 
 #Construct the data frames 
-columns = ['No perspectives', 'Both', 'Persp. A', 'Persp. B']
+columns = ['Omn', 'M', 'SA', 'SB']
 accuracies_list = [omniscient_acc, multiple_acc, singleA_acc, singleB_acc]
+print(accuracies_list)
 #print("accuracies list: ", accuracies_list)
 confidences_list = [omniscient_conf, multiple_conf, singleA_conf, singleB_conf]
 #print("confidences list: ", accuracies_list)
@@ -659,6 +701,7 @@ revs_list = [omniscient_rev, multiple_rev, singleA_rev, singleB_rev]
 #print("revs list: ", accuracies_list)
 
 accuracy_df = pd.DataFrame (accuracies_list).transpose()
+print(accuracy_df)
 accuracy_df.columns = columns
 #print(accuracy_df)
 
@@ -675,20 +718,45 @@ reversals_df.columns = columns
 ##Accuracy
 print("BOXPLOTS")
 accuracy_df.boxplot()
-plt.title("Accuracy Across Path Planning Method")
+plt.title("Accuracy Across Pathing Method")
 plt.show()
 
 #
 ##Confidence
 confidence_df.boxplot()
-plt.title("Continuous Correctness Across Path Planning Method")
+plt.title("Confidence Across Pathing Method")
 plt.show()
 #
 #
 ##Reversals
 reversals_df.boxplot()
-plt.title("Reversals Across Path Planning Method")
+plt.title("Reversals Across Pathing Method")
 plt.show()
+
+# TODO
+for goal in goals:
+    goal_label = goal_names[goal]
+
+    goal_acc_df = pd.DataFrame(accuracies_list)
+    goal_acc_df = goal_acc_df.loc[goal_acc_df['goaltable'] == int(goal)].transpose()
+    goal_acc_df.columns = columns
+    goal_acc_df.boxplot()
+    plt.title("Accuracy: " + goal_label)
+    plt.savefig("acc-" + goal_label + ".png")
+
+    goal_conf_df = pd.DataFrame(confidences_list)
+    goal_conf_df = goal_conf_df[goal_conf_df['goaltable'] == int(goal)].transpose()
+    goal_conf_df.columns = columns
+    goal_conf_df.boxplot()
+    plt.title("Confidence: " + goal_label)
+    plt.savefig("conf-" + goal_label + ".png")
+
+    goal_rev_df = pd.DataFrame(revs_list)
+    goal_rev_df = goal_rev_df[goal_rev_df['goaltable'] == int(goal)].transpose()
+    goal_rev_df.columns = columns
+    goal_rev_df.boxplot()
+    plt.title("Reversals: " + goal_label)
+    plt.savefig("rev-" + goal_label + ".png")
 
 
 '''
@@ -703,6 +771,7 @@ plt.show()
 
 #stats f_oneway function takes the groups as inputs and returns F and P-values
 print("=====ANOVA, Accuracy:=====")
+print(accuracy_df)
 fvalue_acc, pvalue_acc = stats.f_oneway(accuracy_df['Omn'], accuracy_df['M'], accuracy_df['SA'], accuracy_df['SB'])
 print("fvalue,pvalue: " + str(fvalue_acc) + ',' +str(pvalue_acc))
 
