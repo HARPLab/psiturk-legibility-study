@@ -110,24 +110,25 @@ for ind in df.index: #how to iterate through rows
     idSet.add(row['uniqueid'])
     
 print("Number of participants: " + str(len(idSet)))
+print("participants: "+ str(idSet))
 
-ageList = []
-for ind in df_postquestionnaire.index: #how to iterate through rows
-    row = df_postquestionnaire.loc[ind]
-    ageList.append(row['age'])
+#ageList = []
+#for ind in df_postquestionnaire.index: #how to iterate through rows
+#    row = df_postquestionnaire.loc[ind]
+#    ageList.append(row['age'])
 
-print("Ages: ")
-for item in ageList:
-    print(item)
+#print("Ages: ")
+#for item in ageList:
+#    print(item)
 
-genderList = []
-for ind in df_postquestionnaire.index: #how to iterate through rows
-    row = df_postquestionnaire.loc[ind]
-    genderList.append(row['gender'])
+#genderList = []
+#for ind in df_postquestionnaire.index: #how to iterate through rows
+#    row = df_postquestionnaire.loc[ind]
+#    genderList.append(row['gender'])
 
-print("Genders: ")
-for item in genderList:
-    print(item)
+#print("Genders: ")
+#for item in genderList:
+#    print(item)
 
 '''
  END: TABLE DEFINITIONS
@@ -560,16 +561,30 @@ def get_raw_confidence_at_timestamp(trial_row, time):
 #   
 #Given a trial and uniqueid, plot the participants's confidence values over time
 def plot_confidence_one_participant(trial_row):
-    events = separate_timestamps_and_values(trial_row)
-    times = events[0]
-    values = events[1]
-    
+    events = get_slider_events(trial_row)
+    times = []
+    values = []
+
+    for event in events:
+        times.append(event[0])
+        values.append(event[1])   
+ 
     plt.plot(times, values)
     plt.xlabel('Timestamp (milliseconds)')
     plt.ylabel('Confidence Value "My Table"')
-    plt.title('Confidence Values for Participant ' + pid + ' During Trial ' + str(trial))
+    plt.title('Confidence Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + trial_row['goaltable'] + ', ' + trial_row['IV'])
+    plt.savefig('plot.pdf')
     plt.show()
     
 '''
  END: METHOD DECLARATIONS
 '''
+
+'''
+START: graph generation
+'''
+
+dfs = get_dfs("0", "Omn")
+print(dfs[0])
+
+plot_confidence_one_participant(dfs[0])
