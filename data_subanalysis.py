@@ -693,7 +693,7 @@ print("reversal avg: " + str(avgr))
 #Construct the data frames 
 columns = ['Omn', 'M', 'SA', 'SB']
 accuracies_list = [omniscient_acc, multiple_acc, singleA_acc, singleB_acc]
-print(accuracies_list)
+# print(accuracies_list)
 #print("accuracies list: ", accuracies_list)
 confidences_list = [omniscient_conf, multiple_conf, singleA_conf, singleB_conf]
 #print("confidences list: ", accuracies_list)
@@ -701,7 +701,7 @@ revs_list = [omniscient_rev, multiple_rev, singleA_rev, singleB_rev]
 #print("revs list: ", accuracies_list)
 
 accuracy_df = pd.DataFrame (accuracies_list).transpose()
-print(accuracy_df)
+# print(accuracy_df)
 accuracy_df.columns = columns
 #print(accuracy_df)
 
@@ -719,26 +719,27 @@ reversals_df.columns = columns
 print("BOXPLOTS")
 accuracy_df.boxplot()
 plt.title("Accuracy Across Pathing Method")
-plt.show()
+# plt.show()
 
 #
 ##Confidence
 confidence_df.boxplot()
 plt.title("Confidence Across Pathing Method")
-plt.show()
+# plt.show()
 #
 #
 ##Reversals
 reversals_df.boxplot()
 plt.title("Reversals Across Pathing Method")
-plt.show()
+# plt.show()
 
 # TODO
 for goal in goals:
     goal_label = goal_names[goal]
-    print(goal_acc_df.keys())
 
     goal_acc_df = pd.DataFrame(accuracies_list)
+    # print(goal_acc_df.keys())
+    print(goal_acc_df.head())
     goal_acc_df = goal_acc_df.loc[goal_acc_df['goaltable'] == int(goal)].transpose()
     goal_acc_df.columns = columns
     goal_acc_df.boxplot()
