@@ -175,6 +175,7 @@ If the goal of the trial is not the participant's table, a 90 confidence value m
 In other words, whatever the goal was, a 100 confidence score represents that they were 100% confidence and their guess was correct. 
 '''
 def get_avg_confidence_overall(perspective, pathing_method):
+    print("+++++++++GETTING AVERAGE CONFIDENCE+++++++++++")
     frames = get_dfs(perspective, pathing_method)
     
     #get the average from each frame and add it to averages
@@ -182,6 +183,7 @@ def get_avg_confidence_overall(perspective, pathing_method):
     for frame in frames:
         conf_averages.append(get_avg_confidence_trial(frame))
         
+    print("confidence averages: " + str(conf_averages))
     if RETURN_LIST_OF_AVERAGES:
         #return the list of averages rather than an overall average
         return conf_averages
@@ -277,12 +279,12 @@ Given a dataframe representing a trial row, return the average confidence value 
 See get_avg_confidence_overall method for description of confidence value
 '''
 def get_avg_confidence_trial(trial_row):
-    #DEBUG: print("==========new avg confidence trial method call ==========")
+    #print("==========new avg confidence trial method call ==========")
     
     #the confidence values are in terms of what the participant thinks about the server approaching their table. So if the goal is not their table, the confidence values need to be subtracted from 100. Since, a 0% conf score means that the participant was 100% confident that they were approaching a different table
     goal = trial_row['goaltable']
     goalIsOtherTable = False
-    if int(goal) != 2: #if the server was approaching the participant's table 
+    if int(goal) != 1: #if the server was approaching the participant's table 
         goalIsOtherTable = True
         #DEBUG: print("goal is other table")
     
@@ -299,6 +301,8 @@ def get_avg_confidence_trial(trial_row):
     lengths_values = get_lengths_and_values(slider_events, video_length)
     lengths = lengths_values[0]
     values = lengths_values[1]
+    
+    #print("values: ", values)
     
     #DEBUG: print("Values: ", values)
     if goalIsOtherTable:
@@ -320,6 +324,8 @@ def get_avg_confidence_trial(trial_row):
     weighted_average = weighted_sum / video_length
     
     #DEBUG: print("average: ", weighted_average)
+    if weighted_average < 0:
+        print("????????????????????????NEGATIVE confidence???????????????????????")
     
     return weighted_average
 
@@ -334,11 +340,11 @@ Accuracy value can be calculated as
 Which option is being used is determined by the flag ACCURACY_OPTION
 '''
 def get_avg_accuracy_trial(trial_row):
-#    print("==========new avg accuracy trial method call ==========")
+    print("==========new avg accuracy trial method call ==========")
         
     goal = trial_row['goaltable']
     goalIsOtherTable = False
-    if int(goal) != 2: #if the server was approaching the participant's table 
+    if int(goal) != 1: #if the server was approaching the participant's table 
         goalIsOtherTable = True
         
     slider_events = get_slider_events(trial_row)
@@ -365,7 +371,8 @@ def get_avg_accuracy_trial(trial_row):
         for i in range(0,num_events):
             values[i] = 100 - values[i]
             
-                  
+    print("Values: ", values)
+    print("Lenghts: ", lengths)
     #once the values are adjusted so that 100% confidence value means that they were 100% confident about the correct thing, a confidence value above 50 means they were correct
     #calculate the average accuracy due to the accuracy option
     weighted_average = None
@@ -405,6 +412,8 @@ def get_avg_accuracy_trial(trial_row):
         weighted_average = time_correct / (time_correct + time_incorrect)
         
 #    print("weighted average using accuracy option " + str(ACCURACY_OPTION) + ": " + str(weighted_average))
+    if weighted_average < 0:
+        print("????????????????????????NEGATIVE accuracy???????????????????????")
     return(weighted_average)
     
 
@@ -469,6 +478,7 @@ Given a list of events, create two lists, one of event lengths and one of event 
 Event length is the length of time (in milliseconds) from the time the event occurs to the time the next event occurs
 '''
 def get_lengths_and_values(slider_events, video_length):
+    
     numEvents = len(slider_events)
     
     lengths = []
@@ -489,14 +499,7 @@ def get_lengths_and_values(slider_events, video_length):
         next_event = slider_events[i+1]
         timestamp = event[0]
         next_timestamp = next_event[0]
-        if timestamp == None: #believe this is another odd case of someone using a non-supported browser, but not sure 
-            UNSUPPORTED_BROWSER_ERROR = True
-            #print("None timestamp")
-            timestamp = 0
-        if next_timestamp == None:
-            UNSUPPORTED_BROWSER_ERROR = True
-            #print("None next_timestamp")
-            next_timestamp = 0
+#        
         event_length = next_timestamp - timestamp
         lengths.append(event_length)
         
@@ -512,6 +515,12 @@ def get_lengths_and_values(slider_events, video_length):
         length_of_last_event = 0
     else:
         length_of_last_event = video_length - last_event[0]
+    
+    if length_of_last_event < 0:
+        print("HEREHERE**********************************************************************")
+        print("video length: ", video_length)
+        print("last event[0]: ", last_event[0])
+        
     lengths.append(length_of_last_event)
     last_event_value = last_event[1]
     values.append(last_event_value)
@@ -528,8 +537,38 @@ def get_slider_events(trial_row):
         return None
     #get the slider event data, access the list (of lists) it is storing
     slider_events = trial_row['events']
-    #if len(slider_events) == 0:
-        #print("Participant " + trial_row['uniqueid'] + " reported no events in a trial")
+    
+#    vidlength = round(trial_row['videoduraction'] * 1000)
+#    print("video length is ", vidlength)
+#    print(slider_events)
+    
+    #Cleans glitchy data. We should enforce the browsers we want, and see if these still occur
+    if len(slider_events) != 0:
+        #Take care of some glitched data, where an erroneous first event is recorded 
+        firstEvent = slider_events[0]
+        firstValue = firstEvent[1]
+        if firstValue < 45 or firstValue > 55:
+            slider_events = slider_events[1:]
+            print("fixed glitched data: First event glitch")
+        
+        #Take care of some glitched data, where events are recorded after the end of the video. Remove those events
+        i = 0
+        glitch = False
+        vidlength = round(trial_row['videoduraction'] * 1000)
+        for event in slider_events:
+            time = event[0]
+            if time == None: #believe this is another odd case of someone using a non-supported browser, but not sure 
+                UNSUPPORTED_BROWSER_ERROR = True
+                return []
+                #print("None timestamp") 
+            if time > vidlength: #found an event that took place after the video ended
+                print("fixed glitched data: Last event glitch")
+                glitch = True
+                break
+            i = i+1
+        if glitch:
+            slider_events = slider_events[0:i] #slice off any of that data
+        
     return slider_events
 
     
@@ -541,7 +580,9 @@ def get_raw_confidence_at_timestamp(trial_row, time):
     
     slider_events = get_slider_events(trial_row)
 #    print("Slider events we are looking at: " + str(slider_events))
-   
+    if len(slider_events) == 0:
+#        print("no slider events")
+        return None
  #   print("the time we're looking for is: " + str(time))    
 
     last_event_time = slider_events[len(slider_events)-1][0]
@@ -569,19 +610,22 @@ def get_raw_confidence_at_timestamp(trial_row, time):
             continue 
 
 
-#Confidence Value = Confidence that the server is approaching the PARTICIPANT's table
+#Across all participants that completed the specific trial, return a list of times and values that represent the average slider value at those timestamps
 #Just the raw confidence value
-#If a time is given that is greater than the final timestamp or less than one, returns None
+#Note: perspective and viewpoint must match. Perspective 0 = Viewpoint A and Perspective 1 = Viewpoint B
 def average_raw_confidence_trial(perspective, pathing_method, viewpoint, goaltable):
     
     dfs = get_dfs(perspective, pathing_method)
-    
+    #print(type(dfs))
+
     filter_dfs = []
     
     for frame in dfs:
-        if (goaltable == frame['goaltable'] and viewpoint == frame['viewpoint']):
+        if (goaltable == str(int(frame['goaltable'])) and viewpoint == frame['viewpoint']):
+            #print("appending")
             filter_dfs.append(frame)
-    
+    #print(filter_dfs)
+
     vidLength = 1000* filter_dfs[0]['videoduraction'] #round to the closest milliseconds
     vidLength = round(vidLength)
     vidLength = int(vidLength)
@@ -608,26 +652,24 @@ def average_raw_confidence_trial(perspective, pathing_method, viewpoint, goaltab
     #    print("avg at time: ", avg_at_time)
         avg_values.append(avg_at_time)
 
-    print("avg values: ", avg_values)
+    #print("avg values: ", avg_values)
     return((timestamps, avg_values))
 
 
 
 #Given a trial and uniqueid, plot the participants's confidence values over time
-def plot_confidence_all_participants(goaltable, pathing_method, perspective):
-    events = average_raw_confidence_trial(perspective, pathing_method, goaltable)
-    times = []
-    values = []
-
-    for event in events:
-        times.append(event[0])
-        values.append(event[1])   
+#Note: perspective and viewpoint must match. Perspective 0 = Viewpoint A and Perspective 1 = Viewpoint B
+def plot_confidence_all_participants(perspective, pathing_method, viewpoint, goaltable):
+    times_and_values = average_raw_confidence_trial(perspective, pathing_method, viewpoint, goaltable)
+    times = times_and_values[0]
+    values = times_and_values[1]
  
     plt.plot(times, values)
     plt.xlabel('Timestamp (milliseconds)')
-    plt.ylabel('Confidence Value "My Table"')
-    plt.title('Average Confidence Value Across Participants for Goal Table ' + goaltable + ', Pathing Method' + pathing_method + ', and perspective ' + perspective)
-    plt.savefig('plot.pdf')
+    plt.ylabel('Average Raw Confidence Value')
+    plt.ylim(30,100)
+    plt.title('Average Raw Confidence Value Over Time for Trial (table: ' + goaltable + ', pathing method: ' + pathing_method + ', perspective ' + viewpoint + ')')
+    #plt.savefig("testPlots.pdf")
     plt.show()
             
 #   
@@ -643,10 +685,9 @@ def plot_confidence_one_participant(trial_row):
  
     plt.plot(times, values)
     plt.xlabel('Timestamp (milliseconds)')
-    plt.ylabel('Confidence Value "My Table"')
+    plt.ylabel('Average Raw Slider Value')
     plt.title('Confidence Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + trial_row['goaltable'] + ', ' + trial_row['IV'])
-    plt.savefig('plot.pdf')
-    plt.show()
+    plt.savefig("testPlots.pdf")
     
 '''
  END: METHOD DECLARATIONS
@@ -661,4 +702,104 @@ START: graph generation
 #
 #plot_confidence_one_participant(dfs[0])
 
-average_raw_confidence_trial('0', 'M', 'A', '1')
+#perspective, pathing_method, viewpoint, goaltable
+#average_raw_confidence_trial('0', 'M', 'A', '3')
+
+
+#plot_confidence_all_participants('1', 'SB', 'B', '1')
+'''
+END: graph generation
+'''
+
+'''
+START: construct dataframes for h2
+'''
+
+RETURN_LIST_OF_AVERAGES = True
+
+# Condition 0 = Viewpoint A and Condition 1 = Viewpoint B
+
+singleA_A_conf = get_avg_confidence_overall('0', 'SA')
+singleA_A_acc = get_avg_accuracy_overall('0', 'SA')
+singleA_A_rev = get_average_num_reversals_overall('0', 'SA')
+
+singleA_B_conf = get_avg_confidence_overall('1', 'SA')
+singleA_B_acc = get_avg_accuracy_overall('1', 'SA')
+singleA_B_rev = get_average_num_reversals_overall('1', 'SA')
+
+singleB_A_conf = get_avg_confidence_overall('0', 'SB')
+singleB_A_acc = get_avg_accuracy_overall('0', 'SB')
+singleB_A_rev = get_average_num_reversals_overall('0', 'SB')
+
+singleB_B_conf = get_avg_confidence_overall('1', 'SB')
+singleB_B_acc = get_avg_accuracy_overall('1', 'SB')
+singleB_B_rev = get_average_num_reversals_overall('1', 'SB')
+
+
+#Match = Path was made for the perspective that the participant was watching from
+#Mismatch = Path was made for one perspective and the participant was watching from the other
+#SA with perspective A
+#SB with perspective B
+
+#Accuracy
+match_acc = singleA_A_acc + singleB_B_acc
+mismatch_acc = singleA_B_acc + singleB_A_acc
+
+#Confidence
+match_conf = singleA_A_conf + singleB_B_conf
+mismatch_conf = singleA_B_conf + singleB_A_conf
+
+#Reversals
+match_rev = singleA_A_rev + singleB_B_rev
+mismatch_rev = singleA_B_rev + singleB_A_rev
+
+#Construct the data frames 
+columns = ['PerspectivePathMatch', 'PerspectivePathMisMatch']
+accuracies_list = [match_acc, mismatch_acc]
+confidences_list = [match_conf, mismatch_conf]
+reversals_list = [match_rev, mismatch_rev]
+
+accuracy_df = pd.DataFrame (accuracies_list).transpose()
+accuracy_df.columns = columns
+print(accuracy_df)
+
+confidence_df = pd.DataFrame (confidences_list).transpose()
+confidence_df.columns = columns
+#print(confidence_df) 
+
+reversals_df = pd.DataFrame (reversals_list).transpose()
+reversals_df.columns = columns
+#print(reversals_df)
+
+'''
+END: construct dataframes for h2
+'''
+
+'''
+START: statistics for H2
+'''
+
+#Boxplots 
+
+##Accuracy
+#print("BOXPLOTS")
+accuracy_df.boxplot()
+plt.title("Accuracy For Matched and Mismatched Trials")
+plt.show()
+#
+##
+###Confidence
+confidence_df.boxplot()
+plt.title("Continuous Correctness For Matched and Mismatched Trials")
+plt.show()
+#
+##
+###Reversals
+reversals_df.boxplot()
+plt.title("Reversals Across For Matched and Mismatched Trials")
+plt.show()
+
+
+'''
+END: statistics for H2
+'''

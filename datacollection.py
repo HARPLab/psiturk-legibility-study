@@ -18,6 +18,8 @@ UNSURE_WINDOW = 5 #the amount of values around 50 that counts as people being un
 REVERSALS_WINDOW = 5 #the amount of values around 50 that don't count as the participant changing their mind. 0 = participants change their mind every time the confidence value passes 50
 RETURN_LIST_OF_AVERAGES = False #if you want the list of all the trials' averages (or total list of reversals) rather than the overall averages
 UNSUPPORTED_BROWSER_ERROR = False #for the pilot study, some people used unsupported browsers. If that's the case, this will trigger and adapt the rest of it
+FLAG_EXPORT = False
+FLAG_LOCAL_VERSION = True
 '''
  START: BOILER PLATE SET UP
 '''
@@ -26,56 +28,60 @@ db_url = dbkeys.db_url
 table_name = dbkeys.table_name
 data_column_name = dbkeys.data_column_name
 
+if not FLAG_LOCAL_VERSION:
+    # boilerplace sqlalchemy setup
+    engine = create_engine(db_url)
+    metadata = MetaData()
+    metadata.bind = engine
+    table = Table(table_name, metadata, autoload=True)
+    # make a query and loop through
+    s = table.select()
+    rows = s.execute()
 
-# boilerplace sqlalchemy setup
-engine = create_engine(db_url)
-metadata = MetaData()
-metadata.bind = engine
-table = Table(table_name, metadata, autoload=True)
-# make a query and loop through
-s = table.select()
-rows = s.execute()
 
+    data = []
 
-data = []
+    #status codes of subjects who completed experiment
+    statuses = [3,4,5,7]
+    # if you have workers you wish to exclude, add them here
+    exclude = []
+    for row in rows:
+        # only use subjects who completed experiment and aren't excluded
+        if row['status'] in statuses and row['uniqueid'] not in exclude:
+            data.append(row[data_column_name])
+        
+    #For use when not excluding participants:
+    #for row in rows:
+    #        data.append(row[data_column_name])
+    #        #ids.append((row['assignmentID'], condition))
+            
 
-#status codes of subjects who completed experiment
-statuses = [3,4,5,7]
-# if you have workers you wish to exclude, add them here
-exclude = []
-for row in rows:
-    # only use subjects who completed experiment and aren't excluded
-    if row['status'] in statuses and row['uniqueid'] not in exclude:
-        data.append(row[data_column_name])
-    
-#For use when not excluding participants:
-#for row in rows:
-#        data.append(row[data_column_name])
-#        #ids.append((row['assignmentID'], condition))
+    # Now we have all participant datastrings in a list.
+    # Let's make it a bit easier to work with:
+
+    # parse each participant's datastring as json object
+    # and take the 'data' sub-object
+    data = [json.loads(part)['data'] for part in data]
+
+    # insert uniqueid field into trialdata in case it wasn't added
+    # in experiment:
+    for part in data:
+        for record in part:
+            record['trialdata']['uniqueid'] = record['uniqueid']
         
 
-# Now we have all participant datastrings in a list.
-# Let's make it a bit easier to work with:
+        
+    # flatten nested list so we just have a list of the trialdata recorded
+    # each time psiturk.recordTrialData(trialdata) was called.
+    data = [record['trialdata'] for part in data for record in part]
 
-# parse each participant's datastring as json object
-# and take the 'data' sub-object
-data = [json.loads(part)['data'] for part in data]
+    # Put all subjects' trial data into a dataframe object from the
+    # 'pandas' python library: one option among many for analysis
+    df = pd.DataFrame(data)
+else:
+    df = pd.read_json('pilot-all-frames.json')
+    print("Pandas data imported from JSON")
 
-# insert uniqueid field into trialdata in case it wasn't added
-# in experiment:
-for part in data:
-    for record in part:
-        record['trialdata']['uniqueid'] = record['uniqueid']
-    
-
-    
-# flatten nested list so we just have a list of the trialdata recorded
-# each time psiturk.recordTrialData(trialdata) was called.
-data = [record['trialdata'] for part in data for record in part]
-
-# Put all subjects' trial data into a dataframe object from the
-# 'pandas' python library: one option among many for analysis
-df = pd.DataFrame(data)
 '''
  END: BOILER PLATE SET UP
 '''
@@ -481,14 +487,7 @@ def get_lengths_and_values(slider_events, video_length):
         next_event = slider_events[i+1]
         timestamp = event[0]
         next_timestamp = next_event[0]
-        if timestamp == None: #believe this is another odd case of someone using a non-supported browser, but not sure 
-            UNSUPPORTED_BROWSER_ERROR = True
-            #print("None timestamp")
-            timestamp = 0
-        if next_timestamp == None:
-            UNSUPPORTED_BROWSER_ERROR = True
-            #print("None next_timestamp")
-            next_timestamp = 0
+        
         event_length = next_timestamp - timestamp
         lengths.append(event_length)
         
@@ -520,8 +519,32 @@ def get_slider_events(trial_row):
         return None
     #get the slider event data, access the list (of lists) it is storing
     slider_events = trial_row['events']
-    #if len(slider_events) == 0:
-        #print("Participant " + trial_row['uniqueid'] + " reported no events in a trial")
+    #Cleans glitchy data. We should enforce the browsers we want, and see if these still occur
+    if len(slider_events) != 0:
+        #Take care of some glitched data, where an erroneous first event is recorded 
+        firstEvent = slider_events[0]
+        firstValue = firstEvent[1]
+        if firstValue < 45 or firstValue > 55:
+            slider_events = slider_events[1:]
+            #print("fixed glitched data: First event glitch")
+        
+        #Take care of some glitched data, where events are recorded after the end of the video. Remove those events
+        i = 0
+        glitch = False
+        vidlength = round(trial_row['videoduraction'] * 1000)
+        for event in slider_events:
+            time = event[0]
+            if time == None: #believe this is another odd case of someone using a non-supported browser, but not sure 
+                UNSUPPORTED_BROWSER_ERROR = True
+                return []
+                #print("None timestamp") 
+            if time > vidlength: #found an event that took place after the video ended
+                #print("fixed glitched data: Last event glitch")
+                glitch = True
+                break
+            i = i+1
+        if glitch:
+            slider_events = slider_events[0:i] #slice off any of that data
     return slider_events
 
     
