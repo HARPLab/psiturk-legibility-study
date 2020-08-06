@@ -175,7 +175,7 @@ If the goal of the trial is not the participant's table, a 90 confidence value m
 In other words, whatever the goal was, a 100 confidence score represents that they were 100% confidence and their guess was correct. 
 '''
 def get_avg_confidence_overall(perspective, pathing_method):
-    print("+++++++++GETTING AVERAGE CONFIDENCE+++++++++++")
+    #print("+++++++++GETTING AVERAGE CONFIDENCE+++++++++++")
     frames = get_dfs(perspective, pathing_method)
     
     #get the average from each frame and add it to averages
@@ -183,7 +183,7 @@ def get_avg_confidence_overall(perspective, pathing_method):
     for frame in frames:
         conf_averages.append(get_avg_confidence_trial(frame))
         
-    print("confidence averages: " + str(conf_averages))
+    #print("confidence averages: " + str(conf_averages))
     if RETURN_LIST_OF_AVERAGES:
         #return the list of averages rather than an overall average
         return conf_averages
@@ -324,8 +324,6 @@ def get_avg_confidence_trial(trial_row):
     weighted_average = weighted_sum / video_length
     
     #DEBUG: print("average: ", weighted_average)
-    if weighted_average < 0:
-        print("????????????????????????NEGATIVE confidence???????????????????????")
     
     return weighted_average
 
@@ -340,7 +338,7 @@ Accuracy value can be calculated as
 Which option is being used is determined by the flag ACCURACY_OPTION
 '''
 def get_avg_accuracy_trial(trial_row):
-    print("==========new avg accuracy trial method call ==========")
+#     print("==========new avg accuracy trial method call ==========")
         
     goal = trial_row['goaltable']
     goalIsOtherTable = False
@@ -371,8 +369,7 @@ def get_avg_accuracy_trial(trial_row):
         for i in range(0,num_events):
             values[i] = 100 - values[i]
             
-    print("Values: ", values)
-    print("Lenghts: ", lengths)
+    
     #once the values are adjusted so that 100% confidence value means that they were 100% confident about the correct thing, a confidence value above 50 means they were correct
     #calculate the average accuracy due to the accuracy option
     weighted_average = None
@@ -411,9 +408,7 @@ def get_avg_accuracy_trial(trial_row):
             return 0
         weighted_average = time_correct / (time_correct + time_incorrect)
         
-#    print("weighted average using accuracy option " + str(ACCURACY_OPTION) + ": " + str(weighted_average))
-    if weighted_average < 0:
-        print("????????????????????????NEGATIVE accuracy???????????????????????")
+
     return(weighted_average)
     
 
@@ -549,7 +544,7 @@ def get_slider_events(trial_row):
         firstValue = firstEvent[1]
         if firstValue < 45 or firstValue > 55:
             slider_events = slider_events[1:]
-            print("fixed glitched data: First event glitch")
+#            print("fixed glitched data: First event glitch")
         
         #Take care of some glitched data, where events are recorded after the end of the video. Remove those events
         i = 0
@@ -562,7 +557,7 @@ def get_slider_events(trial_row):
                 return []
                 #print("None timestamp") 
             if time > vidlength: #found an event that took place after the video ended
-                print("fixed glitched data: Last event glitch")
+#                print("fixed glitched data: Last event glitch")
                 glitch = True
                 break
             i = i+1
@@ -761,7 +756,7 @@ reversals_list = [match_rev, mismatch_rev]
 
 accuracy_df = pd.DataFrame (accuracies_list).transpose()
 accuracy_df.columns = columns
-print(accuracy_df)
+#print(accuracy_df)
 
 confidence_df = pd.DataFrame (confidences_list).transpose()
 confidence_df.columns = columns
@@ -781,7 +776,7 @@ START: statistics for H2
 
 #Boxplots 
 
-##Accuracy
+#Accuracy
 #print("BOXPLOTS")
 accuracy_df.boxplot()
 plt.title("Accuracy For Matched and Mismatched Trials")
@@ -800,6 +795,54 @@ plt.title("Reversals Across For Matched and Mismatched Trials")
 plt.show()
 
 
+
+#Accuracy
+
+#stats f_oneway function takes the groups as inputs and returns F and P-values
+print("=====ANOVA, H2 Accuracy:=====")
+fvalue_acc, pvalue_acc = stats.f_oneway(accuracy_df['PerspectivePathMatch'], accuracy_df['PerspectivePathMisMatch'])
+print("fvalue,pvalue: " + str(fvalue_acc) + ',' +str(pvalue_acc))
+
+#get ANOVA table 
+accuracy_df_melt = pd.melt(accuracy_df.reset_index(), id_vars = ['index'], value_vars=['PerspectivePathMatch', 'PerspectivePathMisMatch'])
+accuracy_df_melt.columns = ['index', 'treatments', 'value']
+# Ordinary Least Squares (OLS) model
+model_acc = ols.ols('value ~ C(treatments)', data=accuracy_df_melt).fit()
+anova_table_acc = sm.stats.anova_lm(model_acc,typ=2)
+print(anova_table_acc)
+print("==========================")
+
+
+#Confidence
+print("=====ANOVA, H2 Confidence:=====")
+fvalue_conf, pvalue_conf = stats.f_oneway(confidence_df['PerspectivePathMatch'], confidence_df['PerspectivePathMisMatch'])
+print("fvalue,pvalue: " + str(fvalue_conf) + ',' +str(pvalue_conf))
+
+
+#get ANOVA table 
+confidence_df_melt = pd.melt(confidence_df.reset_index(), id_vars = ['index'], value_vars=['PerspectivePathMatch', 'PerspectivePathMisMatch'])
+confidence_df_melt.columns = ['index', 'treatments', 'value']
+# Ordinary Least Squares (OLS) model
+model_conf = ols.ols('value ~ C(treatments)', data=confidence_df_melt).fit()
+anova_table_conf = sm.stats.anova_lm(model_conf,typ=2)
+print(anova_table_conf)
+print("=============================")
+
+
+#Reversals
+print("=====ANOVA, H2 Reversals:=====")
+fvalue_rev, pvalue_rev = stats.f_oneway(reversals_df['PerspectivePathMatch'], reversals_df['PerspectivePathMisMatch'])
+print("fvalue,pvalue: " + str(fvalue_rev) + ',' +str(pvalue_rev))
+
+
+#get ANOVA table 
+reversals_df_melt = pd.melt(reversals_df.reset_index(), id_vars = ['index'],value_vars=['PerspectivePathMatch', 'PerspectivePathMisMatch'])
+reversals_df_melt.columns = ['index', 'treatments', 'value']
+# Ordinary Least Squares (OLS) model
+model_rev = ols.ols('value ~ C(treatments)', data=reversals_df_melt).fit()
+anova_table_rev = sm.stats.anova_lm(model_rev,typ=2)
+print(anova_table_rev)
+print("=============================")
 '''
 END: statistics for H2
 '''
