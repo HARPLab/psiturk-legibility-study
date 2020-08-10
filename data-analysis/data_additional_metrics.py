@@ -35,7 +35,7 @@ FLAG_LOCAL_VERSION = True
 perspectives = ['0','1']
 pathing_methods = ['Omn', 'M', 'SA', 'SB']
 goals = [0, 1, 2, 3]
-goal_names = ["BEFORE", "ME", "ACROSS", "PAST"]
+goal_names = ["BEFORE", "ME", "PAST", "ACROSS"]
 
 COL_PATHING = 'Pathing Method'
 COL_CHAIR = 'Perspective'
@@ -46,17 +46,24 @@ COL_MATCHING = 'Match Condition'
 A_PCT_UNSURE = 'pct_unsure'
 A_PCT_CORRECT = 'pct_correct'
 A_PCT_INCORRECT = 'pct_incorrect'
+
 A_REVERSALS = 'reversals'
+
 A_ENV_CUTOFF = 'envelope_cutoff'
 A_ENV_ACC = 'envelope_accuracy'
 A_ENV_CERT = 'envelope_certainty'
+
+
+A_TT_CUTOFF = 'tt_cutoff'
+A_TT_ACC = 'tt_accuracy'
+A_TT_CERT = 'tt_certainty'
 
 P_GLITCHES = 'glitches'
 P_POST_EVENTS = 'post-events'
 P_LOOKUP = 'lookup-packet'
 
 GRAPH_BOXPLOT = True
-GRAPH_STRIPPLOT = False
+GRAPH_STRIPPLOT = True
 GRAPH_BLENDED = True
 
 STATUS_GLITCH_UNSUPPORTED_BROWSER = "unsupported browser"
@@ -64,6 +71,11 @@ STATUS_GLITCH_NO_EVENTS = "no events found"
 STATUS_GLITCH_EVENT_PAST_VIDEO_END = "past video end"
 STATUS_NORMAL = "glitch-free"
 
+LABELS_PATHING = {}
+LABELS_PATHING['Omn'] = "Omniscient"
+LABELS_PATHING['M'] = "Multi"
+LABELS_PATHING['SA'] = "Single:A\n (for back-to-robot)"
+LABELS_PATHING['SB'] = "Single:B\n (for facing-robot)"
 # Static math
 unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
 unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
@@ -392,7 +404,7 @@ def get_stat_envelope(events, frame_view, lookup_packet):
         # print(lp)
 
     # tag rows based on the threshold
-    df['acc'] = df['value'] >= VALUE_MIDDLE
+    df['acc'] = df['value'] > VALUE_MIDDLE
     # first row is a True preceded by a False
     fst = df.index[df['acc'] & ~ df['acc'].shift(1).fillna(False)]
     # last row is a True followed by a False
@@ -403,6 +415,7 @@ def get_stat_envelope(events, frame_view, lookup_packet):
     if len(pa) > 0:
         region = pa[-1]
         envelope_accuracy = (region[1] - region[0]) / units
+
     else:
         envelope_accuracy = 0
         print("Never right acc env?")
@@ -428,7 +441,9 @@ def get_stat_envelope(events, frame_view, lookup_packet):
     return envelope_accuracy, envelope_certainty, envelope_cutoff
 
 def get_stat_tt(events, frame_view, lookup_packet):
-    tt_accuracy, tt_cutoff = 0, 0
+    last_frame = frame_view["time"].max()
+
+    tt_accuracy, tt_cutoff, tt_certainty = last_frame, last_frame, last_frame 
     units = 1000.0
     df = frame_view
 
@@ -445,8 +460,8 @@ def get_stat_tt(events, frame_view, lookup_packet):
     if len(pr) > 0:
         region = pr[-1]
         tt_cutoff = (region[0]) / units
-    else:
-        tt_cutoff = 0
+    # else:
+        # tt_cutoff = frame_view[-1][0]
         # print(lp)
 
     # tag rows based on the threshold
@@ -461,8 +476,8 @@ def get_stat_tt(events, frame_view, lookup_packet):
     if len(pa) > 0:
         region = pa[-1]
         tt_accuracy = (region[0]) / units
-    else:
-        tt_accuracy = 0
+    # else:
+    #     tt_accuracy = 0
         # print("Never right acc env?")
         # print(lookup_packet)
 
@@ -479,8 +494,8 @@ def get_stat_tt(events, frame_view, lookup_packet):
     if len(pc) > 0:
         region = pc[-1]
         tt_certainty = (region[0]) / units
-    else:
-        tt_certainty = 0
+    # else:
+    #     tt_certainty = 0
 
 
     return tt_accuracy, tt_certainty, tt_cutoff
@@ -506,8 +521,8 @@ def get_stat_total_confidence(events, frame_view, lp):
     return acc
 
 def get_stat_total_accuracy(events, frame_view, lp):
-    df['acc'] = df['value'] >= VALUE_MIDDLE
-
+    # df['acc'] = df['value'] >= VALUE_MIDDLE
+    acc = 0
     return acc
 
 def get_perspective_label(row):
@@ -517,11 +532,7 @@ def get_perspective_label(row):
 
 def get_pm_label(row):
     perspective = row['IV']
-    labels = {}
-    labels['Omn'] = "Omniscient"
-    labels['M'] = "Multi"
-    labels['SA'] = "Single:A"
-    labels['SB'] = "Single:B"
+    labels = LABELS_PATHING
     return labels[perspective]
 
 def get_mismatch_label(row):
@@ -565,9 +576,12 @@ def analyze_participant(trial_row):
 
     pct_correct, pct_incorrect, pct_unsure = get_stat_percents(events, frame_view, lp)
     envelope_accuracy, envelope_certainty, envelope_cutoff = get_stat_envelope(events, frame_view, lp)
+    tt_accuracy, tt_certainty, tt_cutoff = get_stat_tt(events, frame_view, lp)
     reversals = get_stat_reversals(events, frame_view, lp)
     total_confidence = get_stat_total_confidence(events, frame_view, lp)
     total_accuracy = get_stat_total_accuracy(events, frame_view, lp)
+
+
 
     analyses = {}
     # Notes if there's a glitch in any of the processing
@@ -583,6 +597,10 @@ def analyze_participant(trial_row):
     analyses[A_ENV_CUTOFF] = envelope_cutoff
     analyses[A_ENV_ACC] = envelope_accuracy
     analyses[A_ENV_CERT] = envelope_certainty
+
+    analyses[A_TT_CUTOFF] = tt_cutoff
+    analyses[A_TT_ACC] = tt_accuracy
+    analyses[A_TT_CERT] = tt_certainty
 
     analyses[A_PCT_UNSURE] = pct_unsure
     analyses[A_PCT_CORRECT] = pct_correct
@@ -680,8 +698,10 @@ def make_boxplot(df, analysis, fn):
     if GRAPH_BOXPLOT:
         graph_type = "boxplot"
         plt.figure()
+        plt.tight_layout()
         bx = sns.boxplot(data=df, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
-        bx.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
+        bx.set(xlabel='Pathing Method')
+        bx.set(title=pretty_al[analysis], ylabel=y_units[analysis])
         figure = bx.get_figure()    
         figure.savefig(fn + graph_type + '.png')
         plt.close()
@@ -690,13 +710,15 @@ def make_stripplot(df, analysis, fn):
     if GRAPH_STRIPPLOT:
             graph_type = "stripplot"
             plt.figure()
+            plt.tight_layout()
             bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
                            data=df_goal, 
                            jitter=True, 
                            marker='o', 
                            alpha=0.5,
                            hue=COL_CHAIR, order=cat_order)
-            bplot.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
+            bplot.set(xlabel='Pathing Method')
+            bplot.set(title=pretty_al[analysis], ylabel=y_units[analysis])
             figure = bplot.get_figure()    
             figure.savefig(fn + graph_type + '.png')
             plt.close()
@@ -718,6 +740,23 @@ pretty_al[A_ENV_CUTOFF] = "Envelope (in seconds) of Certainty Beyond Cutoff"
 pretty_al[A_ENV_ACC] = "Envelope (in seconds) of Staying Accurate"
 pretty_al[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
 
+pretty_al[A_TT_CUTOFF] = "Time to Correct Certainty Beyond Cutoff"
+pretty_al[A_TT_ACC] = "Time to final correct Accuracy"
+pretty_al[A_TT_CERT] = "Time to Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+
+y_units = {}
+y_units[A_PCT_UNSURE] = "\% of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
+y_units[A_PCT_CORRECT] = "\% of Time Spent Correct"
+y_units[A_PCT_INCORRECT] = "\% of Time Spent Incorrect"
+y_units[A_REVERSALS] = "# of Reversals"
+y_units[A_ENV_CUTOFF] = "Period of Time Correct Beyond Cutoff"
+y_units[A_ENV_ACC] = "Period of Time with Accurate Guess"
+y_units[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+
+y_units[A_TT_CUTOFF] = "Time (in seconds)"
+y_units[A_TT_ACC] = "Time (in seconds)"
+y_units[A_TT_CERT] = "Time (in seconds)"
+
 UNSURE_WINDOW = 5
 FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
 
@@ -727,16 +766,17 @@ analysis_categories = pretty_al.keys()
 df_analyzed = copy.copy(df_trials)
 df_analyzed = analyze_all_participants(df_analyzed)
 
-goal = 2
+goal = 3
+goals = [3]
 goal_title = goal_names[goal]
 categories = pathing_methods
 # perspective = don't care
 
-custom_palette = sns.color_palette("Paired", 2)
-sns.set_palette(custom_palette)
+# custom_palette = sns.color_palette("Paired", 2)
+# sns.set_palette(custom_palette)
 # sns.set_palette("colorblind")
 
-cat_order = ["Omniscient", "Single:A", "Single:B", "Multi"]
+cat_order = [LABELS_PATHING['Omn'], LABELS_PATHING['SA'], LABELS_PATHING['SB'], LABELS_PATHING['M']]
 
 for goal in goals:
     goal_title = goal_names[goal]
