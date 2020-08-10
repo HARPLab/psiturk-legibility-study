@@ -51,6 +51,10 @@ A_ENV_CUTOFF = 'envelope_cutoff'
 A_ENV_ACC = 'envelope_accuracy'
 A_ENV_CERT = 'envelope_certainty'
 
+GRAPH_BOXPLOT = True
+GRAPH_STRIPPLOT = False
+GRAPH_BLENDED = True
+
 # Static math
 unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
 unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
@@ -476,7 +480,7 @@ def analyze_participant(trial_row):
     analyses = {}
     analyses['total_confidence'] = total_confidence
     analyses['total_accuracy'] = total_accuracy
-    
+
     analyses[A_REVERSALS] = reversals
 
     analyses[A_ENV_CUTOFF] = envelope_cutoff
@@ -583,26 +587,28 @@ for goal in goals:
     for analysis in analysis_categories:
         # print(df_across)
 
-        graph_type = "boxplot"
-        plt.figure()
-        bx = sns.boxplot(data=df_goal, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
-        bx.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
-        figure = bx.get_figure()    
-        figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ analysis + '.png')
-        plt.close()
+        if GRAPH_BOXPLOT:
+            graph_type = "boxplot"
+            plt.figure()
+            bx = sns.boxplot(data=df_goal, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
+            bx.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
+            figure = bx.get_figure()    
+            figure.savefig(FILENAME_PLOTS + goal_title + "-" + analysis + "-"+ graph_type + '.png')
+            plt.close()
 
-        # graph_type = "stripplot"
-        # plt.figure()
-        # bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
-        #                data=df_goal, 
-        #                jitter=True, 
-        #                marker='o', 
-        #                alpha=0.5,
-        #                hue=COL_CHAIR, order=cat_order)
-        # bplot.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
-        # figure = bplot.get_figure()    
-        # figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ analysis + '.png')
-        # plt.close()
+        if GRAPH_STRIPPLOT:
+            graph_type = "stripplot"
+            plt.figure()
+            bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
+                           data=df_goal, 
+                           jitter=True, 
+                           marker='o', 
+                           alpha=0.5,
+                           hue=COL_CHAIR, order=cat_order)
+            bplot.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
+            figure = bplot.get_figure()    
+            figure.savefig(FILENAME_PLOTS + goal_title + "-" + analysis + "-"+ graph_type + '.png')
+            plt.close()
 
         # # Do some ANOVA checks
         # formula = ""
