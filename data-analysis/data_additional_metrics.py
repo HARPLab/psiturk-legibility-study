@@ -456,10 +456,10 @@ def plot_confidence_one_participant_full(trial_row):
 
 # analysis_categories = ['total_confidence', 'total_accuracy', 'reversals', 'envelope_cutoff', 'envelope_accuracy', 'pct_unsure', 'pct_correct', 'pct_incorrect']
 analysis_categories = ['pct_unsure', 'pct_correct', 'pct_incorrect']
-pretty_categories = {}
-pretty_categories['pct_unsure'] = "Percent of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
-pretty_categories['pct_correct'] = "Percent of Time Spent Correct"
-pretty_categories['pct_incorrect'] = "Percent of Time Spent Incorrect"
+pretty_al = {}
+pretty_al['pct_unsure'] = "Percent of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
+pretty_al['pct_correct'] = "Percent of Time Spent Correct"
+pretty_al['pct_incorrect'] = "Percent of Time Spent Incorrect"
 
 
 UNSURE_WINDOW = 5
@@ -474,37 +474,44 @@ custom_palette = sns.color_palette("Paired", 2)
 sns.set_palette(custom_palette)
 # sns.set_palette("colorblind")
 
+COL_PATHING = 'Pathing Method'
+COL_CHAIR = 'Perspective'
+COL_GOAL = 'Goal Table'
+COL_MATCHING = 'Match Condition'
+
+cat_order = ["Omniscient", "Single:A", "Single:B", "Multi"]
+
 # print(analysis_categories)
 for goal in goals:
     goal_title = goal_names[goal]
     df_goal = df_analyzed[df_analyzed['goaltable'] == goal]
 
-    for category in analysis_categories:
+    for analysis in analysis_categories:
         # print(df_across)
 
         graph_type = "boxplot"
         plt.figure()
-        bx = sns.boxplot(data=df_goal, x='IV', y=category, hue="Perspective")
-        bx.set(xlabel='Pathing Method',ylabel=pretty_categories[category])
+        bx = sns.boxplot(data=df_goal, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
+        bx.set(xlabel='Pathing Method',ylabel=pretty_al[analysis])
         figure = bx.get_figure()    
-        figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ category + '.png')
+        figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ analysis + '.png')
         plt.close()
 
         graph_type = "stripplot"
         plt.figure()
-        bplot=sns.stripplot(y=category, x='IV', 
+        bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
                        data=df_goal, 
                        jitter=True, 
                        marker='o', 
                        alpha=0.5,
-                       hue='Perspective')
-        bplot.set(xlabel='Pathing Method',ylabel=pretty_categories[category])
+                       hue=COL_CHAIR, order=cat_order)
+        bplot.set(xlabel='Pathing Method',ylabel=pretty_al[analysis])
         figure = bplot.get_figure()    
-        figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ category + '.png')
+        figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ analysis + '.png')
         plt.close()
 
-    print("DONE")
-
+    print("DONE with " + goal_title)
+print("FINISHED")
 
 
 
