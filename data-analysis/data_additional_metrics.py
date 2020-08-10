@@ -51,9 +51,18 @@ A_ENV_CUTOFF = 'envelope_cutoff'
 A_ENV_ACC = 'envelope_accuracy'
 A_ENV_CERT = 'envelope_certainty'
 
+P_GLITCHES = 'glitches'
+P_POST_EVENTS = 'post-events'
+P_LOOKUP = 'lookup-packet'
+
 GRAPH_BOXPLOT = True
 GRAPH_STRIPPLOT = False
 GRAPH_BLENDED = True
+
+STATUS_GLITCH_UNSUPPORTED_BROWSER = "unsupported browser"
+STATUS_GLITCH_NO_EVENTS = "no events found"
+STATUS_GLITCH_EVENT_PAST_VIDEO_END = "past video end"
+STATUS_NORMAL = "glitch-free"
 
 # Static math
 unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
@@ -128,12 +137,15 @@ else:
 '''
  START: TABLE DEFINITIONS
 '''
+print("All trials pre-work")
+print(df.shape)
 
 #Just stimulus trials
 df_trials = df[['uniqueid', 'condition', 'videoduraction', 'phase', 'events', 'IV', 'goaltable', 'viewpoint']] 
 df_trials = df_trials[df_trials['phase'] == 'TRIAL']
 #print("============Stimulus trials==================")
-#print(df_trials)
+print("Trials")
+print(df_trials.shape)
 
 #Just botcheck trials
 df_botcheck = df[['uniqueid', 'phase', 'BotCheckResponse']]
@@ -179,8 +191,6 @@ print("participants: "+ str(idSet))
  END: TABLE DEFINITIONS
 '''
 
-df_analyzed = copy.copy(df_trials)
-
 
 '''
  START: METHOD DECLARATIONS
@@ -214,11 +224,15 @@ DEFAULT_START = 50
 Given a dataframe/trial_row, return the list (of lists) that represents the slider events from that trial
 '''
 def get_slider_events(trial_row):
+    ERROR_EVENTS = [[0,DEFAULT_START]]
+
     if trial_row.empty:
         print("Participant " + pid + " did not complete a trial")
         return None
     #get the slider event data, access the list (of lists) it is storing
     slider_events = trial_row['events']
+    status = STATUS_NORMAL
+    # print(len(slider_events))
     
     #Cleans glitchy data. We should enforce the browsers we want, and see if these still occur
     if len(slider_events) != 0:
@@ -238,17 +252,26 @@ def get_slider_events(trial_row):
             time = event[0]
             if time == None: #believe this is another odd case of someone using a non-supported browser, but not sure 
                 UNSUPPORTED_BROWSER_ERROR = True
-                return []
+                status = STATUS_GLITCH_UNSUPPORTED_BROWSER
+                return status, ERROR_EVENTS
                 #print("None timestamp") 
             if time > vidlength: #found an event that took place after the video ended
 #                print("fixed glitched data: Last event glitch")
-                # glitch = True
+                glitch = True
+                status = STATUS_GLITCH_EVENT_PAST_VIDEO_END
                 break
             i = i+1
         if glitch:
             # slider_events = slider_events[0:i] #slice off any of that data
-            slider_events = [(0,DEFAULT_START)]
-    return slider_events
+            # status = STATUS_GLITCH
+            # slider_events = ERROR_EVENTS
+            return status, ERROR_EVENTS
+    else:
+        status = STATUS_GLITCH_NO_EVENTS
+
+    # print(type(slider_events))
+    # print(status)
+    return status, slider_events
 
 def slider_test():
     events = [[100, 50],[110, 44],[120, 50],[130, 56],[135, 75],[150, 100]]
@@ -258,9 +281,10 @@ def slider_test():
     df.loc[0] = [events]
 
     post_events = get_slider_events(df)
-    # print("Post events")
-    # print(post_events)
-    # print("Slider test OK")
+    print("Post events")
+    print(post_events)
+    print(post_events.shape)
+    print("Slider test OK")
 
 def get_polarity(value):
     unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
@@ -277,6 +301,7 @@ def get_polarity(value):
 
 
 # print(slider_test())
+
 def new_frame_view(events, video_length):
     #Note: this method does not provide any smoothing
     # Events guaranteed to be in order
@@ -344,9 +369,10 @@ def get_stat_percents(events, df, lp):
 
     return pct_correct, pct_incorrect, pct_unsure
 
-def get_stat_envelope(events, df, lookup_packet):
+def get_stat_envelope(events, frame_view, lookup_packet):
     envelope_accuracy, envelope_cutoff = 0, 0
     units = 1000.0
+    df = frame_view
 
     # tag rows based on the threshold
     df['tag'] = df['value'] > VALUE_THRES_ACCURATE
@@ -401,6 +427,64 @@ def get_stat_envelope(events, df, lookup_packet):
 
     return envelope_accuracy, envelope_certainty, envelope_cutoff
 
+def get_stat_tt(events, frame_view, lookup_packet):
+    tt_accuracy, tt_cutoff = 0, 0
+    units = 1000.0
+    df = frame_view
+
+    # tag rows based on the threshold
+    df['tag'] = df['value'] > VALUE_THRES_ACCURATE
+    # first row is a True preceded by a False
+    fst = df.index[df['tag'] & ~ df['tag'].shift(1).fillna(False)]
+    # last row is a True followed by a False
+    lst = df.index[df['tag'] & ~ df['tag'].shift(-1).fillna(False)]
+    # filter those which are adequately apart
+    pr = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+    
+    # This is now a series of contiguous regions
+    if len(pr) > 0:
+        region = pr[-1]
+        tt_cutoff = (region[0]) / units
+    else:
+        tt_cutoff = 0
+        # print(lp)
+
+    # tag rows based on the threshold
+    df['acc'] = df['value'] >= VALUE_MIDDLE
+    # first row is a True preceded by a False
+    fst = df.index[df['acc'] & ~ df['acc'].shift(1).fillna(False)]
+    # last row is a True followed by a False
+    lst = df.index[df['acc'] & ~ df['acc'].shift(-1).fillna(False)]
+    # filter those which are adequately apart
+    pa = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+    # This is now a series of contiguous regions
+    if len(pa) > 0:
+        region = pa[-1]
+        tt_accuracy = (region[0]) / units
+    else:
+        tt_accuracy = 0
+        # print("Never right acc env?")
+        # print(lookup_packet)
+
+
+    # tag rows based on the threshold
+    df['cert'] = df['value'] > unsure_top
+    # first row is a True preceded by a False
+    fst = df.index[df['cert'] & ~ df['cert'].shift(1).fillna(False)]
+    # last row is a True followed by a False
+    lst = df.index[df['cert'] & ~ df['cert'].shift(-1).fillna(False)]
+    # filter those which are adequately apart
+    pc = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+    # This is now a series of contiguous regions
+    if len(pc) > 0:
+        region = pc[-1]
+        tt_certainty = (region[0]) / units
+    else:
+        tt_certainty = 0
+
+
+    return tt_accuracy, tt_certainty, tt_cutoff
+
 def get_stat_reversals(events, frame_view, lp):
     reversals = 0
     status = 0
@@ -422,13 +506,13 @@ def get_stat_total_confidence(events, frame_view, lp):
     return acc
 
 def get_stat_total_accuracy(events, frame_view, lp):
-    acc = 0
+    df['acc'] = df['value'] >= VALUE_MIDDLE
 
     return acc
 
 def get_perspective_label(row):
     perspective = row['condition']
-    labels = ["A", "B"]
+    labels = ["A: back-to-robot", "B: facing-robot"]
     return labels[int(perspective)]
 
 def get_pm_label(row):
@@ -463,7 +547,7 @@ def get_mismatch_label(row):
 
 # Given a row, return a dictionary of new analysis columns for understanding
 def analyze_participant(trial_row):
-    events = get_slider_events(trial_row)
+    status, events = get_slider_events(trial_row)
     times = []
     values = []
 
@@ -486,6 +570,11 @@ def analyze_participant(trial_row):
     total_accuracy = get_stat_total_accuracy(events, frame_view, lp)
 
     analyses = {}
+    # Notes if there's a glitch in any of the processing
+    analyses[P_GLITCHES] = status
+    analyses[P_LOOKUP] = lp
+    analyses[P_POST_EVENTS] = json.dumps(events)
+
     analyses['total_confidence'] = total_confidence
     analyses['total_accuracy'] = total_accuracy
 
@@ -507,6 +596,7 @@ def analyze_participant(trial_row):
     return analyses, frame_view
 
 def analyze_all_participants(df):
+    print(df.shape)
     for i, row in df.iterrows():
         analyses, frame_view = analyze_participant(row)
 
@@ -517,17 +607,22 @@ def analyze_all_participants(df):
         # Add pretty and easy sorting mechanism for mismatches
         df.at[i,COL_MATCHING] = get_perspective_label(row)
 
+        # print(df.columns)
         for key in analyses.keys():
+            # print(key)
+            # print(analyses[key])
             df.at[i,key] = analyses[key]
 
     analysis_categories = analyses.keys()
     print("Time to make some graphs")
+    print(df.columns)
+    print(df.shape)
     return df
 
 #   
 #Given a trial and uniqueid, plot the participants's confidence values over time
 def plot_confidence_one_participant(trial_row):
-    events = get_slider_events(trial_row)
+    status, events = get_slider_events(trial_row)
     times = []
     values = []
 
@@ -539,11 +634,38 @@ def plot_confidence_one_participant(trial_row):
     plt.xlabel('Timestamp (milliseconds)')
     plt.ylabel('Average Raw Slider Value')
     plt.title('Confidence Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + str(trial_row['goaltable']) + ', ' + str(trial_row['IV']))
-    plt.savefig("testPlots.png")
+    plt.savefig(FILENAME_PLOTS + "conf_one.png")
+
+
+def plot_analysis_one_participant(trial_row, lp, fn):
+    # print(trial_row.columns)
+    glitch = trial_row.get(P_GLITCHES)
+
+    # print(trial_row[P_POST_EVENTS])
+    events = trial_row.get(P_POST_EVENTS)
+    events = json.loads(events)
+    times = []
+    values = []
+
+    for event in events:
+        times.append(event[0])
+        values.append(event[1])   
+ 
+    uniqueid = trial_row['uniqueid']
+    goaltable = trial_row['goaltable']
+    iv = trial_row['IV']
+
+    plt.figure()
+    plt.plot(times, values)
+    plt.xlabel('Timestamp (milliseconds)')
+    plt.ylabel('Average Raw Slider Value')
+    plt.title('Confidence Values for Participant ' + str(uniqueid) + ' During Trial ' + str(goaltable) + ', ' + str(iv) +  " status=" + glitch)
+    plt.savefig(fn)
+    plt.close()
     
 
 def plot_confidence_one_participant_full(trial_row):
-    events = get_slider_events(trial_row)
+    status, events = get_slider_events(trial_row)
     video_length = int(round(trial_row['videoduraction'] * 1000)) #round to the nearest millisecond
     frame_view = new_frame_view(events, video_length)
  
@@ -596,12 +718,15 @@ pretty_al[A_ENV_CUTOFF] = "Envelope (in seconds) of Certainty Beyond Cutoff"
 pretty_al[A_ENV_ACC] = "Envelope (in seconds) of Staying Accurate"
 pretty_al[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
 
-analysis_categories = pretty_al.keys()
-analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
-
 UNSURE_WINDOW = 5
 FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
+
+analysis_categories = pretty_al.keys()
+# analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
+
+df_analyzed = copy.copy(df_trials)
 df_analyzed = analyze_all_participants(df_analyzed)
+
 goal = 2
 goal_title = goal_names[goal]
 categories = pathing_methods
@@ -613,11 +738,10 @@ sns.set_palette(custom_palette)
 
 cat_order = ["Omniscient", "Single:A", "Single:B", "Multi"]
 
-
-# print(analysis_categories)
 for goal in goals:
     goal_title = goal_names[goal]
     df_goal = df_analyzed[df_analyzed['goaltable'] == goal]
+    # print(df_goal.shape)
 
     for analysis in analysis_categories:
         
@@ -626,28 +750,36 @@ for goal in goals:
         make_stripplot(df_goal, analysis, fn)
         
 
-        # # Do some ANOVA checks
-        # formula = ""
-        # model = ols(formula, data=df_goal).fit()
-        # sm.stats.anova_lm(model, typ=2)
-
-
-        # print(accuracy_df)
-        # fvalue_acc, pvalue_acc = stats.f_oneway(accuracy_df['Omn'], accuracy_df['M'], accuracy_df['SA'], accuracy_df['SB'])
-        # print("fvalue,pvalue: " + str(fvalue_acc) + ',' +str(pvalue_acc))
-
-        # #get ANOVA table 
-        # accuracy_df_melt = pd.melt(accuracy_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
-        # accuracy_df_melt.columns = ['index', 'treatments', 'value']
-        # # Ordinary Least Squares (OLS) model
-        # model_acc = ols.ols('value ~ C(treatments)', data=accuracy_df_melt).fit()
-        # anova_table_acc = sm.stats.anova_lm(model_acc,typ=2)
-        # print(anova_table_acc)
-
-
-
+        # TODO: ANOVAs, highlight if something interesting
 
     print("DONE with " + goal_title)
+
+
+print("Inspecting troublemakers")
+# Inspect troublemakers
+# Ex ('debugRg8DP:debugDKHYC', 'M', 'B', 2.0)
+t1 = "('debugRg8DP:debugDKHYC', 'M', 'B', 2.0)"
+t2 = "('debugRg8DP:debugDKHYC', 'M', 'B', 3.0)"
+troublemakers = [t1, t2]
+
+for t in troublemakers:
+    df_trouble = df_analyzed[df_analyzed[P_LOOKUP] == t]
+    # print(type(df_trouble))
+    df_trouble = df_trouble.iloc[0]
+
+    print(df_trouble.shape)
+    # Should only be one
+    t_id = t
+    t_id = t_id.replace("(", "")
+    t_id = t_id.replace(")", "")
+    t_id = t_id.replace("\'", "")
+    t_id = t_id.replace(", ", "-")
+    print(t_id)
+
+    fn = FILENAME_PLOTS + "trouble-" + t_id + ".png"
+    plot_analysis_one_participant(df_trouble, t, fn)
+    # Add dirty data marker, too
+
 print("FINISHED")
 
 
