@@ -309,7 +309,7 @@ def new_frame_view(events, video_length):
     # return frame_view
     return df_time
 
-def get_stat_percents(events, df):
+def get_stat_percents(events, df, lp):
 
     df_unsure = (df[df['value'].between(unsure_bottom, unsure_top)])
     df_correct = (df[df['value'] > unsure_top])
@@ -344,7 +344,7 @@ def get_stat_percents(events, df):
 
     return pct_correct, pct_incorrect, pct_unsure
 
-def get_stat_envelope(events, df):
+def get_stat_envelope(events, df, lookup_packet):
     envelope_accuracy, envelope_cutoff = 0, 0
     units = 1000.0
 
@@ -363,9 +363,10 @@ def get_stat_envelope(events, df):
         envelope_cutoff = (region[1] - region[0]) / units
     else:
         envelope_cutoff = 0
+        # print(lp)
 
     # tag rows based on the threshold
-    df['acc'] = df['value'] > VALUE_MIDDLE
+    df['acc'] = df['value'] >= VALUE_MIDDLE
     # first row is a True preceded by a False
     fst = df.index[df['acc'] & ~ df['acc'].shift(1).fillna(False)]
     # last row is a True followed by a False
@@ -378,6 +379,8 @@ def get_stat_envelope(events, df):
         envelope_accuracy = (region[1] - region[0]) / units
     else:
         envelope_accuracy = 0
+        print("Never right acc env?")
+        print(lookup_packet)
 
 
     # tag rows based on the threshold
@@ -398,7 +401,7 @@ def get_stat_envelope(events, df):
 
     return envelope_accuracy, envelope_certainty, envelope_cutoff
 
-def get_stat_reversals(events, frame_view):
+def get_stat_reversals(events, frame_view, lp):
     reversals = 0
     status = 0
 
@@ -413,12 +416,12 @@ def get_stat_reversals(events, frame_view):
     #     print("success " + str(reversals))
     return reversals
 
-def get_stat_total_confidence(events, frame_view):
+def get_stat_total_confidence(events, frame_view, lp):
     acc = 0
 
     return acc
 
-def get_stat_total_accuracy(events, frame_view):
+def get_stat_total_accuracy(events, frame_view, lp):
     acc = 0
 
     return acc
@@ -467,15 +470,20 @@ def analyze_participant(trial_row):
     goaltable = trial_row['goaltable']
     iv = trial_row['IV']
     viewpoint = trial_row['viewpoint']
+    person_id = trial_row['uniqueid']
+    lookup_packet = (person_id, iv, viewpoint, goaltable)
+    lp = str(lookup_packet)
+
+    # print("Analysis for person id: " + str(person_id))
 
     video_length = int(round(trial_row['videoduraction'] * 1000)) #round to the nearest millisecond
     frame_view = new_frame_view(events, video_length)
 
-    pct_correct, pct_incorrect, pct_unsure = get_stat_percents(events, frame_view)
-    envelope_accuracy, envelope_certainty, envelope_cutoff = get_stat_envelope(events, frame_view)
-    reversals = get_stat_reversals(events, frame_view)
-    total_confidence = get_stat_total_confidence(events, frame_view)
-    total_accuracy = get_stat_total_accuracy(events, frame_view)
+    pct_correct, pct_incorrect, pct_unsure = get_stat_percents(events, frame_view, lp)
+    envelope_accuracy, envelope_certainty, envelope_cutoff = get_stat_envelope(events, frame_view, lp)
+    reversals = get_stat_reversals(events, frame_view, lp)
+    total_confidence = get_stat_total_confidence(events, frame_view, lp)
+    total_accuracy = get_stat_total_accuracy(events, frame_view, lp)
 
     analyses = {}
     analyses['total_confidence'] = total_confidence
@@ -578,6 +586,7 @@ sns.set_palette(custom_palette)
 # sns.set_palette("colorblind")
 
 cat_order = ["Omniscient", "Single:A", "Single:B", "Multi"]
+
 
 # print(analysis_categories)
 for goal in goals:
