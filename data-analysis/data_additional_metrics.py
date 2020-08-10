@@ -271,6 +271,7 @@ def get_slider_events(trial_row):
 #                print("fixed glitched data: Last event glitch")
                 glitch = True
                 status = STATUS_GLITCH_EVENT_PAST_VIDEO_END
+                print(str(time) +" is longer than "+ str(vidlength))
                 break
             i = i+1
         if glitch:
@@ -613,6 +614,26 @@ def analyze_participant(trial_row):
 
     return analyses, frame_view
 
+
+def clean_glitchy_data_and_report(df):
+    df_glitches = df[df[P_GLITCHES] != STATUS_NORMAL]
+    df_no_glitches = df[df[P_GLITCHES] == STATUS_NORMAL]
+    pct = (1.0 * len(df_glitches) / len(df))
+
+    print("Removed " + str(len(df_glitches)) + " glitchy entries out of " + str(len(df)) + " -> " + str(pct) + "%")
+    error_types = [STATUS_GLITCH_NO_EVENTS, STATUS_GLITCH_UNSUPPORTED_BROWSER, STATUS_GLITCH_EVENT_PAST_VIDEO_END]
+    for et in error_types:
+        df_et = df[df[P_GLITCHES] == et]
+        pct_et = (len(df_et) / len(df_glitches))
+        print("Found " + str(len(df_et)) + " entries with error type " + et + ", " + str(pct_et) + "% of all glitches")
+
+
+    # TODO add filtering summary
+    print("Clean entries: " + str(len(df_no_glitches)) + "")
+
+    return df_no_glitches
+
+
 def analyze_all_participants(df):
     print(df.shape)
     for i, row in df.iterrows():
@@ -632,6 +653,10 @@ def analyze_all_participants(df):
             df.at[i,key] = analyses[key]
 
     analysis_categories = analyses.keys()
+    # remove glitched entries and report
+    
+    df = clean_glitchy_data_and_report(df)
+
     print("Time to make some graphs")
     print(df.columns)
     print(df.shape)
@@ -677,7 +702,7 @@ def plot_analysis_one_participant(trial_row, lp, fn):
     plt.plot(times, values)
     plt.xlabel('Timestamp (milliseconds)')
     plt.ylabel('Average Raw Slider Value')
-    plt.title('Confidence Values for Participant ' + str(uniqueid) + ' During Trial ' + str(goaltable) + ', ' + str(iv) +  " status=" + glitch)
+    plt.title('Confidence Values for Participant ' + str(uniqueid) + ' \nDuring Trial ' + str(goaltable) + ', ' + str(iv) +  " \nstatus=" + glitch)
     plt.savefig(fn)
     plt.close()
     
@@ -691,36 +716,40 @@ def plot_confidence_one_participant_full(trial_row):
     # plt.plot(times, values)
     plt.xlabel('Timestamp (milliseconds)')
     plt.ylabel('Average Raw Slider Value')
-    plt.title('Confidence Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + str(trial_row['goaltable']) + ', ' + str(trial_row['IV']))
-    plt.savefig("testPlots2.png")
+    plt.title('Raw Slider Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + str(trial_row['goaltable']) + ', ' + str(trial_row['IV']))
+    plt.savefig("testPlots2.png", bbox_inches='tight')
 
-def make_boxplot(df, analysis, fn):
+def make_boxplot(df, analysis, fn, title):
     if GRAPH_BOXPLOT:
         graph_type = "boxplot"
         plt.figure()
-        plt.tight_layout()
+        # plt.tight_layout()
+        # title = al_title[analysis] + "\n" + al_y_range
         bx = sns.boxplot(data=df, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
         bx.set(xlabel='Pathing Method')
-        bx.set(title=pretty_al[analysis], ylabel=y_units[analysis])
+        ylims = al_y_range[analysis]
+        bx.set(ylim=ylims)
+        bx.set(title=title, ylabel=al_y_units[analysis])
         figure = bx.get_figure()    
-        figure.savefig(fn + graph_type + '.png')
+        figure.savefig(fn + graph_type + '.png', bbox_inches='tight')
         plt.close()
 
-def make_stripplot(df, analysis, fn):
+def make_stripplot(df, analysis, fn, title):
     if GRAPH_STRIPPLOT:
             graph_type = "stripplot"
             plt.figure()
-            plt.tight_layout()
+            # plt.tight_layout()
             bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
                            data=df_goal, 
                            jitter=True, 
                            marker='o', 
-                           alpha=0.5,
+                           alpha=0.8,
                            hue=COL_CHAIR, order=cat_order)
             bplot.set(xlabel='Pathing Method')
-            bplot.set(title=pretty_al[analysis], ylabel=y_units[analysis])
+            bplot.set(ylim=al_y_range[analysis])
+            bplot.set(title=al_title[analysis], ylabel=al_y_units[analysis])
             figure = bplot.get_figure()    
-            figure.savefig(fn + graph_type + '.png')
+            figure.savefig(fn + graph_type + '.png', bbox_inches='tight')
             plt.close()
 
 '''
@@ -731,43 +760,65 @@ def make_stripplot(df, analysis, fn):
 # plot_confidence_one_participant(row)
 # plot_confidence_one_participant_full(row)
 
-pretty_al = {}
-pretty_al[A_PCT_UNSURE] = "Percent of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
-pretty_al[A_PCT_CORRECT] = "Percent of Time Spent Correct"
-pretty_al[A_PCT_INCORRECT] = "Percent of Time Spent Incorrect"
-pretty_al[A_REVERSALS] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "%)"
-pretty_al[A_ENV_CUTOFF] = "Envelope (in seconds) of Certainty Beyond Cutoff"
-pretty_al[A_ENV_ACC] = "Envelope (in seconds) of Staying Accurate"
-pretty_al[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+al_title = {}
+al_y_units = {}
+al_y_range = {}
 
-pretty_al[A_TT_CUTOFF] = "Time to Correct Certainty Beyond Cutoff"
-pretty_al[A_TT_ACC] = "Time to final correct Accuracy"
-pretty_al[A_TT_CERT] = "Time to Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+al_title[A_PCT_UNSURE] = "Proportion of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
+al_title[A_PCT_CORRECT] = "Percent of Time Spent Correct"
+al_title[A_PCT_INCORRECT] = "Percent of Time Spent Incorrect"
+al_title[A_REVERSALS] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "%)"
+al_title[A_ENV_CUTOFF] = "Envelope (in seconds) of Certainty Beyond Cutoff"
+al_title[A_ENV_ACC] = "Envelope (in seconds) of Staying Accurate"
+al_title[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
 
-y_units = {}
-y_units[A_PCT_UNSURE] = "\% of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
-y_units[A_PCT_CORRECT] = "\% of Time Spent Correct"
-y_units[A_PCT_INCORRECT] = "\% of Time Spent Incorrect"
-y_units[A_REVERSALS] = "# of Reversals"
-y_units[A_ENV_CUTOFF] = "Period of Time Correct Beyond Cutoff"
-y_units[A_ENV_ACC] = "Period of Time with Accurate Guess"
-y_units[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+al_title[A_TT_CUTOFF] = "Time to Correct Certainty Beyond Cutoff"
+al_title[A_TT_ACC] = "Time to final correct Accuracy"
+al_title[A_TT_CERT] = "Time to Staying More Certain Than +/- " + str(UNSURE_WINDOW) + "% from neutral)"
 
-y_units[A_TT_CUTOFF] = "Time (in seconds)"
-y_units[A_TT_ACC] = "Time (in seconds)"
-y_units[A_TT_CERT] = "Time (in seconds)"
+
+al_y_units[A_PCT_UNSURE] = "Proportion of Time Spent Unsure"
+al_y_units[A_PCT_CORRECT] = "Proportion of Time Spent Correct"
+al_y_units[A_PCT_INCORRECT] = "Proportion of Time Spent Incorrect"
+al_y_units[A_REVERSALS] = "# of Reversals"
+al_y_units[A_ENV_CUTOFF] = "Period of Time Correct Beyond Cutoff"
+al_y_units[A_ENV_ACC] = "Period of Time with Accurate Guess"
+al_y_units[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+
+al_y_units[A_TT_CUTOFF] = "Time (in seconds)"
+al_y_units[A_TT_ACC] = "Time (in seconds)"
+al_y_units[A_TT_CERT] = "Time (in seconds)"
+
+
+max_video = round(df_trials["videoduraction"].max() * 1000)
+print("Max Video Length")
+print(max_video)
 
 UNSURE_WINDOW = 5
 FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
 
-analysis_categories = pretty_al.keys()
+analysis_categories = al_title.keys()
 # analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
 
 df_analyzed = copy.copy(df_trials)
 df_analyzed = analyze_all_participants(df_analyzed)
 
+# Calculate graph bounds AFTER analysis
+al_y_range[A_PCT_UNSURE] =      (0, 1.0)
+al_y_range[A_PCT_CORRECT] =     (0, 1.0)
+al_y_range[A_PCT_INCORRECT] =   (0, 1.0)
+al_y_range[A_REVERSALS] =  (0, df_analyzed[A_REVERSALS].max())
+al_y_range[A_ENV_CUTOFF] = (0, max_video)
+al_y_range[A_ENV_ACC] = (0, max_video)
+al_y_range[A_ENV_CERT] = (0, max_video)
+
+al_y_range[A_TT_CUTOFF] =   (0, max_video)
+al_y_range[A_TT_ACC] =      (0, max_video)
+al_y_range[A_TT_CERT] =     (0, max_video)
+
+
 goal = 3
-goals = [3]
+# goals = [3, 1]
 goal_title = goal_names[goal]
 categories = pathing_methods
 # perspective = don't care
@@ -776,7 +827,7 @@ categories = pathing_methods
 # sns.set_palette(custom_palette)
 # sns.set_palette("colorblind")
 
-cat_order = [LABELS_PATHING['Omn'], LABELS_PATHING['SA'], LABELS_PATHING['SB'], LABELS_PATHING['M']]
+cat_order = [LABELS_PATHING['Omn'], LABELS_PATHING['SB'], LABELS_PATHING['SA'], LABELS_PATHING['M']]
 
 for goal in goals:
     goal_title = goal_names[goal]
@@ -785,9 +836,11 @@ for goal in goals:
 
     for analysis in analysis_categories:
         
+        title = al_title[analysis]
+        title += "\n for the goal " + goal_title
         fn = FILENAME_PLOTS + goal_title + "-" + analysis + "-"
-        make_boxplot(df_goal, analysis, fn)
-        make_stripplot(df_goal, analysis, fn)
+        make_boxplot(df_goal, analysis, fn, title)
+        make_stripplot(df_goal, analysis, fn, title)
         
 
         # TODO: ANOVAs, highlight if something interesting
@@ -800,7 +853,9 @@ print("Inspecting troublemakers")
 # Ex ('debugRg8DP:debugDKHYC', 'M', 'B', 2.0)
 t1 = "('debugRg8DP:debugDKHYC', 'M', 'B', 2.0)"
 t2 = "('debugRg8DP:debugDKHYC', 'M', 'B', 3.0)"
-troublemakers = [t1, t2]
+t3 = "('debugYuhM3:debugdoGQl', 'M', 'B', 1.0)"
+t4 = "('debugYuhM3:debugdoGQl', 'SA', 'B', 0.0)"
+troublemakers = [t1, t2, t3, t4]
 
 for t in troublemakers:
     df_trouble = df_analyzed[df_analyzed[P_LOOKUP] == t]
