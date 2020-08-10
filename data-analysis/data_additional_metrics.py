@@ -42,6 +42,15 @@ COL_CHAIR = 'Perspective'
 COL_GOAL = 'Goal Table'
 COL_MATCHING = 'Match Condition'
 
+# Types of analysis
+A_PCT_UNSURE = 'pct_unsure'
+A_PCT_CORRECT = 'pct_correct'
+A_PCT_INCORRECT = 'pct_incorrect'
+A_REVERSALS = 'reversals'
+A_ENV_CUTOFF = 'envelope_cutoff'
+A_ENV_ACC = 'envelope_accuracy'
+A_ENV_CERT = 'envelope_certainty'
+
 # Static math
 unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
 unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
@@ -467,15 +476,16 @@ def analyze_participant(trial_row):
     analyses = {}
     analyses['total_confidence'] = total_confidence
     analyses['total_accuracy'] = total_accuracy
-    analyses['reversals'] = reversals
+    
+    analyses[A_REVERSALS] = reversals
 
-    analyses['envelope_cutoff'] = envelope_cutoff
-    analyses['envelope_accuracy'] = envelope_accuracy
-    analyses['envelope_certainty'] = envelope_certainty
+    analyses[A_ENV_CUTOFF] = envelope_cutoff
+    analyses[A_ENV_ACC] = envelope_accuracy
+    analyses[A_ENV_CERT] = envelope_certainty
 
-    analyses['pct_unsure'] = pct_unsure
-    analyses['pct_correct'] = pct_correct
-    analyses['pct_incorrect'] = pct_incorrect
+    analyses[A_PCT_UNSURE] = pct_unsure
+    analyses[A_PCT_CORRECT] = pct_correct
+    analyses[A_PCT_INCORRECT] = pct_incorrect
 
     # analyses['avg_accuracy'] = get_overall_confidence(events, video_length)
     # analyses['avg_accuracy'] = get_overall_confidence(events, video_length)
@@ -539,24 +549,17 @@ def plot_confidence_one_participant_full(trial_row):
 # plot_confidence_one_participant(row)
 # plot_confidence_one_participant_full(row)
 
-# A_PCT_UNSURE = 'pct_unsure'
-# A_PCT_CORRECT = 'pct_correct'
-# A_PCT_INCORRECT = 'pct_incorrect'
-# A_REVERSALS = 'reversals'
-
-# analysis_categories = ['total_confidence', 'total_accuracy', 'reversals', 'envelope_cutoff', 'envelope_accuracy', 'pct_unsure', 'pct_correct', 'pct_incorrect']
-analysis_categories = ['pct_unsure', 'pct_correct', 'pct_incorrect', 'reversals', 'envelope_cutoff', 'envelope_accuracy','envelope_certainty']
-
 pretty_al = {}
-pretty_al['pct_unsure'] = "Percent of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
-pretty_al['pct_correct'] = "Percent of Time Spent Correct"
-pretty_al['pct_incorrect'] = "Percent of Time Spent Incorrect"
-pretty_al['reversals'] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "%)"
-pretty_al['envelope_cutoff'] = "Envelope (in seconds) of Certainty Beyond Cutoff"
-pretty_al['envelope_accuracy'] = "Envelope (in seconds) of Staying Accurate"
-pretty_al['envelope_certainty'] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+pretty_al[A_PCT_UNSURE] = "Percent of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
+pretty_al[A_PCT_CORRECT] = "Percent of Time Spent Correct"
+pretty_al[A_PCT_INCORRECT] = "Percent of Time Spent Incorrect"
+pretty_al[A_REVERSALS] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "%)"
+pretty_al[A_ENV_CUTOFF] = "Envelope (in seconds) of Certainty Beyond Cutoff"
+pretty_al[A_ENV_ACC] = "Envelope (in seconds) of Staying Accurate"
+pretty_al[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
 
-# analysis_categories = ['reversals']
+analysis_categories = pretty_al.keys()
+analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
 
 UNSURE_WINDOW = 5
 FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
