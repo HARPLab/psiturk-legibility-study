@@ -553,6 +553,32 @@ def plot_confidence_one_participant_full(trial_row):
     plt.ylabel('Average Raw Slider Value')
     plt.title('Confidence Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + str(trial_row['goaltable']) + ', ' + str(trial_row['IV']))
     plt.savefig("testPlots2.png")
+
+def make_boxplot(df, analysis, fn):
+    if GRAPH_BOXPLOT:
+        graph_type = "boxplot"
+        plt.figure()
+        bx = sns.boxplot(data=df, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
+        bx.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
+        figure = bx.get_figure()    
+        figure.savefig(fn + graph_type + '.png')
+        plt.close()
+
+def make_stripplot(df, analysis, fn):
+    if GRAPH_STRIPPLOT:
+            graph_type = "stripplot"
+            plt.figure()
+            bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
+                           data=df_goal, 
+                           jitter=True, 
+                           marker='o', 
+                           alpha=0.5,
+                           hue=COL_CHAIR, order=cat_order)
+            bplot.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
+            figure = bplot.get_figure()    
+            figure.savefig(fn + graph_type + '.png')
+            plt.close()
+
 '''
  END: METHOD DECLARATIONS
 '''
@@ -594,30 +620,11 @@ for goal in goals:
     df_goal = df_analyzed[df_analyzed['goaltable'] == goal]
 
     for analysis in analysis_categories:
-        # print(df_across)
-
-        if GRAPH_BOXPLOT:
-            graph_type = "boxplot"
-            plt.figure()
-            bx = sns.boxplot(data=df_goal, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
-            bx.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
-            figure = bx.get_figure()    
-            figure.savefig(FILENAME_PLOTS + goal_title + "-" + analysis + "-"+ graph_type + '.png')
-            plt.close()
-
-        if GRAPH_STRIPPLOT:
-            graph_type = "stripplot"
-            plt.figure()
-            bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
-                           data=df_goal, 
-                           jitter=True, 
-                           marker='o', 
-                           alpha=0.5,
-                           hue=COL_CHAIR, order=cat_order)
-            bplot.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
-            figure = bplot.get_figure()    
-            figure.savefig(FILENAME_PLOTS + goal_title + "-" + analysis + "-"+ graph_type + '.png')
-            plt.close()
+        
+        fn = FILENAME_PLOTS + goal_title + "-" + analysis + "-"
+        make_boxplot(df_goal, analysis, fn)
+        make_stripplot(df_goal, analysis, fn)
+        
 
         # # Do some ANOVA checks
         # formula = ""
