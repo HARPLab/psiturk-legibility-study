@@ -27,6 +27,7 @@ FILENAME_PLOTS = "plots/"
 VALUE_MIDDLE = 50
 VALUE_MAX = 100
 VALUE_MIN = 0
+VALUE_THRES_ACCURATE = 75
 
 FLAG_EXPORT = False
 FLAG_LOCAL_VERSION = True
@@ -35,6 +36,15 @@ perspectives = ['0','1']
 pathing_methods = ['Omn', 'M', 'SA', 'SB']
 goals = [0, 1, 2, 3]
 goal_names = ["BEFORE", "ME", "ACROSS", "PAST"]
+
+COL_PATHING = 'Pathing Method'
+COL_CHAIR = 'Perspective'
+COL_GOAL = 'Goal Table'
+COL_MATCHING = 'Match Condition'
+
+# Static math
+unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
+unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
 
 '''
  START: BOILER PLATE SET UP
@@ -239,7 +249,20 @@ def slider_test():
     # print(post_events)
     # print("Slider test OK")
 
-    
+def get_polarity(value):
+    unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
+    unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
+
+    if unsure_bottom <= value <= unsure_top:
+        return 0
+    elif value > unsure_top:
+        return 1
+    elif value < unsure_bottom:
+        return -1
+    print("Error in polarity of " + str(value))
+    return None
+
+
 # print(slider_test())
 def new_frame_view(events, video_length):
     #Note: this method does not provide any smoothing
@@ -274,8 +297,6 @@ def new_frame_view(events, video_length):
     return df_time
 
 def get_stat_percents(events, df):
-    unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
-    unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
 
     df_unsure = (df[df['value'].between(unsure_bottom, unsure_top)])
     df_correct = (df[df['value'] > unsure_top])
@@ -310,14 +331,73 @@ def get_stat_percents(events, df):
 
     return pct_correct, pct_incorrect, pct_unsure
 
-def get_stat_envelope(events, frame_view):
+def get_stat_envelope(events, df):
     envelope_accuracy, envelope_cutoff = 0, 0
+    units = 1000.0
 
-    return envelope_accuracy, envelope_cutoff
+    # tag rows based on the threshold
+    df['tag'] = df['value'] > VALUE_THRES_ACCURATE
+    # first row is a True preceded by a False
+    fst = df.index[df['tag'] & ~ df['tag'].shift(1).fillna(False)]
+    # last row is a True followed by a False
+    lst = df.index[df['tag'] & ~ df['tag'].shift(-1).fillna(False)]
+    # filter those which are adequately apart
+    pr = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+    
+    # This is now a series of contiguous regions
+    if len(pr) > 0:
+        region = pr[-1]
+        envelope_cutoff = (region[1] - region[0]) / units
+    else:
+        envelope_cutoff = 0
+
+    # tag rows based on the threshold
+    df['acc'] = df['value'] > VALUE_MIDDLE
+    # first row is a True preceded by a False
+    fst = df.index[df['acc'] & ~ df['acc'].shift(1).fillna(False)]
+    # last row is a True followed by a False
+    lst = df.index[df['acc'] & ~ df['acc'].shift(-1).fillna(False)]
+    # filter those which are adequately apart
+    pa = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+    # This is now a series of contiguous regions
+    if len(pa) > 0:
+        region = pa[-1]
+        envelope_accuracy = (region[1] - region[0]) / units
+    else:
+        envelope_accuracy = 0
+
+
+    # tag rows based on the threshold
+    df['cert'] = df['value'] > unsure_top
+    # first row is a True preceded by a False
+    fst = df.index[df['cert'] & ~ df['cert'].shift(1).fillna(False)]
+    # last row is a True followed by a False
+    lst = df.index[df['cert'] & ~ df['cert'].shift(-1).fillna(False)]
+    # filter those which are adequately apart
+    pc = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+    # This is now a series of contiguous regions
+    if len(pc) > 0:
+        region = pc[-1]
+        envelope_certainty = (region[1] - region[0]) / units
+    else:
+        envelope_certainty = 0
+
+
+    return envelope_accuracy, envelope_certainty, envelope_cutoff
 
 def get_stat_reversals(events, frame_view):
     reversals = 0
+    status = 0
 
+    for time, value in events:
+        polarity = get_polarity(value)
+        if polarity is not 0:
+            if polarity is not status:
+                reversals += 1
+                status = polarity
+
+    # if reversals > 0:
+    #     print("success " + str(reversals))
     return reversals
 
 def get_stat_total_confidence(events, frame_view):
@@ -379,7 +459,7 @@ def analyze_participant(trial_row):
     frame_view = new_frame_view(events, video_length)
 
     pct_correct, pct_incorrect, pct_unsure = get_stat_percents(events, frame_view)
-    envelope_accuracy, envelope_cutoff = get_stat_envelope(events, frame_view)
+    envelope_accuracy, envelope_certainty, envelope_cutoff = get_stat_envelope(events, frame_view)
     reversals = get_stat_reversals(events, frame_view)
     total_confidence = get_stat_total_confidence(events, frame_view)
     total_accuracy = get_stat_total_accuracy(events, frame_view)
@@ -387,9 +467,11 @@ def analyze_participant(trial_row):
     analyses = {}
     analyses['total_confidence'] = total_confidence
     analyses['total_accuracy'] = total_accuracy
-    analyses['reversals'] = total_accuracy
+    analyses['reversals'] = reversals
+
     analyses['envelope_cutoff'] = envelope_cutoff
     analyses['envelope_accuracy'] = envelope_accuracy
+    analyses['envelope_certainty'] = envelope_certainty
 
     analyses['pct_unsure'] = pct_unsure
     analyses['pct_correct'] = pct_correct
@@ -406,9 +488,12 @@ def analyze_all_participants(df):
     for i, row in df.iterrows():
         analyses, frame_view = analyze_participant(row)
 
-        df.at[i,"Pathing Method"] = get_pm_label(row)
-        df.at[i,"Perspective"] = get_perspective_label(row)
-        df.at[i,"Match Condition"] = get_perspective_label(row)
+        # Add pretty labels for making graphs later
+        df.at[i,COL_PATHING] = get_pm_label(row)
+        df.at[i,COL_CHAIR] = get_perspective_label(row)
+
+        # Add pretty and easy sorting mechanism for mismatches
+        df.at[i,COL_MATCHING] = get_perspective_label(row)
 
         for key in analyses.keys():
             df.at[i,key] = analyses[key]
@@ -454,13 +539,24 @@ def plot_confidence_one_participant_full(trial_row):
 # plot_confidence_one_participant(row)
 # plot_confidence_one_participant_full(row)
 
+# A_PCT_UNSURE = 'pct_unsure'
+# A_PCT_CORRECT = 'pct_correct'
+# A_PCT_INCORRECT = 'pct_incorrect'
+# A_REVERSALS = 'reversals'
+
 # analysis_categories = ['total_confidence', 'total_accuracy', 'reversals', 'envelope_cutoff', 'envelope_accuracy', 'pct_unsure', 'pct_correct', 'pct_incorrect']
-analysis_categories = ['pct_unsure', 'pct_correct', 'pct_incorrect']
+analysis_categories = ['pct_unsure', 'pct_correct', 'pct_incorrect', 'reversals', 'envelope_cutoff', 'envelope_accuracy','envelope_certainty']
+
 pretty_al = {}
 pretty_al['pct_unsure'] = "Percent of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
 pretty_al['pct_correct'] = "Percent of Time Spent Correct"
 pretty_al['pct_incorrect'] = "Percent of Time Spent Incorrect"
+pretty_al['reversals'] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "%)"
+pretty_al['envelope_cutoff'] = "Envelope (in seconds) of Certainty Beyond Cutoff"
+pretty_al['envelope_accuracy'] = "Envelope (in seconds) of Staying Accurate"
+pretty_al['envelope_certainty'] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
 
+# analysis_categories = ['reversals']
 
 UNSURE_WINDOW = 5
 FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
@@ -473,11 +569,6 @@ categories = pathing_methods
 custom_palette = sns.color_palette("Paired", 2)
 sns.set_palette(custom_palette)
 # sns.set_palette("colorblind")
-
-COL_PATHING = 'Pathing Method'
-COL_CHAIR = 'Perspective'
-COL_GOAL = 'Goal Table'
-COL_MATCHING = 'Match Condition'
 
 cat_order = ["Omniscient", "Single:A", "Single:B", "Multi"]
 
@@ -492,23 +583,44 @@ for goal in goals:
         graph_type = "boxplot"
         plt.figure()
         bx = sns.boxplot(data=df_goal, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
-        bx.set(xlabel='Pathing Method',ylabel=pretty_al[analysis])
+        bx.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
         figure = bx.get_figure()    
         figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ analysis + '.png')
         plt.close()
 
-        graph_type = "stripplot"
-        plt.figure()
-        bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
-                       data=df_goal, 
-                       jitter=True, 
-                       marker='o', 
-                       alpha=0.5,
-                       hue=COL_CHAIR, order=cat_order)
-        bplot.set(xlabel='Pathing Method',ylabel=pretty_al[analysis])
-        figure = bplot.get_figure()    
-        figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ analysis + '.png')
-        plt.close()
+        # graph_type = "stripplot"
+        # plt.figure()
+        # bplot=sns.stripplot(y=analysis, x=COL_PATHING, 
+        #                data=df_goal, 
+        #                jitter=True, 
+        #                marker='o', 
+        #                alpha=0.5,
+        #                hue=COL_CHAIR, order=cat_order)
+        # bplot.set(xlabel='Pathing Method', ylabel=pretty_al[analysis])
+        # figure = bplot.get_figure()    
+        # figure.savefig(FILENAME_PLOTS + graph_type + "-" + goal_title + "-"+ analysis + '.png')
+        # plt.close()
+
+        # # Do some ANOVA checks
+        # formula = ""
+        # model = ols(formula, data=df_goal).fit()
+        # sm.stats.anova_lm(model, typ=2)
+
+
+        # print(accuracy_df)
+        # fvalue_acc, pvalue_acc = stats.f_oneway(accuracy_df['Omn'], accuracy_df['M'], accuracy_df['SA'], accuracy_df['SB'])
+        # print("fvalue,pvalue: " + str(fvalue_acc) + ',' +str(pvalue_acc))
+
+        # #get ANOVA table 
+        # accuracy_df_melt = pd.melt(accuracy_df.reset_index(), id_vars = ['index'], value_vars=['Omn', 'M', 'SA', 'SB'])
+        # accuracy_df_melt.columns = ['index', 'treatments', 'value']
+        # # Ordinary Least Squares (OLS) model
+        # model_acc = ols.ols('value ~ C(treatments)', data=accuracy_df_melt).fit()
+        # anova_table_acc = sm.stats.anova_lm(model_acc,typ=2)
+        # print(anova_table_acc)
+
+
+
 
     print("DONE with " + goal_title)
 print("FINISHED")
