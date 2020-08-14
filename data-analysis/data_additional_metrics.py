@@ -379,10 +379,10 @@ def slider_test():
     df.loc[0] = [events]
 
     post_events = get_slider_events(df)
-    print("Post events")
-    print(post_events)
-    print(post_events.shape)
-    print("Slider test OK")
+    # print("Post events")
+    # print(post_events)
+    # print(post_events.shape)
+    # print("Slider test OK")
 
 def get_polarity(value):
     unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
@@ -626,13 +626,11 @@ def get_stat_is_flipped(events, frame_view, lp):
                 status = polarity
     
     if status > 0:
-        return FLIPPED
+        return NOT_FLIPPED
     elif status == 0:
         return INDECISIVE
     else:
-        print(lp)
-        print(events)
-        return NOT_FLIPPED
+        return FLIPPED
 
 
 
@@ -677,17 +675,22 @@ def get_mismatch_label(row):
 
     return label
 
-# Given a row, return a dictionary of new analysis columns for understanding
-def analyze_participant(trial_row):
-
+# Create a unique human-readable string to identify this specific entry
+def get_lookup_packet(trial_row):
     goaltable = trial_row['goaltable']
     iv = trial_row['IV']
     viewpoint = trial_row['viewpoint']
     person_id = trial_row['uniqueid']
     lookup_packet = (person_id, iv, viewpoint, goaltable)
-    lp = str(lookup_packet)
+    return str(lookup_packet)
 
-    status, events = get_slider_events(trial_row, lp)
+# Given a row, return a dictionary of new analysis columns for understanding
+def analyze_participant(trial_row):
+
+    lookup_packet = get_lookup_packet(trial_row)
+    lp = lookup_packet
+
+    status, events = get_slider_events(trial_row, lookup_packet)
     times = []
     values = []
 
@@ -947,6 +950,8 @@ print(max_video)
 UNSURE_WINDOW = 5
 FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
 
+
+# CONDUCT ANALYSIS ON DATA
 analysis_categories = al_title.keys()
 # analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
 
@@ -967,21 +972,16 @@ al_y_range[A_TT_ACC] =      (0, max_video)
 al_y_range[A_TT_CERT] =     (0, max_video)
 
 
-
+# GENERATE GRAPHS FOR DATA
 goal = 3
 # goals = [3]
 goal_title = goal_names[goal]
 categories = pathing_methods
 # perspective = don't care
 
-# colors = ["windows blue", "amber", "faded green", "dusty purple"]
-# # sns.palplot()
+# Colors aligned with blue and yellow of the table images
 PATH_COLORS = [(0,255,255), (255,64,64), (0,201,87)]
-# Create an array with the colors you want to use
 PATH_COLORS = ["amber", "windows blue"]
-# Set your custom color palette
-# sns.set_palette(sns.color_palette(PATH_COLORS))
-
 
 custom_palette = sns.xkcd_palette(PATH_COLORS) #sns.color_palette("Paired", 2)
 sns.set_palette(custom_palette)
