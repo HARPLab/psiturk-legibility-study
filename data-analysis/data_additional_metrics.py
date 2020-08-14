@@ -9,6 +9,7 @@ import scipy.stats as stats
 import statsmodels.api as sm
 import statsmodels.formula.api as ols
 from pingouin import pairwise_tukey
+import pingouin as pg
 import copy
 import seaborn as sns
 import numpy as np
@@ -67,6 +68,7 @@ P_LOOKUP = 'lookup-packet'
 GRAPH_BOXPLOT = True
 GRAPH_STRIPPLOT = True
 GRAPH_BLENDED = True
+CALC_ANOVA = True
 
 STATUS_GLITCH_UNSUPPORTED_BROWSER = "unsupported browser"
 STATUS_GLITCH_NO_EVENTS = "no events found"
@@ -868,6 +870,51 @@ def plot_confidence_one_participant_full(trial_row):
     plt.title('Raw Slider Values for Participant ' + trial_row['uniqueid'] + ' During Trial ' + str(trial_row['goaltable']) + ', ' + str(trial_row['IV']))
     plt.savefig("testPlots2.png", bbox_inches='tight')
 
+
+def is_unique(s):
+    a = s.to_numpy() # s.values (pandas<0.24)
+    return (a[0] == a).all()
+
+def make_anova(df, analysis_label, fn, title):
+    SIGNIFICANCE_CUTOFF = .4
+    if CALC_ANOVA:
+        # print("ANOVA FOR ")
+        # print(analysis_label)
+        # print(df[analysis_label])
+
+        subject_id = 'uniqueid'
+
+        df_col = df[analysis_label]
+        a = df.to_numpy()
+        valid_data = (a[0] == a).all()
+
+        if valid_data:
+            aov = pg.mixed_anova(dv=analysis_label, between=COL_CHAIR, within=COL_PATHING, subject=subject_id, data=df)
+            aov.round(3)
+        else:
+            print("Issue creating ANOVA for " + analysis_label)
+            print("Verify that there are at least a few non-identical values recorded")
+            return
+
+        p_vals = aov['p-unc']
+        p_chair = p_vals[0]
+        p_path_method = p_vals[1]
+
+        if p_chair < SIGNIFICANCE_CUTOFF:
+            print("Chair position is significant for " + analysis_label + ": " + str(p_chair))
+            print(title)
+        if p_path_method < SIGNIFICANCE_CUTOFF:
+            print("Pathing method is significant for " + analysis_label + ": " + str(p_path_method))
+            print(title)
+
+        # Verify that subjects is legit
+        # print(df[subject_id])
+
+        # posthocs = pg.pairwise_ttests(dv=analysis_label, within=COL_PATHING, between=COL_CHAIR,
+        #                           subject=subject_id, data=df)
+        # pg.print_table(posthocs)
+        # return anova
+
 def make_boxplot(df, analysis, fn, title):
     if GRAPH_BOXPLOT:
         graph_type = "boxplot"
@@ -952,8 +999,8 @@ FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
 
 
 # CONDUCT ANALYSIS ON DATA
-analysis_categories = al_title.keys()
-# analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
+# analysis_categories = al_title.keys()
+analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
 
 df_analyzed = copy.copy(df_trials)
 df_analyzed = analyze_all_participants(df_analyzed)
@@ -974,7 +1021,7 @@ al_y_range[A_TT_CERT] =     (0, max_video)
 
 # GENERATE GRAPHS FOR DATA
 goal = 3
-# goals = [3]
+goals = [3]
 goal_title = goal_names[goal]
 categories = pathing_methods
 # perspective = don't care
@@ -985,10 +1032,12 @@ PATH_COLORS = ["amber", "windows blue"]
 
 custom_palette = sns.xkcd_palette(PATH_COLORS) #sns.color_palette("Paired", 2)
 sns.set_palette(custom_palette)
-# sns.set_palette("colorblind")
 
+# Set a consistent ordering for the groupings of analysis
 cat_order = [LABELS_PATHING['Omn'], LABELS_PATHING['SB'], LABELS_PATHING['SA'], LABELS_PATHING['M']]
 
+# For each stimuli, group the data and inspect individually
+# (this should help distill what's going on)
 for goal in goals:
     goal_title = goal_names[goal]
     df_goal = df_analyzed[df_analyzed['goaltable'] == goal]
@@ -1000,10 +1049,11 @@ for goal in goals:
         # print(df_goal)
 
         title = al_title[analysis]
-        title += "\n for the goal " + goal_title
+        title += "\nfor the goal " + goal_title
         fn = FILENAME_PLOTS + goal_title + "-" + analysis + "-"
         make_boxplot(df_goal, analysis, fn, title)
         make_stripplot(df_goal, analysis, fn, title)
+        make_anova(df_goal, analysis, fn, title)
         
 
         # TODO: ANOVAs, highlight if something interesting
