@@ -878,6 +878,7 @@ def is_unique(s):
 def make_anova(df, analysis_label, fn, title):
     SIGNIFICANCE_CUTOFF = .4
     if CALC_ANOVA:
+        anova_text = title + "\n"
         # print("ANOVA FOR ")
         # print(analysis_label)
         # print(df[analysis_label])
@@ -885,35 +886,44 @@ def make_anova(df, analysis_label, fn, title):
         subject_id = 'uniqueid'
 
         df_col = df[analysis_label]
-        a = df.to_numpy()
-        valid_data = (a[0] == a).all()
+        val_min = df_col.get(df_col.idxmin())
+        val_max = df_col.get(df_col.idxmax())
+        homogenous_data = (val_min == val_max)
 
-        if valid_data:
+        if not homogenous_data:
             aov = pg.mixed_anova(dv=analysis_label, between=COL_CHAIR, within=COL_PATHING, subject=subject_id, data=df)
             aov.round(3)
+
+            anova_text = anova_text + str(aov)
+
+            p_vals = aov['p-unc']
+            p_chair = p_vals[0]
+            p_path_method = p_vals[1]
+
+            if p_chair < SIGNIFICANCE_CUTOFF:
+                print("Chair position is significant for " + analysis_label + ": " + str(p_chair))
+                print(title)
+            if p_path_method < SIGNIFICANCE_CUTOFF:
+                print("Pathing method is significant for " + analysis_label + ": " + str(p_path_method))
+                print(title)
+
+            anova_text = anova_text + "\n"
+            # Verify that subjects is legit
+            # print(df[subject_id])
+
+            # posthocs = pg.pairwise_ttests(dv=analysis_label, within=COL_PATHING, between=COL_CHAIR,
+            #                           subject=subject_id, data=df)
+            # anova_text = anova_text + pg.print_table(posthocs)
+
         else:
-            print("Issue creating ANOVA for " + analysis_label)
+            print("! Issue creating ANOVA for " + analysis_label)
             print("Verify that there are at least a few non-identical values recorded")
-            return
+            anova_text = anova_text + "Column homogenous with value " + str(val_min)
 
-        p_vals = aov['p-unc']
-        p_chair = p_vals[0]
-        p_path_method = p_vals[1]
 
-        if p_chair < SIGNIFICANCE_CUTOFF:
-            print("Chair position is significant for " + analysis_label + ": " + str(p_chair))
-            print(title)
-        if p_path_method < SIGNIFICANCE_CUTOFF:
-            print("Pathing method is significant for " + analysis_label + ": " + str(p_path_method))
-            print(title)
-
-        # Verify that subjects is legit
-        # print(df[subject_id])
-
-        # posthocs = pg.pairwise_ttests(dv=analysis_label, within=COL_PATHING, between=COL_CHAIR,
-        #                           subject=subject_id, data=df)
-        # pg.print_table(posthocs)
-        # return anova
+        f = open(fn + "anova.txt", "w")
+        f.write(anova_text)
+        f.close()
 
 def make_boxplot(df, analysis, fn, title):
     if GRAPH_BOXPLOT:
