@@ -22,7 +22,7 @@ REVERSALS_WINDOW = 5 #the amount of values around 50 that don't count as the par
 RETURN_LIST_OF_AVERAGES = False #if you want the list of all the trials' averages (or total list of reversals) rather than the overall averages
 UNSUPPORTED_BROWSER_ERROR = False #for the pilot study, some people used unsupported browsers. If that's the case, this will trigger and adapt the rest of it
 
-FILENAME_PLOTS = "plots/"
+FILENAME_PLOTS = "plots/no-outlier-"
 
 VALUE_MIDDLE = 50
 VALUE_MAX = 100
@@ -58,6 +58,8 @@ A_TT_CUTOFF = 'tt_cutoff'
 A_TT_ACC = 'tt_accuracy'
 A_TT_CERT = 'tt_certainty'
 
+A_FLIPPED = 'is-flipped'
+
 P_GLITCHES = 'glitches'
 P_POST_EVENTS = 'post-events'
 P_LOOKUP = 'lookup-packet'
@@ -79,6 +81,20 @@ LABELS_PATHING['SB'] = "Single:B\n (for facing-robot)"
 # Static math
 unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
 unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
+
+perspectives_file = ['PA','PB']
+pathings_file = ['Omn', 'SA', 'SB', 'Multi']
+
+# OUTPUT helper for finding video lengths
+# video_lengths ={}
+# for goal in goals:
+#     for pathing in pathing_methods:
+#         for perspective in perspectives:
+#             # print(pathing + "_" + str(int(goal)) + "_" + perspective + ".mp4")
+#             key = (pathing, goal, perspective)
+#             print("video_lengths.append(" + str(key) + ", v)")
+
+
 
 '''
  START: BOILER PLATE SET UP
@@ -141,6 +157,47 @@ if not FLAG_LOCAL_VERSION:
 else:
     df = pd.read_json('pilot-all-frames.json')
     print("Pandas data imported from JSON")
+
+video_lengths = {}
+video_lengths[('Omn', 0, 0)] = 11.233333
+video_lengths[('Omn', 0, 1)] = 8.63333
+video_lengths[('SA', 0, 0)] = 10.8333
+video_lengths[('SA', 0, 1)] = 10.400000
+
+video_lengths[('SB', 0, 0)] = 11.666667
+video_lengths[('SB', 0, 1)] = 9.7000
+video_lengths[('M', 0, 0)] = 11.1333
+video_lengths[('M', 0, 1)] = 9.600
+
+video_lengths[('Omn', 1, 0)] = 11.76666
+video_lengths[('Omn', 1, 1)] = 11.700000
+video_lengths[('SA', 1, 0)] = 11.7333
+video_lengths[('SA', 1, 1)] = 11.233333
+
+video_lengths[('SB', 1, 0)] = 11.866667
+video_lengths[('SB', 1, 1)] = 11.400000
+video_lengths[('M', 1, 0)] = 11.66666
+video_lengths[('M', 1, 1)] = 11.800000
+
+video_lengths[('Omn', 2, 0)] = 12.93333
+video_lengths[('Omn', 2, 1)] = 12.4333
+video_lengths[('SA', 2, 0)] = 13.1000
+video_lengths[('SA', 2, 1)] = 13.466667
+
+video_lengths[('SB', 2, 0)] = 13.1666
+video_lengths[('SB', 2, 1)] = 13.800
+video_lengths[('M', 2, 0)] = 13.1000
+video_lengths[('M', 2, 1)] = 12.600
+
+video_lengths[('Omn', 3, 0)] = 10.96666
+video_lengths[('Omn', 3, 1)] = 11.166667
+video_lengths[('SA', 3, 0)] = 12.20000
+video_lengths[('SA', 3, 1)] = 12.7000
+
+video_lengths[('SB', 3, 0)] = 11.46666
+video_lengths[('SB', 3, 1)] = 11.46666
+video_lengths[('M', 3, 0)] = 11.33333
+video_lengths[('M', 3, 1)] = 11.133333
 
 '''
  END: BOILER PLATE SET UP
@@ -235,8 +292,15 @@ DEFAULT_START = 50
 '''
 Given a dataframe/trial_row, return the list (of lists) that represents the slider events from that trial
 '''
-def get_slider_events(trial_row):
+def get_slider_events(trial_row, lp):
     ERROR_EVENTS = [[0,DEFAULT_START]]
+    pathing = trial_row['IV']
+    goal = trial_row['goaltable']
+    perspective = trial_row['condition']
+
+    key = (pathing, goal, perspective)
+    final_timestamp = int(video_lengths[key] * 1000) + 1
+    # print(final_timestamp)
 
     if trial_row.empty:
         print("Participant " + pid + " did not complete a trial")
@@ -245,7 +309,8 @@ def get_slider_events(trial_row):
     slider_events = trial_row['events']
     status = STATUS_NORMAL
     # print(len(slider_events))
-    
+    clean_events = [[0, DEFAULT_START]]
+
     #Cleans glitchy data. We should enforce the browsers we want, and see if these still occur
     if len(slider_events) != 0:
         #Take care of some glitched data, where an erroneous first event is recorded 
@@ -259,7 +324,8 @@ def get_slider_events(trial_row):
         #Take care of some glitched data, where events are recorded after the end of the video. Remove those events
         i = 0
         glitch = False
-        vidlength = round(trial_row['videoduraction'] * 1000)
+        
+        vidlength = final_timestamp #round(trial_row['videoduraction'] * 1000)
         for event in slider_events:
             time = event[0]
             if time == None: #believe this is another odd case of someone using a non-supported browser, but not sure 
@@ -270,10 +336,28 @@ def get_slider_events(trial_row):
             if time > vidlength: #found an event that took place after the video ended
 #                print("fixed glitched data: Last event glitch")
                 glitch = True
-                status = STATUS_GLITCH_EVENT_PAST_VIDEO_END
-                print(str(time) +" is longer than "+ str(vidlength))
+                # THIS IS NO LONGER A GLITCH, HANDLED
+                # status = STATUS_GLITCH_EVENT_PAST_VIDEO_END
+                # print("~~~")
+                # print(str(time) +" is longer than "+ str(vidlength))
+                # print(slider_events)
+                # return clean_events, status
+                clean_events.append([final_timestamp, clean_events[-1][1]])
+                # print(clean_events)
                 break
             i = i+1
+            clean_events.append(event)
+
+        
+        # print("Final event is ")
+        if (len(slider_events) > 0):
+            final_val = slider_events[-1][1]
+            # print(slider_events[-1])
+        else:
+            # print("No events " + status)
+            final_val = -1
+        # slider_events.append([final_timestamp, final_val])
+
         if glitch:
             # slider_events = slider_events[0:i] #slice off any of that data
             # status = STATUS_GLITCH
@@ -282,9 +366,10 @@ def get_slider_events(trial_row):
     else:
         status = STATUS_GLITCH_NO_EVENTS
 
+
     # print(type(slider_events))
     # print(status)
-    return status, slider_events
+    return status, clean_events
 
 def slider_test():
     events = [[100, 50],[110, 44],[120, 50],[130, 56],[135, 75],[150, 100]]
@@ -398,10 +483,14 @@ def get_stat_envelope(events, frame_view, lookup_packet):
     
     # This is now a series of contiguous regions
     if len(pr) > 0:
+        # print(pr)
         region = pr[-1]
         envelope_cutoff = (region[1] - region[0]) / units
     else:
         envelope_cutoff = 0
+        # print("Never right acc cutoff?")
+        # print(lookup_packet)
+        # print(events)
         # print(lp)
 
     # tag rows based on the threshold
@@ -419,8 +508,10 @@ def get_stat_envelope(events, frame_view, lookup_packet):
 
     else:
         envelope_accuracy = 0
-        print("Never right acc env?")
-        print(lookup_packet)
+        # print("Never right acc env?")
+        # print(lookup_packet)
+        # print(events)
+        # print("~~~")
 
 
     # tag rows based on the threshold
@@ -438,7 +529,12 @@ def get_stat_envelope(events, frame_view, lookup_packet):
     else:
         envelope_certainty = 0
 
+    # print(envelope_accuracy, envelope_certainty, envelope_cutoff)
 
+    if envelope_accuracy == 0:
+        # print("Never accurate")
+        # print(lookup_packet)
+        pass
     return envelope_accuracy, envelope_certainty, envelope_cutoff
 
 def get_stat_tt(events, frame_view, lookup_packet):
@@ -516,6 +612,30 @@ def get_stat_reversals(events, frame_view, lp):
     #     print("success " + str(reversals))
     return reversals
 
+NOT_FLIPPED = 1
+INDECISIVE = 0
+FLIPPED = -1
+
+def get_stat_is_flipped(events, frame_view, lp):
+    status = 0
+
+    for time, value in events:
+        polarity = get_polarity(value)
+        if polarity is not 0:
+            if polarity is not status:
+                status = polarity
+    
+    if status > 0:
+        return FLIPPED
+    elif status == 0:
+        return INDECISIVE
+    else:
+        print(lp)
+        print(events)
+        return NOT_FLIPPED
+
+
+
 def get_stat_total_confidence(events, frame_view, lp):
     acc = 0
 
@@ -559,9 +679,6 @@ def get_mismatch_label(row):
 
 # Given a row, return a dictionary of new analysis columns for understanding
 def analyze_participant(trial_row):
-    status, events = get_slider_events(trial_row)
-    times = []
-    values = []
 
     goaltable = trial_row['goaltable']
     iv = trial_row['IV']
@@ -569,6 +686,13 @@ def analyze_participant(trial_row):
     person_id = trial_row['uniqueid']
     lookup_packet = (person_id, iv, viewpoint, goaltable)
     lp = str(lookup_packet)
+
+    status, events = get_slider_events(trial_row, lp)
+    times = []
+    values = []
+
+    # lookup_packet = (person_id, iv, viewpoint, goaltable, status)
+    # lp = str(lookup_packet)
 
     # print("Analysis for person id: " + str(person_id))
 
@@ -582,6 +706,7 @@ def analyze_participant(trial_row):
     total_confidence = get_stat_total_confidence(events, frame_view, lp)
     total_accuracy = get_stat_total_accuracy(events, frame_view, lp)
 
+    is_flipped = get_stat_is_flipped(events, frame_view, lp)
 
 
     analyses = {}
@@ -607,12 +732,31 @@ def analyze_participant(trial_row):
     analyses[A_PCT_CORRECT] = pct_correct
     analyses[A_PCT_INCORRECT] = pct_incorrect
 
+    analyses[A_FLIPPED] = is_flipped
+
     # analyses['avg_accuracy'] = get_overall_confidence(events, video_length)
     # analyses['avg_accuracy'] = get_overall_confidence(events, video_length)
     # analyses['avg_accuracy'] = get_overall_confidence(events, video_length)
     
 
     return analyses, frame_view
+
+def clean_flipped_data(df):
+    df_clean = df[df[A_FLIPPED] != FLIPPED]
+    df_flipped = df[df[A_FLIPPED] == FLIPPED]
+    df_indecisive = df[df[A_FLIPPED] == INDECISIVE]
+
+
+    pct = (1.0 * len(df_flipped) / len(df))
+
+    print("Removed " + str(len(df_flipped)) + "flipped entries out of " + str(len(df)) + " -> " + str(pct) + "%")
+    pct = (1.0 * len(df_indecisive) / len(df))
+    print("Retained " + str(len(df_indecisive)) + " indecisive entries out of " + str(len(df)) + " -> " + str(pct) + "%")
+
+    # TODO add filtering summary
+    print("Clean entries: " + str(len(df_clean)) + "")
+
+    return df_clean
 
 
 def clean_glitchy_data_and_report(df):
@@ -656,6 +800,8 @@ def analyze_all_participants(df):
     # remove glitched entries and report
     
     df = clean_glitchy_data_and_report(df)
+
+    df = clean_flipped_data(df)    
 
     print("Time to make some graphs")
     print(df.columns)
@@ -726,6 +872,10 @@ def make_boxplot(df, analysis, fn, title):
         # plt.tight_layout()
         # title = al_title[analysis] + "\n" + al_y_range
         bx = sns.boxplot(data=df, x=COL_PATHING, y=analysis, hue=COL_CHAIR, order=cat_order)
+        # print("San check on data")
+        # print(df[analysis])
+        # print(df[analysis].columns)
+
         bx.set(xlabel='Pathing Method')
         ylims = al_y_range[analysis]
         bx.set(ylim=ylims)
@@ -765,9 +915,9 @@ al_y_units = {}
 al_y_range = {}
 
 al_title[A_PCT_UNSURE] = "Proportion of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
-al_title[A_PCT_CORRECT] = "Percent of Time Spent Correct"
-al_title[A_PCT_INCORRECT] = "Percent of Time Spent Incorrect"
-al_title[A_REVERSALS] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "%)"
+al_title[A_PCT_CORRECT] = "Proportion of Time Spent Correct"
+al_title[A_PCT_INCORRECT] = "Proportion of Time Spent Incorrect"
+al_title[A_REVERSALS] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "% from neutral)"
 al_title[A_ENV_CUTOFF] = "Envelope (in seconds) of Certainty Beyond Cutoff"
 al_title[A_ENV_ACC] = "Envelope (in seconds) of Staying Accurate"
 al_title[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
@@ -790,7 +940,7 @@ al_y_units[A_TT_ACC] = "Time (in seconds)"
 al_y_units[A_TT_CERT] = "Time (in seconds)"
 
 
-max_video = round(df_trials["videoduraction"].max() * 1000)
+max_video = round(df_trials["videoduraction"].max())
 print("Max Video Length")
 print(max_video)
 
@@ -817,14 +967,24 @@ al_y_range[A_TT_ACC] =      (0, max_video)
 al_y_range[A_TT_CERT] =     (0, max_video)
 
 
+
 goal = 3
-# goals = [3, 1]
+# goals = [3]
 goal_title = goal_names[goal]
 categories = pathing_methods
 # perspective = don't care
 
-# custom_palette = sns.color_palette("Paired", 2)
-# sns.set_palette(custom_palette)
+# colors = ["windows blue", "amber", "faded green", "dusty purple"]
+# # sns.palplot()
+PATH_COLORS = [(0,255,255), (255,64,64), (0,201,87)]
+# Create an array with the colors you want to use
+PATH_COLORS = ["amber", "windows blue"]
+# Set your custom color palette
+# sns.set_palette(sns.color_palette(PATH_COLORS))
+
+
+custom_palette = sns.xkcd_palette(PATH_COLORS) #sns.color_palette("Paired", 2)
+sns.set_palette(custom_palette)
 # sns.set_palette("colorblind")
 
 cat_order = [LABELS_PATHING['Omn'], LABELS_PATHING['SB'], LABELS_PATHING['SA'], LABELS_PATHING['M']]
@@ -835,7 +995,10 @@ for goal in goals:
     # print(df_goal.shape)
 
     for analysis in analysis_categories:
-        
+        # print(df_goal[analysis])
+
+        # print(df_goal)
+
         title = al_title[analysis]
         title += "\n for the goal " + goal_title
         fn = FILENAME_PLOTS + goal_title + "-" + analysis + "-"
@@ -855,7 +1018,9 @@ t1 = "('debugRg8DP:debugDKHYC', 'M', 'B', 2.0)"
 t2 = "('debugRg8DP:debugDKHYC', 'M', 'B', 3.0)"
 t3 = "('debugYuhM3:debugdoGQl', 'M', 'B', 1.0)"
 t4 = "('debugYuhM3:debugdoGQl', 'SA', 'B', 0.0)"
-troublemakers = [t1, t2, t3, t4]
+t5 = "('debugYuhM3:debugdoGQl', 'SA', 'B', 0.0)"
+# This one is never accurate
+troublemakers = [t5]
 
 for t in troublemakers:
     df_trouble = df_analyzed[df_analyzed[P_LOOKUP] == t]
