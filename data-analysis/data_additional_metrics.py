@@ -968,13 +968,27 @@ def make_stripplot(df, analysis, fn, title):
             figure.savefig(FILENAME_PLOTS + fn + graph_type + '.png', bbox_inches='tight')
             plt.close()
 
+def inspect_troublemakers(list_of_lookup_packets):
+    for t in troublemakers:
+        df_trouble = df_analyzed[df_analyzed[P_LOOKUP] == t]
+        df_trouble = df_trouble.iloc[0]
+
+        # Should only be one
+        t_id = t
+        t_id = t_id.replace("(", "")
+        t_id = t_id.replace(")", "")
+        t_id = t_id.replace("\'", "")
+        t_id = t_id.replace(", ", "-")
+        print("Found and generating raw slider log for " + t_id)
+
+        fn = "trouble-" + t_id + ".png"
+        plot_analysis_one_participant(df_trouble, t, fn)
+        # Add dirty data marker, too
+
+
 '''
  END: METHOD DECLARATIONS
 '''
-
-# row = df_analyzed.loc[0]
-# plot_confidence_one_participant(row)
-# plot_confidence_one_participant_full(row)
 
 al_title = {}
 al_y_units = {}
@@ -1088,23 +1102,7 @@ t5 = "('debugYuhM3:debugdoGQl', 'SA', 'B', 0.0)"
 # This one is never accurate
 troublemakers = [t5]
 
-for t in troublemakers:
-    df_trouble = df_analyzed[df_analyzed[P_LOOKUP] == t]
-    # print(type(df_trouble))
-    df_trouble = df_trouble.iloc[0]
-
-    print(df_trouble.shape)
-    # Should only be one
-    t_id = t
-    t_id = t_id.replace("(", "")
-    t_id = t_id.replace(")", "")
-    t_id = t_id.replace("\'", "")
-    t_id = t_id.replace(", ", "-")
-    print(t_id)
-
-    fn = "trouble-" + t_id + ".png"
-    plot_analysis_one_participant(df_trouble, t, fn)
-    # Add dirty data marker, too
+inspect_troublemakers(troublemakers)
 
 print("FINISHED")
 
