@@ -898,6 +898,7 @@ def make_anova(df, analysis_label, fn, title):
             aov.round(3)
 
             anova_text = anova_text + str(aov)
+            aov.to_csv(FILENAME_ANOVAS + fn + 'anova.csv')
 
             p_vals = aov['p-unc']
             p_chair = p_vals[0]
@@ -917,6 +918,7 @@ def make_anova(df, analysis_label, fn, title):
             # posthocs = pg.pairwise_ttests(dv=analysis_label, within=COL_PATHING, between=COL_CHAIR,
             #                           subject=subject_id, data=df)
             # anova_text = anova_text + pg.print_table(posthocs)
+            # posthocs.to_csv(FILENAME_ANOVAS + fn + 'posthocs.csv')
 
         else:
             print("! Issue creating ANOVA for " + analysis_label)
