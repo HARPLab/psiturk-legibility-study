@@ -25,6 +25,7 @@ UNSUPPORTED_BROWSER_ERROR = False #for the pilot study, some people used unsuppo
 
 FILENAME_OUTPUTS = "outputs/"
 FILENAME_PLOTS = FILENAME_OUTPUTS + "plots/"
+FILENAME_TROUBLEMAKERS = FILENAME_OUTPUTS + "inspections/"
 FILENAME_ANOVAS = FILENAME_OUTPUTS + "anovas/"
 FILENAME_PREFIX = ""
 
@@ -857,7 +858,7 @@ def plot_analysis_one_participant(trial_row, lp, fn):
     plt.xlabel('Timestamp (milliseconds)')
     plt.ylabel('Average Raw Slider Value')
     plt.title('Confidence Values for Participant ' + str(uniqueid) + ' \nDuring Trial ' + str(goaltable) + ', ' + str(iv) +  " \nstatus=" + glitch)
-    plt.savefig(fn)
+    plt.savefig(FILENAME_TROUBLEMAKERS + fn)
     plt.close()
     
 
@@ -1101,7 +1102,7 @@ for t in troublemakers:
     t_id = t_id.replace(", ", "-")
     print(t_id)
 
-    fn = FILENAME_PLOTS + "trouble-" + t_id + ".png"
+    fn = "trouble-" + t_id + ".png"
     plot_analysis_one_participant(df_trouble, t, fn)
     # Add dirty data marker, too
 
