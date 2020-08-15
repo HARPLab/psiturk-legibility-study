@@ -54,9 +54,17 @@ A_PCT_INCORRECT = 'pct_incorrect'
 
 A_REVERSALS = 'reversals'
 
-A_ENV_CUTOFF = 'envelope_cutoff'
-A_ENV_ACC = 'envelope_accuracy'
-A_ENV_CERT = 'envelope_certainty'
+A_ENV_START_THRESHOLD   = 'envelope_start_threshold'
+A_ENV_START_ACC         = 'envelope_start_accuracy'
+A_ENV_START_CERT        = 'envelope_start_certainty'
+
+A_ENV_END_THRESHOLD = 'envelope_end_threshold'
+A_ENV_END_ACC       = 'envelope_end_accuracy'
+A_ENV_END_CERT      = 'envelope_end_certainty'
+
+A_ENV_LEN_THRESHOLD = 'envelope_length_threshold'
+A_ENV_LEN_ACC       = 'envelope_length_accuracy'
+A_ENV_LEN_CERT      = 'envelope_length_certainty'
 
 
 A_TT_CUTOFF = 'tt_cutoff'
@@ -473,75 +481,122 @@ def get_stat_percents(events, df, lp):
 
     return pct_correct, pct_incorrect, pct_unsure
 
-def get_stat_envelope(events, frame_view, lookup_packet):
-    envelope_accuracy, envelope_cutoff = 0, 0
+def envelope_helper(tag, df, lp):
     units = 1000.0
-    df = frame_view
 
-    # tag rows based on the threshold
-    df['tag'] = df['value'] > VALUE_THRES_ACCURATE
-    # first row is a True preceded by a False
-    fst = df.index[df['tag'] & ~ df['tag'].shift(1).fillna(False)]
+    fst = df.index[df[tag] & ~ df[tag].shift(1).fillna(False)]
     # last row is a True followed by a False
-    lst = df.index[df['tag'] & ~ df['tag'].shift(-1).fillna(False)]
+    lst = df.index[df[tag] & ~ df[tag].shift(-1).fillna(False)]
     # filter those which are adequately apart
     pr = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
     
     # This is now a series of contiguous regions
+    region = (0, 0)
+    envelope_length = 0
+    
     if len(pr) > 0:
         # print(pr)
         region = pr[-1]
-        envelope_cutoff = (region[1] - region[0]) / units
+        envelope_length = (region[1] - region[0]) / units
     else:
         envelope_cutoff = 0
-        # print("Never right acc cutoff?")
-        # print(lookup_packet)
-        # print(events)
-        # print(lp)
 
-    # tag rows based on the threshold
-    df['acc'] = df['value'] > VALUE_MIDDLE
-    # first row is a True preceded by a False
-    fst = df.index[df['acc'] & ~ df['acc'].shift(1).fillna(False)]
-    # last row is a True followed by a False
-    lst = df.index[df['acc'] & ~ df['acc'].shift(-1).fillna(False)]
-    # filter those which are adequately apart
-    pa = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
-    # This is now a series of contiguous regions
-    if len(pa) > 0:
-        region = pa[-1]
-        envelope_accuracy = (region[1] - region[0]) / units
+    return (region, envelope_length)
 
-    else:
-        envelope_accuracy = 0
-        # print("Never right acc env?")
-        # print(lookup_packet)
-        # print(events)
-        # print("~~~")
+def get_stat_envelope_accuracy(events, frame_view, lookup_packet):
+    df = frame_view
+    tag = 'tag'
+    df[tag] = df['value'] > VALUE_MIDDLE
+
+    return envelope_helper(tag, df, lookup_packet)
+
+def get_stat_envelope_correct(events, frame_view, lookup_packet):
+    df = frame_view
+    tag = 'tag'
+    df[tag] = df['value'] > unsure_top
+
+    return envelope_helper(tag, df, lookup_packet)
+
+def get_stat_envelope_threshold(events, frame_view, lookup_packet):
+    df = frame_view
+    tag = 'tag'
+    df[tag] = df['value'] > VALUE_THRES_ACCURATE
+
+    return envelope_helper(tag, df, lookup_packet)
 
 
-    # tag rows based on the threshold
-    df['cert'] = df['value'] > unsure_top
-    # first row is a True preceded by a False
-    fst = df.index[df['cert'] & ~ df['cert'].shift(1).fillna(False)]
-    # last row is a True followed by a False
-    lst = df.index[df['cert'] & ~ df['cert'].shift(-1).fillna(False)]
-    # filter those which are adequately apart
-    pc = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
-    # This is now a series of contiguous regions
-    if len(pc) > 0:
-        region = pc[-1]
-        envelope_certainty = (region[1] - region[0]) / units
-    else:
-        envelope_certainty = 0
 
-    # print(envelope_accuracy, envelope_certainty, envelope_cutoff)
 
-    if envelope_accuracy == 0:
-        # print("Never accurate")
-        # print(lookup_packet)
-        pass
-    return envelope_accuracy, envelope_certainty, envelope_cutoff
+
+# def get_stat_envelope(events, frame_view, lookup_packet):
+#     envelope_accuracy, envelope_cutoff = 0, 0
+#     units = 1000.0
+#     df = frame_view
+
+#     # tag rows based on the threshold
+#     df['tag'] = df['value'] > VALUE_THRES_ACCURATE
+#     # first row is a True preceded by a False
+#     fst = df.index[df['tag'] & ~ df['tag'].shift(1).fillna(False)]
+#     # last row is a True followed by a False
+#     lst = df.index[df['tag'] & ~ df['tag'].shift(-1).fillna(False)]
+#     # filter those which are adequately apart
+#     pr = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+    
+#     # This is now a series of contiguous regions
+#     if len(pr) > 0:
+#         # print(pr)
+#         region = pr[-1]
+#         envelope_cutoff = (region[1] - region[0]) / units
+#     else:
+#         envelope_cutoff = 0
+#         # print("Never right acc cutoff?")
+#         # print(lookup_packet)
+#         # print(events)
+#         # print(lp)
+
+#     # tag rows based on the threshold
+#     df['acc'] = df['value'] > VALUE_MIDDLE
+#     # first row is a True preceded by a False
+#     fst = df.index[df['acc'] & ~ df['acc'].shift(1).fillna(False)]
+#     # last row is a True followed by a False
+#     lst = df.index[df['acc'] & ~ df['acc'].shift(-1).fillna(False)]
+#     # filter those which are adequately apart
+#     pa = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+#     # This is now a series of contiguous regions
+#     if len(pa) > 0:
+#         region = pa[-1]
+#         envelope_accuracy = (region[1] - region[0]) / units
+
+#     else:
+#         envelope_accuracy = 0
+#         # print("Never right acc env?")
+#         # print(lookup_packet)
+#         # print(events)
+#         # print("~~~")
+
+
+#     # tag rows based on the threshold
+#     df['cert'] = df['value'] > unsure_top
+#     # first row is a True preceded by a False
+#     fst = df.index[df['cert'] & ~ df['cert'].shift(1).fillna(False)]
+#     # last row is a True followed by a False
+#     lst = df.index[df['cert'] & ~ df['cert'].shift(-1).fillna(False)]
+#     # filter those which are adequately apart
+#     pc = [(i, j) for i, j in zip(fst, lst) if j > i + 4]
+#     # This is now a series of contiguous regions
+#     if len(pc) > 0:
+#         region = pc[-1]
+#         envelope_certainty = (region[1] - region[0]) / units
+#     else:
+#         envelope_certainty = 0
+
+#     # print(envelope_accuracy, envelope_certainty, envelope_cutoff)
+
+#     if envelope_accuracy == 0:
+#         # print("Never accurate")
+#         # print(lookup_packet)
+#         pass
+#     return envelope_accuracy, envelope_certainty, envelope_cutoff
 
 def get_stat_tt(events, frame_view, lookup_packet):
     last_frame = frame_view["time"].max()
@@ -709,8 +764,19 @@ def analyze_participant(trial_row):
     frame_view = new_frame_view(events, video_length)
 
     pct_correct, pct_incorrect, pct_unsure = get_stat_percents(events, frame_view, lp)
-    envelope_accuracy, envelope_certainty, envelope_cutoff = get_stat_envelope(events, frame_view, lp)
+
+    # envelope_accuracy, envelope_certainty, envelope_cutoff = get_stat_envelope(events, frame_view, lp)
+    envelope_accuracy,  envelope_accuracy_length        = get_stat_envelope_accuracy(events, frame_view, lp)
+    envelope_start_accuracy, envelope_end_accuracy      = envelope_accuracy
+
+    envelope_threshold, envelope_threshold_length       = get_stat_envelope_threshold(events, frame_view, lp)
+    envelope_start_threshold, envelope_end_threshold    = envelope_threshold
+
+    envelope_certainty, envelope_certainty_length       = get_stat_envelope_correct(events, frame_view, lp)
+    envelope_start_certainty, envelope_end_certainty    = envelope_certainty
+
     tt_accuracy, tt_certainty, tt_cutoff = get_stat_tt(events, frame_view, lp)
+
     reversals = get_stat_reversals(events, frame_view, lp)
     total_confidence = get_stat_total_confidence(events, frame_view, lp)
     total_accuracy = get_stat_total_accuracy(events, frame_view, lp)
@@ -729,17 +795,25 @@ def analyze_participant(trial_row):
 
     analyses[A_REVERSALS] = reversals
 
-    analyses[A_ENV_CUTOFF] = envelope_cutoff
-    analyses[A_ENV_ACC] = envelope_accuracy
-    analyses[A_ENV_CERT] = envelope_certainty
+    analyses[A_ENV_START_THRESHOLD] = envelope_start_threshold
+    analyses[A_ENV_START_ACC]       = envelope_start_accuracy
+    analyses[A_ENV_START_CERT]      =  envelope_start_certainty
 
-    analyses[A_TT_CUTOFF] = tt_cutoff
-    analyses[A_TT_ACC] = tt_accuracy
-    analyses[A_TT_CERT] = tt_certainty
+    analyses[A_ENV_END_THRESHOLD]   = envelope_end_threshold
+    analyses[A_ENV_END_ACC]         = envelope_end_accuracy
+    analyses[A_ENV_END_CERT]        = envelope_end_certainty
 
-    analyses[A_PCT_UNSURE] = pct_unsure
-    analyses[A_PCT_CORRECT] = pct_correct
-    analyses[A_PCT_INCORRECT] = pct_incorrect
+    analyses[A_ENV_LEN_THRESHOLD]   = envelope_threshold_length
+    analyses[A_ENV_LEN_ACC]         = envelope_accuracy_length
+    analyses[A_ENV_LEN_CERT]        = envelope_certainty_length
+
+    analyses[A_TT_CUTOFF]       = tt_cutoff
+    analyses[A_TT_ACC]          = tt_accuracy
+    analyses[A_TT_CERT]         = tt_certainty
+
+    analyses[A_PCT_UNSURE]      = pct_unsure
+    analyses[A_PCT_CORRECT]     = pct_correct
+    analyses[A_PCT_INCORRECT]   = pct_incorrect
 
     analyses[A_FLIPPED] = is_flipped
 
@@ -998,9 +1072,9 @@ al_title[A_PCT_UNSURE] = "Proportion of Time Spent Unsure (+/- " + str(UNSURE_WI
 al_title[A_PCT_CORRECT] = "Proportion of Time Spent Correct"
 al_title[A_PCT_INCORRECT] = "Proportion of Time Spent Incorrect"
 al_title[A_REVERSALS] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "% from neutral)"
-al_title[A_ENV_CUTOFF] = "Envelope (in seconds) of Certainty Beyond Cutoff"
-al_title[A_ENV_ACC] = "Envelope (in seconds) of Staying Accurate"
-al_title[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+al_title[A_ENV_LEN_THRESHOLD] = "Envelope (in seconds) of Certainty Beyond Threshold"
+al_title[A_ENV_LEN_ACC] = "Envelope (in seconds) of Staying Accurate"
+al_title[A_ENV_LEN_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
 
 al_title[A_TT_CUTOFF] = "Time to Correct Certainty Beyond Cutoff"
 al_title[A_TT_ACC] = "Time to final correct Accuracy"
@@ -1011,9 +1085,9 @@ al_y_units[A_PCT_UNSURE] = "Proportion of Time Spent Unsure"
 al_y_units[A_PCT_CORRECT] = "Proportion of Time Spent Correct"
 al_y_units[A_PCT_INCORRECT] = "Proportion of Time Spent Incorrect"
 al_y_units[A_REVERSALS] = "# of Reversals"
-al_y_units[A_ENV_CUTOFF] = "Period of Time Correct Beyond Cutoff"
-al_y_units[A_ENV_ACC] = "Period of Time with Accurate Guess"
-al_y_units[A_ENV_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
+al_y_units[A_ENV_LEN_THRESHOLD] = "Period of Time Correct Beyond Threshold"
+al_y_units[A_ENV_LEN_ACC] = "Period of Time with Accurate Guess"
+al_y_units[A_ENV_LEN_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
 
 al_y_units[A_TT_CUTOFF] = "Time (in seconds)"
 al_y_units[A_TT_ACC] = "Time (in seconds)"
@@ -1030,7 +1104,7 @@ FILENAME_PREFIX += str(UNSURE_WINDOW) + "window-"
 
 # CONDUCT ANALYSIS ON DATA
 # analysis_categories = al_title.keys()
-analysis_categories = [A_ENV_ACC, A_ENV_CERT, A_ENV_CUTOFF]
+analysis_categories = [A_ENV_LEN_ACC, A_ENV_LEN_CERT, A_ENV_LEN_THRESHOLD]
 
 df_analyzed = copy.copy(df_trials)
 df_analyzed = analyze_all_participants(df_analyzed)
@@ -1040,9 +1114,9 @@ al_y_range[A_PCT_UNSURE] =      (0, 1.0)
 al_y_range[A_PCT_CORRECT] =     (0, 1.0)
 al_y_range[A_PCT_INCORRECT] =   (0, 1.0)
 al_y_range[A_REVERSALS] =  (0, df_analyzed[A_REVERSALS].max())
-al_y_range[A_ENV_CUTOFF] = (0, max_video)
-al_y_range[A_ENV_ACC] = (0, max_video)
-al_y_range[A_ENV_CERT] = (0, max_video)
+al_y_range[A_ENV_LEN_THRESHOLD] = (0, max_video)
+al_y_range[A_ENV_LEN_ACC] = (0, max_video)
+al_y_range[A_ENV_LEN_CERT] = (0, max_video)
 
 al_y_range[A_TT_CUTOFF] =   (0, max_video)
 al_y_range[A_TT_ACC] =      (0, max_video)
