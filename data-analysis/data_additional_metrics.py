@@ -23,7 +23,10 @@ REVERSALS_WINDOW = 5 #the amount of values around 50 that don't count as the par
 RETURN_LIST_OF_AVERAGES = False #if you want the list of all the trials' averages (or total list of reversals) rather than the overall averages
 UNSUPPORTED_BROWSER_ERROR = False #for the pilot study, some people used unsupported browsers. If that's the case, this will trigger and adapt the rest of it
 
-FILENAME_PLOTS = "plots/no-outlier-"
+FILENAME_OUTPUTS = "outputs/"
+FILENAME_PLOTS = FILENAME_OUTPUTS + "plots/"
+FILENAME_ANOVAS = FILENAME_OUTPUTS + "anovas/"
+FILENAME_PREFIX = ""
 
 VALUE_MIDDLE = 50
 VALUE_MAX = 100
@@ -65,10 +68,10 @@ P_GLITCHES = 'glitches'
 P_POST_EVENTS = 'post-events'
 P_LOOKUP = 'lookup-packet'
 
-GRAPH_BOXPLOT = True
-GRAPH_STRIPPLOT = True
-GRAPH_BLENDED = True
-CALC_ANOVA = True
+OUTPUT_GRAPH_BOXPLOT = True
+OUTPUT_GRAPH_STRIPPLOT = True
+OUTPUT_GRAPH_BLENDED = True
+OUTPUT_CALC_ANOVA = True
 
 STATUS_GLITCH_UNSUPPORTED_BROWSER = "unsupported browser"
 STATUS_GLITCH_NO_EVENTS = "no events found"
@@ -877,7 +880,7 @@ def is_unique(s):
 
 def make_anova(df, analysis_label, fn, title):
     SIGNIFICANCE_CUTOFF = .4
-    if CALC_ANOVA:
+    if OUTPUT_CALC_ANOVA:
         anova_text = title + "\n"
         # print("ANOVA FOR ")
         # print(analysis_label)
@@ -921,12 +924,12 @@ def make_anova(df, analysis_label, fn, title):
             anova_text = anova_text + "Column homogenous with value " + str(val_min)
 
 
-        f = open(fn + "anova.txt", "w")
+        f = open(FILENAME_ANOVAS + fn + "anova.txt", "w")
         f.write(anova_text)
         f.close()
 
 def make_boxplot(df, analysis, fn, title):
-    if GRAPH_BOXPLOT:
+    if OUTPUT_GRAPH_BOXPLOT:
         graph_type = "boxplot"
         plt.figure()
         # plt.tight_layout()
@@ -941,11 +944,11 @@ def make_boxplot(df, analysis, fn, title):
         bx.set(ylim=ylims)
         bx.set(title=title, ylabel=al_y_units[analysis])
         figure = bx.get_figure()    
-        figure.savefig(fn + graph_type + '.png', bbox_inches='tight')
+        figure.savefig(FILENAME_PLOTS + fn + graph_type + '.png', bbox_inches='tight')
         plt.close()
 
 def make_stripplot(df, analysis, fn, title):
-    if GRAPH_STRIPPLOT:
+    if OUTPUT_GRAPH_STRIPPLOT:
             graph_type = "stripplot"
             plt.figure()
             # plt.tight_layout()
@@ -959,7 +962,7 @@ def make_stripplot(df, analysis, fn, title):
             bplot.set(ylim=al_y_range[analysis])
             bplot.set(title=al_title[analysis], ylabel=al_y_units[analysis])
             figure = bplot.get_figure()    
-            figure.savefig(fn + graph_type + '.png', bbox_inches='tight')
+            figure.savefig(FILENAME_PLOTS + fn + graph_type + '.png', bbox_inches='tight')
             plt.close()
 
 '''
@@ -1005,7 +1008,7 @@ print("Max Video Length")
 print(max_video)
 
 UNSURE_WINDOW = 5
-FILENAME_PLOTS += str(UNSURE_WINDOW) + "window-"
+FILENAME_PREFIX += str(UNSURE_WINDOW) + "window-"
 
 
 # CONDUCT ANALYSIS ON DATA
@@ -1060,7 +1063,7 @@ for goal in goals:
 
         title = al_title[analysis]
         title += "\nfor the goal " + goal_title
-        fn = FILENAME_PLOTS + goal_title + "-" + analysis + "-"
+        fn = FILENAME_PREFIX + goal_title + "-" + analysis + "-"
         make_boxplot(df_goal, analysis, fn, title)
         make_stripplot(df_goal, analysis, fn, title)
         make_anova(df_goal, analysis, fn, title)
