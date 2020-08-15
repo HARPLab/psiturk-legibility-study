@@ -493,7 +493,7 @@ def envelope_helper(tag, df, lp):
     # This is now a series of contiguous regions
     region = (0, 0)
     envelope_length = 0
-    
+
     if len(pr) > 0:
         # print(pr)
         region = pr[-1]
@@ -861,6 +861,12 @@ def clean_glitchy_data_and_report(df):
     return df_no_glitches
 
 
+def clean_analyzed_data(df):
+    df = clean_glitchy_data_and_report(df)
+    df = clean_flipped_data(df)
+    return df
+
+
 def analyze_all_participants(df):
     print(df.shape)
     for i, row in df.iterrows():
@@ -882,10 +888,6 @@ def analyze_all_participants(df):
     analysis_categories = analyses.keys()
     # remove glitched entries and report
     
-    df = clean_glitchy_data_and_report(df)
-
-    df = clean_flipped_data(df)    
-
     print("Time to make some graphs")
     print(df.columns)
     print(df.shape)
@@ -912,6 +914,7 @@ def plot_confidence_one_participant(trial_row):
 def plot_analysis_one_participant(trial_row, lp, fn):
     # print(trial_row.columns)
     glitch = trial_row.get(P_GLITCHES)
+    units = 1.0
 
     # print(trial_row[P_POST_EVENTS])
     events = trial_row.get(P_POST_EVENTS)
@@ -929,6 +932,32 @@ def plot_analysis_one_participant(trial_row, lp, fn):
 
     plt.figure()
     plt.plot(times, values)
+
+    env_acc_start   = trial_row[A_ENV_START_ACC]    / units
+    env_acc_end     = trial_row[A_ENV_END_ACC]      /  units
+
+    env_thres_start = trial_row[A_ENV_START_THRESHOLD]  /  units
+    env_thres_end   = trial_row[A_ENV_END_THRESHOLD]    /  units
+
+    env_cert_start  = trial_row[A_ENV_START_CERT]   / units
+    env_cert_end    = trial_row[A_ENV_END_CERT]     / units
+
+    plt.axvline(env_acc_start, color='red')
+    # plt.text(env_acc_start,0,'ENV-ACC-START',rotation=90)
+    plt.axvline(env_acc_end, color='red')
+    # plt.text(env_acc_end,0,'ENV-ACC-END',rotation=90)
+    
+    plt.axvline(env_thres_start, color='pink')
+    plt.axvline(env_thres_end, color='pink')
+    # plt.text(10.1,0,'blah',rotation=90)
+    # plt.text(10.1,0,'blah',rotation=90)
+    
+    plt.axvline(env_cert_start, color='purple')
+    plt.axvline(env_cert_end, color='purple')
+    # plt.text(10.1,0,'blah',rotation=90)
+    # plt.text(10.1,0,'blah',rotation=90)
+
+    
     plt.xlabel('Timestamp (milliseconds)')
     plt.ylabel('Average Raw Slider Value')
     plt.title('Confidence Values for Participant ' + str(uniqueid) + ' \nDuring Trial ' + str(goaltable) + ', ' + str(iv) +  " \nstatus=" + glitch)
@@ -1042,9 +1071,13 @@ def make_stripplot(df, analysis, fn, title):
             figure.savefig(FILENAME_PLOTS + fn + graph_type + '.png', bbox_inches='tight')
             plt.close()
 
-def inspect_troublemakers(list_of_lookup_packets):
-    for t in troublemakers:
+def inspect_troublemakers(df_analyzed, list_of_lookup_packets):
+    print(df_analyzed[P_LOOKUP])
+
+    for t in list_of_lookup_packets:
+        print(t)
         df_trouble = df_analyzed[df_analyzed[P_LOOKUP] == t]
+        print(df_trouble.shape)
         df_trouble = df_trouble.iloc[0]
 
         # Should only be one
@@ -1107,7 +1140,8 @@ FILENAME_PREFIX += str(UNSURE_WINDOW) + "window-"
 analysis_categories = [A_ENV_LEN_ACC, A_ENV_LEN_CERT, A_ENV_LEN_THRESHOLD]
 
 df_analyzed = copy.copy(df_trials)
-df_analyzed = analyze_all_participants(df_analyzed)
+df_analyzed_all = analyze_all_participants(df_analyzed)
+df_analyzed = clean_analyzed_data(df_analyzed)
 
 # Calculate graph bounds AFTER analysis
 al_y_range[A_PCT_UNSURE] =      (0, 1.0)
@@ -1174,9 +1208,10 @@ t3 = "('debugYuhM3:debugdoGQl', 'M', 'B', 1.0)"
 t4 = "('debugYuhM3:debugdoGQl', 'SA', 'B', 0.0)"
 t5 = "('debugYuhM3:debugdoGQl', 'SA', 'B', 0.0)"
 # This one is never accurate
-troublemakers = [t5]
+# troublemakers = [t5]
+troublemakers = [t1, t2, t3, t4, t5]
 
-inspect_troublemakers(troublemakers)
+inspect_troublemakers(df_analyzed_all, troublemakers)
 
 print("FINISHED")
 
