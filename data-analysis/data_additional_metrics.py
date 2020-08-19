@@ -837,7 +837,7 @@ def clean_flipped_data(df):
     print("Retained " + str(len(df_indecisive)) + " indecisive entries out of " + str(len(df)) + " -> " + str(pct) + "%")
 
     # TODO add filtering summary
-    print("Clean entries: " + str(len(df_clean)) + "")
+    print("Clean entries: " + str(len(df_clean)) + "\n")
 
     return df_clean
 
@@ -891,9 +891,9 @@ def analyze_all_participants(df):
     df.loc[:, df.dtypes == 'float64']   = df.loc[:, df.dtypes == 'float64'].astype('float')
     df.loc[:, df.dtypes == 'int64']     = df.loc[:, df.dtypes == 'int64'].astype('int')
 
-    print("Time to make some graphs")
-    print(df.columns)
-    print(df.shape)
+    print("Time to make some graphs \n")
+    # print(df.columns)
+    # print(df.shape)
     return df
 
 #   
@@ -1001,6 +1001,7 @@ def make_anova(df, analysis_label, fn, title):
         homogenous_data = (val_min == val_max)
 
         if not homogenous_data:
+            print("~~~ ANALYSIS FOR " + analysis_label + " ~~~")
             aov = pg.mixed_anova(dv=analysis_label, between=COL_CHAIR, within=COL_PATHING, subject=subject_id, data=df)
             aov.round(3)
 
@@ -1013,10 +1014,10 @@ def make_anova(df, analysis_label, fn, title):
 
             if p_chair < SIGNIFICANCE_CUTOFF:
                 print("Chair position is significant for " + analysis_label + ": " + str(p_chair))
-                print(title)
+                # print(title)
             if p_path_method < SIGNIFICANCE_CUTOFF:
                 print("Pathing method is significant for " + analysis_label + ": " + str(p_path_method))
-                print(title)
+                # print(title)
 
             anova_text = anova_text + "\n"
             # Verify that subjects is legit
@@ -1027,6 +1028,7 @@ def make_anova(df, analysis_label, fn, title):
             # pg.print_table(posthocs)
             anova_text = "\n" + anova_text + str(posthocs)
             posthocs.to_csv(FILENAME_ANOVAS + fn + 'posthocs.csv')
+            print()
 
         else:
             print("! Issue creating ANOVA for " + analysis_label)
@@ -1106,7 +1108,9 @@ al_y_range = {}
 al_title[A_PCT_UNSURE] = "Proportion of Time Spent Unsure (+/- " + str(UNSURE_WINDOW) + ")"
 al_title[A_PCT_CORRECT] = "Proportion of Time Spent Correct"
 al_title[A_PCT_INCORRECT] = "Proportion of Time Spent Incorrect"
+
 al_title[A_REVERSALS] = "Reversals (Flipped Certainty beyond +/- " + str(UNSURE_WINDOW) + "% from neutral)"
+
 al_title[A_ENV_LEN_THRESHOLD] = "Envelope (in seconds) of Certainty Beyond Threshold"
 al_title[A_ENV_LEN_ACC] = "Envelope (in seconds) of Staying Accurate"
 al_title[A_ENV_LEN_CERT] = "Envelope (in seconds) of Staying Certain Beyond +/- " + str(UNSURE_WINDOW) + "%)"
@@ -1130,16 +1134,15 @@ al_y_units[A_TT_CERT] = "Time (in seconds)"
 
 
 max_video = round(df_trials["videoduraction"].max())
-print("Max Video Length")
-print(max_video)
+print("Max Video Length" + str(max_video))
 
 UNSURE_WINDOW = 5
 FILENAME_PREFIX += str(UNSURE_WINDOW) + "window-"
 
 
 # CONDUCT ANALYSIS ON DATA
-# analysis_categories = al_title.keys()
-analysis_categories = [A_ENV_LEN_ACC, A_ENV_LEN_CERT, A_ENV_LEN_THRESHOLD]
+analysis_categories = al_title.keys()
+# analysis_categories = [A_ENV_LEN_ACC, A_ENV_LEN_CERT, A_ENV_LEN_THRESHOLD]
 
 df_analyzed = copy.copy(df_trials)
 df_analyzed_all = analyze_all_participants(df_analyzed)
