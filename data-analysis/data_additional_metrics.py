@@ -501,7 +501,7 @@ def envelope_helper(tag, df, lp):
     else:
         envelope_cutoff = 0
 
-    return (region, envelope_length)
+    return (region, float(envelope_length))
 
 def get_stat_envelope_accuracy(events, frame_view, lookup_packet):
     df = frame_view
@@ -863,7 +863,7 @@ def clean_glitchy_data_and_report(df):
 
 def clean_analyzed_data(df):
     df = clean_glitchy_data_and_report(df)
-    df = clean_flipped_data(df)
+    # df = clean_flipped_data(df)
     return df
 
 
@@ -888,6 +888,9 @@ def analyze_all_participants(df):
     analysis_categories = analyses.keys()
     # remove glitched entries and report
     
+    df.loc[:, df.dtypes == 'float64']   = df.loc[:, df.dtypes == 'float64'].astype('float')
+    df.loc[:, df.dtypes == 'int64']     = df.loc[:, df.dtypes == 'int64'].astype('int')
+
     print("Time to make some graphs")
     print(df.columns)
     print(df.shape)
@@ -1019,10 +1022,11 @@ def make_anova(df, analysis_label, fn, title):
             # Verify that subjects is legit
             # print(df[subject_id])
 
-            # posthocs = pg.pairwise_ttests(dv=analysis_label, within=COL_PATHING, between=COL_CHAIR,
-            #                           subject=subject_id, data=df)
-            # anova_text = anova_text + pg.print_table(posthocs)
-            # posthocs.to_csv(FILENAME_ANOVAS + fn + 'posthocs.csv')
+            posthocs = pg.pairwise_ttests(dv=analysis_label, within=COL_PATHING, between=COL_CHAIR,
+                                      subject=subject_id, data=df)
+            # pg.print_table(posthocs)
+            anova_text = "\n" + anova_text + str(posthocs)
+            posthocs.to_csv(FILENAME_ANOVAS + fn + 'posthocs.csv')
 
         else:
             print("! Issue creating ANOVA for " + analysis_label)
@@ -1072,12 +1076,10 @@ def make_stripplot(df, analysis, fn, title):
             plt.close()
 
 def inspect_troublemakers(df_analyzed, list_of_lookup_packets):
-    print(df_analyzed[P_LOOKUP])
+    # print(df_analyzed[P_LOOKUP])
 
     for t in list_of_lookup_packets:
-        print(t)
         df_trouble = df_analyzed[df_analyzed[P_LOOKUP] == t]
-        print(df_trouble.shape)
         df_trouble = df_trouble.iloc[0]
 
         # Should only be one
