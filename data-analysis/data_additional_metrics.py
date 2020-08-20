@@ -48,6 +48,8 @@ COL_GOAL = 'Goal Table'
 COL_MATCHING = 'Match Condition'
 
 # Types of analysis
+A_CORRECT_END = 'correct-end'
+
 A_PCT_UNSURE = 'pct_unsure'
 A_PCT_CORRECT = 'pct_correct'
 A_PCT_INCORRECT = 'pct_incorrect'
@@ -76,6 +78,7 @@ A_FLIPPED = 'is-flipped'
 P_GLITCHES = 'glitches'
 P_POST_EVENTS = 'post-events'
 P_LOOKUP = 'lookup-packet'
+P_QUAL_CHECK = 'qual_check_correct_end'
 
 OUTPUT_GRAPH_BOXPLOT = True
 OUTPUT_GRAPH_STRIPPLOT = True
@@ -92,6 +95,15 @@ LABELS_PATHING['Omn'] = "Omniscient"
 LABELS_PATHING['M'] = "Multi"
 LABELS_PATHING['SA'] = "Single:A\n (for back-to-robot)"
 LABELS_PATHING['SB'] = "Single:B\n (for facing-robot)"
+
+POLARITY_UNSURE      = 0
+POLARITY_CORRECT     = 1
+POLARITY_INCORRECT   = -1
+
+STATE_UNSURE    = POLARITY_UNSURE
+STATE_CORRECT   = POLARITY_CORRECT
+STATE_INCORRECT = POLARITY_INCORRECT
+
 # Static math
 unsure_top = VALUE_MIDDLE + UNSURE_WINDOW
 unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
@@ -173,45 +185,86 @@ else:
     print("Pandas data imported from JSON")
 
 video_lengths = {}
-video_lengths[('Omn', 0, 0)] = 11.233333
-video_lengths[('Omn', 0, 1)] = 8.63333
-video_lengths[('SA', 0, 0)] = 10.8333
-video_lengths[('SA', 0, 1)] = 10.400000
+video_lengths[('Omn', 0, 0)]    = 11.233333
+video_lengths[('Omn', 0, 1)]    = 8.63333
+video_lengths[('SA', 0, 0)]     = 10.8333
+video_lengths[('SA', 0, 1)]     = 10.400000
 
-video_lengths[('SB', 0, 0)] = 11.666667
-video_lengths[('SB', 0, 1)] = 9.7000
-video_lengths[('M', 0, 0)] = 11.1333
-video_lengths[('M', 0, 1)] = 9.600
+video_lengths[('SB', 0, 0)]     = 11.666667
+video_lengths[('SB', 0, 1)]     = 9.7000
+video_lengths[('M', 0, 0)]      = 11.1333
+video_lengths[('M', 0, 1)]      = 9.600
 
-video_lengths[('Omn', 1, 0)] = 11.76666
-video_lengths[('Omn', 1, 1)] = 11.700000
-video_lengths[('SA', 1, 0)] = 11.7333
-video_lengths[('SA', 1, 1)] = 11.233333
+video_lengths[('Omn', 1, 0)]    = 11.76666
+video_lengths[('Omn', 1, 1)]    = 11.700000
+video_lengths[('SA', 1, 0)]     = 11.7333
+video_lengths[('SA', 1, 1)]     = 11.233333
 
-video_lengths[('SB', 1, 0)] = 11.866667
-video_lengths[('SB', 1, 1)] = 11.400000
-video_lengths[('M', 1, 0)] = 11.66666
-video_lengths[('M', 1, 1)] = 11.800000
+video_lengths[('SB', 1, 0)]     = 11.866667
+video_lengths[('SB', 1, 1)]     = 11.400000
+video_lengths[('M', 1, 0)]      = 11.66666
+video_lengths[('M', 1, 1)]      = 11.800000
 
-video_lengths[('Omn', 2, 0)] = 12.93333
-video_lengths[('Omn', 2, 1)] = 12.4333
-video_lengths[('SA', 2, 0)] = 13.1000
-video_lengths[('SA', 2, 1)] = 13.466667
+video_lengths[('Omn', 2, 0)]    = 12.93333
+video_lengths[('Omn', 2, 1)]    = 12.4333
+video_lengths[('SA', 2, 0)]     = 13.1000
+video_lengths[('SA', 2, 1)]     = 13.466667
 
-video_lengths[('SB', 2, 0)] = 13.1666
-video_lengths[('SB', 2, 1)] = 13.800
-video_lengths[('M', 2, 0)] = 13.1000
-video_lengths[('M', 2, 1)] = 12.600
+video_lengths[('SB', 2, 0)]     = 13.1666
+video_lengths[('SB', 2, 1)]     = 13.800
+video_lengths[('M', 2, 0)]      = 13.1000
+video_lengths[('M', 2, 1)]      = 12.600
 
-video_lengths[('Omn', 3, 0)] = 10.96666
-video_lengths[('Omn', 3, 1)] = 11.166667
-video_lengths[('SA', 3, 0)] = 12.20000
-video_lengths[('SA', 3, 1)] = 12.7000
+video_lengths[('Omn', 3, 0)]    = 10.96666
+video_lengths[('Omn', 3, 1)]    = 11.166667
+video_lengths[('SA', 3, 0)]     = 12.20000
+video_lengths[('SA', 3, 1)]     = 12.7000
 
-video_lengths[('SB', 3, 0)] = 11.46666
-video_lengths[('SB', 3, 1)] = 11.46666
-video_lengths[('M', 3, 0)] = 11.33333
-video_lengths[('M', 3, 1)] = 11.133333
+video_lengths[('SB', 3, 0)]     = 11.46666
+video_lengths[('SB', 3, 1)]     = 11.46666
+video_lengths[('M', 3, 0)]      = 11.33333
+video_lengths[('M', 3, 1)]      = 11.133333
+
+video_ends = {}
+video_ends[('Omn', 0, 0)]   = STATE_UNSURE
+video_ends[('Omn', 0, 1)]   = STATE_UNSURE
+video_ends[('SA', 0, 0)]    = STATE_UNSURE
+video_ends[('SA', 0, 1)]    = STATE_UNSURE
+
+video_ends[('SB', 0, 0)]    = STATE_UNSURE
+video_ends[('SB', 0, 1)]    = STATE_UNSURE
+video_ends[('M', 0, 0)]     = STATE_UNSURE
+video_ends[('M', 0, 1)]     = STATE_UNSURE
+
+video_ends[('Omn', 1, 0)]   = STATE_UNSURE
+video_ends[('Omn', 1, 1)]   = STATE_UNSURE
+video_ends[('SA', 1, 0)]    = STATE_UNSURE
+video_ends[('SA', 1, 1)]    = STATE_UNSURE
+
+video_ends[('SB', 1, 0)]    = STATE_UNSURE
+video_ends[('SB', 1, 1)]    = STATE_UNSURE
+video_ends[('M', 1, 0)]     = STATE_UNSURE
+video_ends[('M', 1, 1)]     = STATE_UNSURE
+
+video_ends[('Omn', 2, 0)]   = STATE_UNSURE
+video_ends[('Omn', 2, 1)]   = STATE_UNSURE
+video_ends[('SA', 2, 0)]    = STATE_UNSURE
+video_ends[('SA', 2, 1)]    = STATE_UNSURE
+
+video_ends[('SB', 2, 0)]    = STATE_UNSURE
+video_ends[('SB', 2, 1)]    = STATE_UNSURE
+video_ends[('M', 2, 0)]     = STATE_UNSURE
+video_ends[('M', 2, 1)]     = STATE_UNSURE
+
+video_ends[('Omn', 3, 0)]   = STATE_UNSURE
+video_ends[('Omn', 3, 1)]   = STATE_UNSURE
+video_ends[('SA', 3, 0)]    = STATE_UNSURE
+video_ends[('SA', 3, 1)]    = STATE_UNSURE
+
+video_ends[('SB', 3, 0)]    = STATE_UNSURE
+video_ends[('SB', 3, 1)]    = STATE_UNSURE
+video_ends[('M', 3, 0)]     = STATE_UNSURE
+video_ends[('M', 3, 1)]     = STATE_UNSURE
 
 '''
  END: BOILER PLATE SET UP
@@ -403,11 +456,11 @@ def get_polarity(value):
     unsure_bottom = VALUE_MIDDLE - UNSURE_WINDOW
 
     if unsure_bottom <= value <= unsure_top:
-        return 0
+        return POLARITY_UNSURE
     elif value > unsure_top:
-        return 1
+        return POLARITY_CORRECT
     elif value < unsure_bottom:
-        return -1
+        return POLARITY_INCORRECT
     print("Error in polarity of " + str(value))
     return None
 
@@ -524,7 +577,23 @@ def get_stat_envelope_threshold(events, frame_view, lookup_packet):
 
     return envelope_helper(tag, df, lookup_packet)
 
+def get_qual_check_correct_end(trial_row, events, frame_view, lp):
+    last_event  = events[-1]
+    last_time, last_state = last_event
+    end_state   = get_polarity(last_state)
 
+
+    pathing = trial_row['IV']
+    goal = trial_row['goaltable']
+    perspective = trial_row['condition']
+
+    key = (pathing, goal, perspective)
+    correct_end = int(video_ends[key])
+
+
+    is_matching = (correct_end == end_state)
+
+    return end_state, is_matching
 
 
 
@@ -763,6 +832,8 @@ def analyze_participant(trial_row):
     video_length = int(round(trial_row['videoduraction'] * 1000)) #round to the nearest millisecond
     frame_view = new_frame_view(events, video_length)
 
+    correct_end, qual_check = get_qual_check_correct_end(trial_row, events, frame_view, lp)
+
     pct_correct, pct_incorrect, pct_unsure = get_stat_percents(events, frame_view, lp)
 
     # envelope_accuracy, envelope_certainty, envelope_cutoff = get_stat_envelope(events, frame_view, lp)
@@ -789,6 +860,9 @@ def analyze_participant(trial_row):
     analyses[P_GLITCHES] = status
     analyses[P_LOOKUP] = lp
     analyses[P_POST_EVENTS] = json.dumps(events)
+
+    analyses[A_CORRECT_END] = correct_end
+    analyses[P_QUAL_CHECK] = qual_check
 
     analyses['total_confidence'] = total_confidence
     analyses['total_accuracy'] = total_accuracy
@@ -860,10 +934,23 @@ def clean_glitchy_data_and_report(df):
 
     return df_no_glitches
 
+def clean_quality_check(df):
+    # Verify that users end on the correct thing
+    # otherwise clean them
+    df_quality = df[df[A_CORRECT_END] == True]
+    df_not_quality = df[df[A_CORRECT_END] == False]
+    pct = (1.0 * len(df_quality) / len(df))
+    print("NO REMOVAL OF WRONG END STATES, but if we had")
+    print("Removed " + str(len(df_not_quality)) + " poor quality entries out of " + str(len(df)) + " -> " + str(pct) + "%")
+    
+    # df_quality
+    return df
+
 
 def clean_analyzed_data(df):
     df = clean_glitchy_data_and_report(df)
     # df = clean_flipped_data(df)
+    df = clean_quality_check(df)
     return df
 
 
@@ -1026,7 +1113,7 @@ def make_anova(df, analysis_label, fn, title):
             posthocs = pg.pairwise_ttests(dv=analysis_label, within=COL_PATHING, between=COL_CHAIR,
                                       subject=subject_id, data=df)
             # pg.print_table(posthocs)
-            anova_text = "\n" + anova_text + str(posthocs)
+            anova_text = anova_text + "\n" + str(posthocs)
             posthocs.to_csv(FILENAME_ANOVAS + fn + 'posthocs.csv')
             print()
 
